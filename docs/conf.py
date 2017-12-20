@@ -16,17 +16,25 @@
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
-#
-# import os
-# import sys
-# sys.path.insert(0, os.path.abspath('.'))
+# Add any Sphinx extension module names here, as strings
 
 
+
+import os
+import sys
+sys.path.insert(0, os.path.abspath('.'))
+sys.path.insert(0, os.path.abspath('../'))
+import mock
+
+MOCK_MODULES = ['numpy', 'scipy', 'matplotlib', 'matplotlib.pyplot', 'scipy.stats','pandas','utils', 'sklearn.model_selection']
+
+for mod_name in MOCK_MODULES:
+    sys.modules[mod_name] = mock.Mock()
 # -- General configuration ------------------------------------------------
 
 # If your documentation needs a minimal Sphinx version, state it here.
 #
-# needs_sphinx = '1.0'
+# needs_sphinx = '1.3'
 
 # Add any Sphinx extension module names here, as strings. They can be
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
@@ -37,7 +45,22 @@ extensions = ['sphinx.ext.autodoc',
     'sphinx.ext.coverage',
     'sphinx.ext.mathjax',
     'sphinx.ext.viewcode',
-    'sphinx.ext.githubpages']
+    'sphinx.ext.githubpages',
+    'sphinx.ext.napoleon']
+#extensions = ['sphinx.ext.autodoc', 'sphinxcontrib.napoleon']
+
+# Napoleon settings
+napoleon_google_docstring = True
+napoleon_numpy_docstring = True
+napoleon_include_init_with_doc = False
+napoleon_include_private_with_doc = False
+napoleon_include_special_with_doc = True
+napoleon_use_admonition_for_examples = False
+napoleon_use_admonition_for_notes = False
+napoleon_use_admonition_for_references = False
+napoleon_use_ivar = False
+napoleon_use_param = True
+napoleon_use_rtype = True
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
@@ -52,7 +75,7 @@ source_suffix = '.rst'
 master_doc = 'index'
 
 # General information about the project.
-project = 'SingleUnit Spike Learning'
+project = 'spikelearn'
 copyright = '2017, Estevão Uyrá Pardillos Vieira'
 author = 'Estevão Uyrá Pardillos Vieira'
 
@@ -121,7 +144,7 @@ html_sidebars = {
 # -- Options for HTMLHelp output ------------------------------------------
 
 # Output file base name for HTML help builder.
-htmlhelp_basename = 'SingleUnitSpikeLearningdoc'
+htmlhelp_basename = 'spikelearndoc'
 
 
 # -- Options for LaTeX output ---------------------------------------------
@@ -148,7 +171,7 @@ latex_elements = {
 # (source start file, target name, title,
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
-    (master_doc, 'SingleUnitSpikeLearning.tex', 'SingleUnit Spike Learning Documentation',
+    (master_doc, 'spikelearn.tex', 'SingleUnit Spike Learning Documentation',
      'Estevão Uyrá Pardillos Vieira', 'manual'),
 ]
 
@@ -158,7 +181,7 @@ latex_documents = [
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
 man_pages = [
-    (master_doc, 'singleunitspikelearning', 'SingleUnit Spike Learning Documentation',
+    (master_doc, 'spikelearn', 'spikelearn Documentation',
      [author], 1)
 ]
 
@@ -169,8 +192,8 @@ man_pages = [
 # (source start file, target name, title, author,
 #  dir menu entry, description, category)
 texinfo_documents = [
-    (master_doc, 'SingleUnitSpikeLearning', 'SingleUnit Spike Learning Documentation',
-     author, 'SingleUnitSpikeLearning', 'One line description of project.',
+    (master_doc, 'spikelearn', 'spikelearn Documentation',
+     author, 'spikelearn', 'One line description of project.',
      'Miscellaneous'),
 ]
 
