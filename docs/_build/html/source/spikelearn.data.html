@@ -106,7 +106,7 @@ Currently accepts ‘shuffle’ and ‘kfold’.</p>
 <span class="gp">&gt;&gt;&gt; </span>    <span class="k">assert</span> <span class="n">X_train</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="mi">3</span>
 <span class="gp">&gt;&gt;&gt; </span>    <span class="k">assert</span> <span class="n">X_test</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="mf">0.4</span> <span class="o">*</span> <span class="n">X</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="k">for</span> <span class="n">X_train</span><span class="p">,</span> <span class="n">y_train</span><span class="p">,</span> <span class="n">X_test</span><span class="p">,</span> <span class="n">y_test</span> <span class="ow">in</span> <span class="n">Batcher</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">):</span>
-<span class="gp">&gt;&gt;&gt; </span>    <span class="k">assert</span> <span class="n">X_train</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">y_train</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="s1">&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span>    <span class="k">assert</span> <span class="n">X_train</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">y_train</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
 </pre></div>
 </div>
 <dl class="method">
@@ -137,56 +137,6 @@ Currently accepts ‘shuffle’ and ‘kfold’.</p>
 <div class="section" id="module-spikelearn.data.utils">
 <span id="spikelearn-data-utils-module"></span><h2>spikelearn.data.utils module<a class="headerlink" href="#module-spikelearn.data.utils" title="Permalink to this headline">¶</a></h2>
 <p>Utilitary functions.</p>
-<dl class="function">
-<dt id="spikelearn.data.utils.func">
-<code class="descclassname">spikelearn.data.utils.</code><code class="descname">func</code><span class="sig-paren">(</span><em>arg1</em>, <em>arg2</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spikelearn/data/utils.html#func"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#spikelearn.data.utils.func" title="Permalink to this definition">¶</a></dt>
-<dd><p>Summary line.</p>
-<p>Extended description of function.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>arg1</strong> (<em>int</em>) – Description of arg1</li>
-<li><strong>arg2</strong> (<em>str</em>) – Description of arg2</li>
-</ul>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">Description of return value</p>
-</td>
-</tr>
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">bool</p>
-</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="function">
-<dt id="spikelearn.data.utils.func1">
-<code class="descclassname">spikelearn.data.utils.</code><code class="descname">func1</code><span class="sig-paren">(</span><em>arg1</em>, <em>arg2</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spikelearn/data/utils.html#func1"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#spikelearn.data.utils.func1" title="Permalink to this definition">¶</a></dt>
-<dd><p>Summary line.</p>
-<p>Extended description of function.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>arg1</strong> (<em>int</em>) – Description of arg1</li>
-<li><strong>arg2</strong> (<em>str</em>) – Description of arg2</li>
-</ul>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">Description of return value</p>
-</td>
-</tr>
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">bool</p>
-</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
 <dl class="function">
 <dt id="spikelearn.data.utils.n_to_idx">
 <code class="descclassname">spikelearn.data.utils.</code><code class="descname">n_to_idx</code><span class="sig-paren">(</span><em>n</em>, <em>ref_with_redundancy</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spikelearn/data/utils.html#n_to_idx"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#spikelearn.data.utils.n_to_idx" title="Permalink to this definition">¶</a></dt>
