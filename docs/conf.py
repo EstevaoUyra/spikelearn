@@ -171,8 +171,8 @@ latex_elements = {
 # (source start file, target name, title,
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
-    (master_doc, 'spikelearn.tex', 'SingleUnit Spike Learning Documentation',
-     'Estevão Uyrá Pardillos Vieira', 'manual'),
+    (master_doc, 'spikelearn.tex', 'spikelearn Documentation',
+     'Estevao Uyra Pardillos Vieira', 'manual'),
 ]
 
 
