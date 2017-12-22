@@ -7,6 +7,7 @@ Subpackages
 .. toctree::
 
     spikelearn.data
+    spikelearn.visuals
 
 Module contents
 ---------------

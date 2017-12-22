@@ -1,0 +1,222 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>spikelearn.visuals &#8212; spikelearn 0.1.2 documentation</title>
+    <link rel="stylesheet" href="../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.1.2',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+   
+  <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for spikelearn.visuals</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">import</span> <span class="nn">seaborn</span> <span class="k">as</span> <span class="nn">sns</span>
+
+<div class="viewcode-block" id="raster_plot"><a class="viewcode-back" href="../../source/spikelearn.html#spikelearn.visuals.raster_plot">[docs]</a><span class="k">def</span> <span class="nf">raster_plot</span><span class="p">(</span><span class="n">spike_trains</span><span class="p">,</span> <span class="n">time</span><span class="o">=</span><span class="s1">&#39;time&#39;</span><span class="p">,</span> <span class="n">yaxis</span><span class="o">=</span><span class="s1">&#39;trial&#39;</span><span class="p">,</span> <span class="n">xlim</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">subplots</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">hue</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">n_cols</span><span class="o">=</span><span class="s1">&#39;auto&#39;</span><span class="p">,</span> <span class="n">n_rows</span><span class="o">=</span><span class="s1">&#39;auto&#39;</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">palette</span><span class="o">=</span><span class="s1">&#39;deep&#39;</span><span class="p">,</span> <span class="n">density</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">n_yticks</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">is_list</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">kde_kwargs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">fig_kwargs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    spike_trains : DataFrame</span>
+<span class="sd">        Each row contains identifier variables, and the time column should</span>
+<span class="sd">        contain a single time or a list of times for each row.</span>
+<span class="sd">        Note: if the format is list of times, the function will take longer,</span>
+<span class="sd">        and this must be flagged at is_list</span>
+
+<span class="sd">    time : string, optional, default: &#39;time&#39;</span>
+<span class="sd">        DataFrame column index containing the times or time lists.</span>
+<span class="sd">        If not &#39;time&#39;, the name of the column is added to the xlabel</span>
+<span class="sd">        default label is &#39;Time (ms)&#39;, and it turns (&#39;Time ({})&#39;).format(time)</span>
+
+<span class="sd">    yaxis : string, optional, default: &#39;trial&#39;</span>
+<span class="sd">        Variable that defines the vertical position of the row&#39;s data.</span>
+
+<span class="sd">    xlim: tuple, optional</span>
+<span class="sd">        Limits of the horizontal axis of each subplot</span>
+
+<span class="sd">    subplots : string, optional</span>
+<span class="sd">        Defines which variable is unique in each subplot</span>
+
+<span class="sd">    hue : string, optional</span>
+<span class="sd">        Defines which variable is unique in each color</span>
+
+<span class="sd">    palette : list or str, optional</span>
+<span class="sd">        list of colors or name of seaborn color_palette. Defaults to &#39;Set3&#39;</span>
+
+<span class="sd">    density : bool or str, optional</span>
+<span class="sd">        Whether to show the time density of spikes on top of each subplot.</span>
+<span class="sd">        If str, selects column to groupby and plot multiple densities.</span>
+<span class="sd">        If &#39;hue&#39;, plots a density for each color.</span>
+
+<span class="sd">    n_yticks : int, optional, default: 5</span>
+<span class="sd">        Number of ticks on the vertical axis of each subplot</span>
+
+<span class="sd">    is_list : bool, optional, default: False</span>
+<span class="sd">        Flags the rows as containing list of times, instead of values.</span>
+<span class="sd">        Making the transformation takes time, and it is preferable to do</span>
+<span class="sd">        this transformation outside the plotting function.</span>
+
+
+
+<span class="sd">    Notes</span>
+<span class="sd">    -----</span>
+
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1">## Mechanics</span>
+    <span class="c1"># Make local copy, verticalyzing if necessary</span>
+    <span class="k">if</span> <span class="n">is_list</span><span class="p">:</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">verticalize_df</span><span class="p">(</span><span class="n">epc</span><span class="p">,</span><span class="n">time</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">spike_trains</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+    <span class="c1"># Make mutables non-persistent</span>
+    <span class="k">if</span> <span class="n">kde_kwargs</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">kde_kwargs</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">if</span> <span class="n">fig_kwargs</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">fig_kwargs</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="c1"># Auxilliary columns</span>
+    <span class="k">if</span> <span class="n">subplots</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">subplots</span> <span class="o">=</span> <span class="s1">&#39;aux_subplots&#39;</span>
+        <span class="n">data</span><span class="p">[</span><span class="s1">&#39;aux_subplots&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="k">if</span> <span class="n">hue</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">hue</span> <span class="o">=</span> <span class="s1">&#39;aux_hue&#39;</span>
+        <span class="n">data</span><span class="p">[</span><span class="s1">&#39;aux_hue&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="k">if</span> <span class="n">density</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
+        <span class="n">density</span> <span class="o">=</span> <span class="s1">&#39;aux_density&#39;</span>
+        <span class="n">data</span><span class="p">[</span><span class="s1">&#39;aux_density&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="c1">## Define plot aesthetics</span>
+    <span class="c1"># Geometry</span>
+    <span class="n">n_subplots</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">subplots</span><span class="p">]</span><span class="o">.</span><span class="n">unique</span><span class="p">()</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="k">assert</span> <span class="n">n_cols</span> <span class="ow">is</span> <span class="s1">&#39;auto&#39;</span> <span class="ow">or</span> <span class="n">n_rows</span> <span class="ow">is</span> <span class="s1">&#39;auto&#39;</span>
+    <span class="k">if</span> <span class="n">n_cols</span> <span class="ow">is</span> <span class="s1">&#39;auto&#39;</span><span class="p">:</span>
+        <span class="n">n_cols</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">n_subplots</span><span class="p">))</span>
+    <span class="k">if</span> <span class="n">n_rows</span> <span class="ow">is</span> <span class="s1">&#39;auto&#39;</span><span class="p">:</span>
+        <span class="n">n_rows</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span><span class="n">n_subplots</span><span class="o">/</span><span class="n">n_cols</span><span class="p">)</span>
+    <span class="k">if</span> <span class="s1">&#39;figsize&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">fig_kwargs</span><span class="p">:</span>
+        <span class="n">fig_kwargs</span><span class="p">[</span><span class="s1">&#39;figsize&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="mi">3</span><span class="o">*</span><span class="n">n_cols</span><span class="p">,</span> <span class="mi">4</span><span class="o">*</span><span class="n">n_rows</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">n_cols</span><span class="p">,</span><span class="n">n_rows</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;test&#39;</span><span class="p">)</span>
+    <span class="n">fig</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="o">**</span><span class="n">fig_kwargs</span><span class="p">)</span>
+    <span class="c1"># Colors</span>
+    <span class="n">n_hue</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">hue</span><span class="p">]</span><span class="o">.</span><span class="n">unique</span><span class="p">()</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">palette</span><span class="p">)</span> <span class="ow">is</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="n">palette</span> <span class="o">=</span> <span class="n">sns</span><span class="o">.</span><span class="n">palettes</span><span class="o">.</span><span class="n">color_palette</span><span class="p">(</span><span class="n">palette</span><span class="p">,</span> <span class="n">n_hue</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">assert</span> <span class="nb">type</span><span class="p">(</span><span class="n">palette</span><span class="p">)</span> <span class="ow">is</span> <span class="nb">list</span>
+        <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">palette</span><span class="p">)</span> <span class="ow">is</span> <span class="n">n_hue</span>
+    <span class="c1"># Text</span>
+    <span class="n">xlabel</span> <span class="o">=</span> <span class="s1">&#39;Time (</span><span class="si">{}</span><span class="s1">)&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s1">&#39;ms&#39;</span> <span class="k">if</span> <span class="n">time</span><span class="o">==</span><span class="s1">&#39;time&#39;</span> <span class="k">else</span> <span class="n">time</span><span class="p">)</span>
+    <span class="n">ylabel</span> <span class="o">=</span> <span class="n">yaxis</span>
+    <span class="c1">## Plotting per se</span>
+    <span class="c1"># Each subplot</span>
+    <span class="k">for</span> <span class="n">sub_i</span><span class="p">,</span> <span class="n">sub_l</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="n">subplots</span><span class="p">]</span><span class="o">.</span><span class="n">unique</span><span class="p">()):</span>
+        <span class="n">ax</span> <span class="o">=</span> <span class="n">fig</span><span class="o">.</span><span class="n">add_subplot</span><span class="p">(</span><span class="n">n_rows</span><span class="p">,</span> <span class="n">n_cols</span><span class="p">,</span> <span class="n">sub_i</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">density</span><span class="p">:</span>
+            <span class="n">axd</span> <span class="o">=</span> <span class="n">ax</span><span class="o">.</span><span class="n">twinx</span><span class="p">()</span>
+        <span class="n">sub_data</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="n">subplots</span><span class="p">)</span><span class="o">.</span><span class="n">get_group</span><span class="p">(</span><span class="n">sub_l</span><span class="p">)</span>
+        <span class="c1"># Each color</span>
+        <span class="k">for</span> <span class="n">hue_i</span><span class="p">,</span> <span class="n">hue_l</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">sub_data</span><span class="p">[</span><span class="n">hue</span><span class="p">]</span><span class="o">.</span><span class="n">unique</span><span class="p">()):</span>
+            <span class="n">hue_data</span> <span class="o">=</span> <span class="n">sub_data</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="n">hue</span><span class="p">)</span><span class="o">.</span><span class="n">get_group</span><span class="p">(</span><span class="n">hue_l</span><span class="p">)</span>
+            <span class="n">ax</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">hue_data</span><span class="p">[</span><span class="n">time</span><span class="p">],</span> <span class="n">hue_data</span><span class="p">[</span><span class="n">yaxis</span><span class="p">],</span> <span class="n">color</span><span class="o">=</span><span class="n">palette</span><span class="p">[</span><span class="n">hue_i</span><span class="p">],</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+            <span class="c1"># Density</span>
+            <span class="k">if</span> <span class="n">density</span><span class="p">:</span>
+                <span class="n">sns</span><span class="o">.</span><span class="n">kdeplot</span><span class="p">(</span><span class="n">hue_data</span><span class="p">[</span><span class="n">time</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="n">axd</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">palette</span><span class="p">[</span><span class="n">hue_i</span><span class="p">],</span> <span class="o">**</span><span class="n">kde_kwargs</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">sca</span><span class="p">(</span><span class="n">ax</span><span class="p">)</span>
+        <span class="n">ticks</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="n">sub_data</span><span class="p">[</span><span class="n">yaxis</span><span class="p">]</span><span class="o">.</span><span class="n">min</span><span class="p">(),</span><span class="n">sub_data</span><span class="p">[</span><span class="n">yaxis</span><span class="p">]</span><span class="o">.</span><span class="n">max</span><span class="p">(),</span> <span class="n">n_yticks</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">yticks</span><span class="p">(</span><span class="n">ticks</span><span class="p">,</span><span class="n">ticks</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="n">sub_l</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="n">ylabel</span><span class="p">);</span> <span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="n">xlabel</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">xlim</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span> <span class="n">plt</span><span class="o">.</span><span class="n">xlim</span><span class="p">(</span><span class="n">xlim</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">title</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">plt</span><span class="o">.</span><span class="n">suptitle</span><span class="p">(</span><span class="n">title</span><span class="p">,</span><span class="n">y</span><span class="o">=</span><span class="mf">1.01</span><span class="p">,</span> <span class="n">x</span><span class="o">=.</span><span class="mi">5</span><span class="p">,</span><span class="n">fontsize</span><span class="o">=</span><span class="mi">16</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../index.html">spikelearn</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../index.html">Documentation overview</a><ul>
+  <li><a href="../index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2017, Estevão Uyrá Pardillos Vieira.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.6.5</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

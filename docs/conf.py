@@ -26,7 +26,7 @@ sys.path.insert(0, os.path.abspath('.'))
 sys.path.insert(0, os.path.abspath('../'))
 import mock
 
-MOCK_MODULES = ['numpy', 'scipy', 'matplotlib', 'matplotlib.pyplot', 'scipy.stats','pandas','utils', 'sklearn.model_selection']
+MOCK_MODULES = ['numpy', 'scipy', 'matplotlib', 'matplotlib.pyplot', 'scipy.stats','pandas','utils', 'sklearn.model_selection','seaborn', 'scipy.io']
 
 for mod_name in MOCK_MODULES:
     sys.modules[mod_name] = mock.Mock()
@@ -196,6 +196,3 @@ texinfo_documents = [
      author, 'spikelearn', 'One line description of project.',
      'Miscellaneous'),
 ]
-
-
-

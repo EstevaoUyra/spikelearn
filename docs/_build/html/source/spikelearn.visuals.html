@@ -1,0 +1,190 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>spikelearn.visuals package &#8212; spikelearn 0.1.2 documentation</title>
+    <link rel="stylesheet" href="../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '0.1.2',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="spikelearn-visuals-package">
+<h1>spikelearn.visuals package<a class="headerlink" href="#spikelearn-visuals-package" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="module-spikelearn.visuals.visuals">
+<span id="spikelearn-visuals-visuals-module"></span><h2>spikelearn.visuals.visuals module<a class="headerlink" href="#module-spikelearn.visuals.visuals" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="spikelearn.visuals.visuals.pretty_neurons">
+<code class="descclassname">spikelearn.visuals.visuals.</code><code class="descname">pretty_neurons</code><span class="sig-paren">(</span><em>spike_vector=None</em>, <em>show_spikes=True</em>, <em>sigma=0</em>, <em>n_neurons=8</em>, <em>rate=1</em>, <em>tmax=10</em>, <em>spacing=1</em>, <em>palette='Set2'</em>, <em>bin_fill=None</em>, <em>alpha_multiplier='auto'</em>, <em>alpha_power=0.5</em>, <em>binpalette='plasma'</em>, <em>bin_sep=None</em>, <em>fig_kwargs=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spikelearn/visuals/visuals.html#pretty_neurons"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#spikelearn.visuals.visuals.pretty_neurons" title="Permalink to this definition">¶</a></dt>
+<dd><p>Plots multiple point processes in parallel lines.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>spike_vector</strong> (<em>array-like</em><em> (</em><em>n_neurons</em><em>, </em><em>max_n_spikes</em><em>)</em>) – Each row contains the spike times of one unit, and will be plotted in
+one line. May contain NANs, which are ignored.</li>
+<li><strong>show_spikes</strong> (<em>bool</em><em>, </em><em>default True</em>) – Which to show spikes or only smoothed activity.
+If True and sigma &gt; 0, plot will be empty.</li>
+<li><strong>sigma</strong> (<em>int</em>) – Width of gaussian kernel to smooth spike-series.</li>
+<li><strong>n_neurons</strong> (<em>int</em>) – Number of units to be generated.
+Is overwritten by spike_vector</li>
+<li><strong>rate</strong> (<em>float</em>) – Firing rate of each generated unit.
+Active only if spike_vector is None</li>
+<li><strong>tmax</strong> (<em>float</em>) – Maximum time until which to simulate activity, in seconds.
+Active only if spike_vector is None</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name" colspan="2">Other Parameters:</th></tr>
+<tr class="field-even field"><td>&#160;</td><td class="field-body"><ul class="first last simple">
+<li><strong>spacing</strong> (<em>float, default 1</em>) – Vertical distance between each baseline</li>
+<li><strong>palette</strong> (<em>string</em>) – If len&gt;1, names a Seabon color_palette
+If char (len==1), is the color of all neurons</li>
+<li><strong>bin_fill</strong> (<em>tuple, (int, int)</em>) – Position (x,y) of bin to be color-filled.
+According to the value of the binning.</li>
+<li><strong>alpha_multiplier</strong> (<em>float or ‘auto’</em>) – How much to multiply each bin fill alpha value.
+‘auto’ selects a number such that the maximum is one.</li>
+<li><strong>alpha_power</strong> (<em>float</em>) – How much to exponentiate each bin’s firing rate to get the alpha.
+Smaller values approximate big values and decrease difference.</li>
+<li><strong>bin_sep</strong> (<em>int</em>) – How much vertical separators to use in the bin separation.</li>
+<li><strong>binpalette</strong> (<em>str</em>) – Which palette to
+Note: It does not correspond to bin filling,
+only to vertical separators.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="spikelearn.visuals.visuals.raster_plot">
+<code class="descclassname">spikelearn.visuals.visuals.</code><code class="descname">raster_plot</code><span class="sig-paren">(</span><em>spike_trains</em>, <em>time='time'</em>, <em>yaxis='trial'</em>, <em>xlim=None</em>, <em>subplots=None</em>, <em>hue=None</em>, <em>n_cols='auto'</em>, <em>n_rows='auto'</em>, <em>title=None</em>, <em>palette='deep'</em>, <em>density=False</em>, <em>n_yticks=5</em>, <em>is_list=False</em>, <em>kde_kwargs=None</em>, <em>fig_kwargs=None</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spikelearn/visuals/visuals.html#raster_plot"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#spikelearn.visuals.visuals.raster_plot" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>spike_trains</strong> (<em>DataFrame</em>) – Each row contains identifier variables, and the time column should
+contain a single time or a list of times for each row.
+Note: if the format is list of times, the function will take longer,
+and this must be flagged at is_list</li>
+<li><strong>time</strong> (<em>string</em><em>, </em><em>optional</em><em>, </em><em>default: 'time'</em>) – DataFrame column index containing the times or time lists.
+If not ‘time’, the name of the column is added to the xlabel
+default label is ‘Time (ms)’, and it turns (‘Time ({})’).format(time)</li>
+<li><strong>yaxis</strong> (<em>string</em><em>, </em><em>optional</em><em>, </em><em>default: 'trial'</em>) – Variable that defines the vertical position of the row’s data.</li>
+<li><strong>xlim</strong> (<em>tuple</em><em>, </em><em>optional</em>) – Limits of the horizontal axis of each subplot</li>
+<li><strong>subplots</strong> (<em>string</em><em>, </em><em>optional</em>) – Defines which variable is unique in each subplot</li>
+<li><strong>hue</strong> (<em>string</em><em>, </em><em>optional</em>) – Defines which variable is unique in each color</li>
+<li><strong>palette</strong> (<em>list</em><em> or </em><em>str</em><em>, </em><em>optional</em>) – list of colors or name of seaborn color_palette. Defaults to ‘Set3’</li>
+<li><strong>density</strong> (<em>bool</em><em> or </em><em>str</em><em>, </em><em>optional</em>) – Whether to show the time density of spikes on top of each subplot.
+If str, selects column to groupby and plot multiple densities.
+If ‘hue’, plots a density for each color.</li>
+<li><strong>n_yticks</strong> (<em>int</em><em>, </em><em>optional</em><em>, </em><em>default: 5</em>) – Number of ticks on the vertical axis of each subplot</li>
+<li><strong>is_list</strong> (<em>bool</em><em>, </em><em>optional</em><em>, </em><em>default: False</em>) – Flags the rows as containing list of times, instead of values.
+Making the transformation takes time, and it is preferable to do
+this transformation outside the plotting function.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Notes</p>
+</dd></dl>
+
+</div>
+<div class="section" id="module-spikelearn.visuals">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-spikelearn.visuals" title="Permalink to this headline">¶</a></h2>
+<p>Contains plotting functions.</p>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../index.html">spikelearn</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../index.html">Documentation overview</a><ul>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2017, Estevão Uyrá Pardillos Vieira.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.6.5</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
+      
+      |
+      <a href="../_sources/source/spikelearn.visuals.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>
