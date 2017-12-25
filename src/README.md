@@ -1,7 +1,8 @@
 # Scripts (src)
-One use of this folder to create pipelines, processing or analysis that may not be general enough to deserve a function and be added to the package.
-In addition, all processing that indeed uses premade functions, even if it not adds anything new to the already done
-The idea
+Every line of code written to process data or generate results has to be in this folder. 
+
+Also use this folder to create pipelines, processing or analysis that are not general enough to deserve a function in to the package.
+
 
 ## data
 Include here processing steps ran upon datasets, that in turn originate novel datasets.
