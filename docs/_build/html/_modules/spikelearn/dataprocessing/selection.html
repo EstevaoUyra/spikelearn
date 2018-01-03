@@ -1,0 +1,295 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>spikelearn.dataprocessing.selection &#8212; spikelearn 0.1.2 documentation</title>
+    <link rel="stylesheet" href="../../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '0.1.2',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+   
+  <link rel="stylesheet" href="../../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for spikelearn.dataprocessing.selection</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Contains the base classes for dealing with data directly.</span>
+<span class="sd">The only data-dealing functions that</span>
+<span class="sd">are accessible from other modules.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">sklearn.model_selection</span> <span class="k">import</span> <span class="n">ShuffleSplit</span><span class="p">,</span> <span class="n">KFold</span>
+<span class="kn">import</span> <span class="nn">operator</span>
+<span class="c1">#import spikeutils as spku</span>
+
+
+
+<div class="viewcode-block" id="Batcher"><a class="viewcode-back" href="../../../source/spikelearn.dataprocessing.html#spikelearn.dataprocessing.selection.Batcher">[docs]</a><span class="k">class</span> <span class="nc">Batcher</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Implements an iterable cross-validator that groups all repeated indexes in the same group.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    X : (n_examples, n_features) ndarray</span>
+<span class="sd">        Sklearn-style example matrix</span>
+
+<span class="sd">    y : (n_examples, 1) ndarray</span>
+<span class="sd">        Label of each example.</span>
+
+<span class="sd">    axis : int or string</span>
+<span class="sd">        Dimension to be sliced and served in batches. Accepts integer axis number, or &#39;last&#39;, &#39;first&#39;, and abbreviations.</span>
+
+<span class="sd">    group : np.ndarray (n_examples, 1)</span>
+<span class="sd">        Use it to make examples always part of the same fold. *Default:* The label itself (no preferential grouping).</span>
+
+<span class="sd">    mode : string or sklearn generator, optional, default</span>
+<span class="sd">        Which kind of splitting will be used for batching.</span>
+<span class="sd">        Currently accepts &#39;shuffle&#39; and &#39;kfold&#39;.</span>
+
+<span class="sd">    train_size : (int) or (float), optional, default: 0.5</span>
+<span class="sd">        If int, total number of groups in the train set. If float, proportion of groups.</span>
+
+<span class="sd">    test_size : (int) or (float), optional, default: 0.5</span>
+<span class="sd">        If int, total number of groups in the test set. If float, proportion of groups.</span>
+
+<span class="sd">    **kwargs :</span>
+<span class="sd">        Extra keyword arguments will be passed to the splitting function.</span>
+
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1">#TODO make better &#39;yields&#39; description</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="s1">&#39;Last&#39;</span><span class="p">,</span> <span class="n">group</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;sh&#39;</span><span class="p">,</span> <span class="n">train_size</span><span class="o">=.</span><span class="mi">5</span><span class="p">,</span> <span class="n">test_size</span><span class="o">=.</span><span class="mi">5</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+
+        <span class="c1">## Attributes</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">X</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">y</span> <span class="o">=</span> <span class="n">X</span><span class="p">,</span> <span class="n">y</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">train_size</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">test_size</span> <span class="o">=</span> <span class="n">train_size</span><span class="p">,</span> <span class="n">test_size</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mode</span> <span class="o">=</span> <span class="n">mode</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">cv</span> <span class="o">=</span> <span class="n">cv</span>
+        <span class="c1"># Axis string to number</span>
+        <span class="k">if</span> <span class="n">axis</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;Last&#39;</span><span class="p">,</span> <span class="s1">&#39;last&#39;</span><span class="p">,</span> <span class="s1">&#39;l&#39;</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">]:</span>
+            <span class="n">axis</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">X</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span>
+        <span class="k">elif</span> <span class="n">axis</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;First&#39;</span><span class="p">,</span> <span class="s1">&#39;first&#39;</span><span class="p">,</span> <span class="s1">&#39;f&#39;</span><span class="p">,</span> <span class="s1">&#39;row&#39;</span><span class="p">,</span> <span class="s1">&#39;rows&#39;</span><span class="p">]:</span>
+            <span class="n">axis</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">assert</span> <span class="nb">type</span><span class="p">(</span><span class="n">axis</span><span class="p">)</span> <span class="ow">is</span> <span class="nb">int</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">axis</span> <span class="o">=</span> <span class="n">axis</span>
+        <span class="c1"># Grouping</span>
+        <span class="k">if</span> <span class="n">group</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">group</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">X</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">axis</span><span class="p">])</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">group</span><span class="p">)</span> <span class="o">==</span> <span class="n">X</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">axis</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">group</span> <span class="o">=</span> <span class="n">group</span>
+
+        <span class="c1">## Private attributes</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_init_mode</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_i</span> <span class="o">=</span> <span class="mi">0</span>
+
+    <span class="k">def</span> <span class="nf">_init_mode</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Initializes the splitting function.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1">#TODO implement cross-validator function initializer</span>
+        <span class="n">indexes</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">group</span><span class="p">)</span>
+        <span class="k">if</span>  <span class="bp">self</span><span class="o">.</span><span class="n">mode</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;sh&#39;</span><span class="p">,</span> <span class="s1">&#39;shuffle&#39;</span><span class="p">,</span> <span class="s1">&#39;shufflesplit&#39;</span><span class="p">,</span> <span class="s1">&#39;markov&#39;</span><span class="p">]:</span>
+            <span class="n">splitter</span> <span class="o">=</span> <span class="n">ShuffleSplit</span><span class="p">(</span><span class="n">n_splits</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">cv</span><span class="p">,</span> <span class="n">test_size</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">test_size</span><span class="p">,</span><span class="n">train_size</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">train_size</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">mode</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;kfold&#39;</span><span class="p">,</span> <span class="s1">&#39;kf&#39;</span><span class="p">]:</span>
+            <span class="n">splitter</span> <span class="o">=</span> <span class="n">KFold</span><span class="p">(</span><span class="n">n_splits</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">cv</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_batcher_gen</span> <span class="o">=</span> <span class="n">splitter</span><span class="o">.</span><span class="n">split</span><span class="p">(</span> <span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">group</span><span class="p">))</span>
+
+    <span class="k">def</span> <span class="nf">_current_batch</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        _next_ train and test sets.</span>
+
+<span class="sd">        Warning</span>
+<span class="sd">        -------</span>
+<span class="sd">        This function iterates the splitting, but does not increase Batcher&#39;s iterator number. It should *not* be used by itself.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">train_groups</span><span class="p">,</span> <span class="n">test_groups</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_batcher_gen</span><span class="o">.</span><span class="n">next</span><span class="p">()</span>
+        <span class="n">train_indices</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">isin</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">group</span><span class="p">,</span> <span class="n">train_groups</span><span class="p">)</span>
+        <span class="n">test_indices</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">isin</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">group</span><span class="p">,</span> <span class="n">test_groups</span><span class="p">)</span>
+
+        <span class="k">def</span> <span class="nf">x_and_y_from_idx</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">idx</span><span class="p">):</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">y</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">X</span><span class="o">.</span><span class="n">take</span><span class="p">(</span><span class="n">idx</span><span class="p">,</span><span class="n">axis</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">axis</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">y</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">return</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">X</span><span class="o">.</span><span class="n">take</span><span class="p">(</span><span class="n">idx</span><span class="p">,</span><span class="n">axis</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">axis</span><span class="p">))</span>
+
+        <span class="k">return</span> <span class="p">(</span><span class="o">*</span><span class="n">x_and_y_from_idx</span><span class="p">(</span><span class="n">train_indices</span><span class="p">),</span> <span class="o">*</span><span class="n">x_and_y_from_idx</span><span class="p">(</span><span class="n">test_indices</span><span class="p">))</span>
+
+    <span class="k">def</span> <span class="nf">__iter__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span>
+
+<div class="viewcode-block" id="Batcher.next"><a class="viewcode-back" href="../../../source/spikelearn.dataprocessing.html#spikelearn.dataprocessing.selection.Batcher.next">[docs]</a>    <span class="k">def</span> <span class="nf">next</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Yields</span>
+<span class="sd">        ------</span>
+<span class="sd">        (train_size, n_features), (test_size, n_features)</span>
+<span class="sd">        (train_size, n_features), (train_size,1), (test_size, n_features),(test_size,1)</span>
+
+<span class="sd">        Examples</span>
+<span class="sd">        -----</span>
+<span class="sd">        &gt;&gt;&gt; for X_train, X_test in Batcher(X, train_size=3, test_size=.4):</span>
+<span class="sd">        &gt;&gt;&gt;     assert X_train.shape[0] == 3</span>
+<span class="sd">        &gt;&gt;&gt;     assert X_test.shape[0] == 0.4 * X.shape[0]</span>
+<span class="sd">        &gt;&gt;&gt; for X_train, y_train, X_test, y_test in Batcher(X, y):</span>
+<span class="sd">        &gt;&gt;&gt;     assert X_train.shape[0] == y_train.shape[0]</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_i</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">cv</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_i</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="k">return</span> <span class="n">_current_batch</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">StopIteration</span><span class="p">()</span></div></div>
+
+
+<div class="viewcode-block" id="select"><a class="viewcode-back" href="../../../source/spikelearn.dataprocessing.html#spikelearn.dataprocessing.selection.select">[docs]</a><span class="k">def</span> <span class="nf">select</span><span class="p">(</span><span class="n">dataframe</span><span class="p">,</span> <span class="n">maxlen</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">takefrom</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    dataframe : pandas DataFrame</span>
+<span class="sd">    The data that will be under selection</span>
+
+<span class="sd">    maxlen : int</span>
+<span class="sd">    Maximum number of rows of resulting dataframe.</span>
+<span class="sd">    Acts after all selection by kwargs.</span>
+<span class="sd">    Has no effect if dataframe is already smaller than maxlen by then.</span>
+
+<span class="sd">    takefrom : str</span>
+<span class="sd">    Only functional when maxlen is not None.</span>
+<span class="sd">    Specifies where to get the rows.</span>
+<span class="sd">    May be one of &#39;shuffle&#39;, &#39;init&#39;, &#39;end&#39;</span>
+
+
+<span class="sd">    Keyword Arguments</span>
+<span class="sd">    -----------------</span>
+<span class="sd">    Key : string</span>
+<span class="sd">    The index of any field in the DataFrame</span>
+<span class="sd">    If type is numerical, may be preceded or succeded by max, min,</span>
+<span class="sd">    maxeq or mineq, inside underlines</span>
+<span class="sd">    it may also receive special key &quot;maxshape&quot;, in which case</span>
+
+
+<span class="sd">    Value : string or numerical</span>
+<span class="sd">    The value used for selecting.</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    &gt;&gt;&gt; select(data, _min_duration=1000)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">localdata</span> <span class="o">=</span> <span class="n">dataframe</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+    <span class="n">ops</span> <span class="o">=</span> <span class="p">{</span> <span class="s1">&#39;_mineq_&#39;</span><span class="p">:</span> <span class="n">operator</span><span class="o">.</span><span class="n">ge</span><span class="p">,</span>
+            <span class="s1">&#39;_min_&#39;</span><span class="p">:</span> <span class="n">operator</span><span class="o">.</span><span class="n">gt</span><span class="p">,</span>
+            <span class="s1">&#39;_maxeq_&#39;</span><span class="p">:</span> <span class="n">operator</span><span class="o">.</span><span class="n">le</span><span class="p">,</span>
+            <span class="s1">&#39;_max_&#39;</span><span class="p">:</span> <span class="n">operator</span><span class="o">.</span><span class="n">lt</span><span class="p">}</span>
+
+    <span class="c1"># Select by the wanted values</span>
+    <span class="n">operation</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">op</span> <span class="ow">in</span> <span class="n">ops</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">op</span> <span class="ow">in</span> <span class="n">key</span><span class="p">:</span>
+                <span class="n">operation</span> <span class="o">=</span> <span class="n">ops</span><span class="p">[</span><span class="n">op</span><span class="p">]</span>
+                <span class="n">field</span> <span class="o">=</span> <span class="n">key</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">op</span><span class="p">,</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
+                <span class="k">assert</span> <span class="n">field</span> <span class="ow">in</span> <span class="n">dataframe</span><span class="o">.</span><span class="n">columns</span>
+        <span class="k">if</span> <span class="n">operation</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">operation</span> <span class="o">=</span> <span class="n">operator</span><span class="o">.</span><span class="n">eq</span>
+        <span class="n">localdata</span> <span class="o">=</span> <span class="n">localdata</span><span class="p">[</span> <span class="n">operation</span><span class="p">(</span><span class="n">localdata</span><span class="p">[</span><span class="n">field</span><span class="p">],</span><span class="n">kwargs</span><span class="p">[</span><span class="n">key</span><span class="p">])</span> <span class="p">]</span>
+
+    <span class="c1"># Return dataframe of expected size</span>
+    <span class="n">size</span> <span class="o">=</span> <span class="n">localdata</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="k">if</span> <span class="n">maxlen</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">size</span> <span class="o">&lt;=</span> <span class="n">maxlen</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">localdata</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">takefrom</span> <span class="ow">is</span> <span class="s1">&#39;init&#39;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">localdata</span><span class="p">[:</span><span class="n">maxlen</span><span class="p">]</span>
+        <span class="k">elif</span> <span class="n">takefrom</span> <span class="ow">is</span> <span class="s1">&#39;end&#39;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">localdata</span><span class="p">[</span><span class="o">-</span><span class="n">maxlen</span><span class="p">:]</span>
+        <span class="k">elif</span> <span class="n">takefrom</span> <span class="ow">is</span> <span class="s1">&#39;shuffle&#39;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">localdata</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span><span class="n">maxlen</span><span class="p">)</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../../index.html">spikelearn</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../../index.html">Documentation overview</a><ul>
+  <li><a href="../../index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2017, Estevão Uyrá Pardillos Vieira.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.6.5</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

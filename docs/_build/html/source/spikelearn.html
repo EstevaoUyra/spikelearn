@@ -45,12 +45,12 @@
 <h2>Subpackages<a class="headerlink" href="#subpackages" title="Permalink to this headline">¶</a></h2>
 <div class="toctree-wrapper compound">
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="spikelearn.data.html">spikelearn.data package</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="spikelearn.data.html#submodules">Submodules</a></li>
-<li class="toctree-l2"><a class="reference internal" href="spikelearn.data.html#module-spikelearn.data.api">spikelearn.data.api module</a></li>
-<li class="toctree-l2"><a class="reference internal" href="spikelearn.data.html#module-spikelearn.data.io">spikelearn.data.io module</a></li>
-<li class="toctree-l2"><a class="reference internal" href="spikelearn.data.html#module-spikelearn.data.utils">spikelearn.data.utils module</a></li>
-<li class="toctree-l2"><a class="reference internal" href="spikelearn.data.html#module-spikelearn.data">Module contents</a></li>
+<li class="toctree-l1"><a class="reference internal" href="spikelearn.dataprocessing.html">spikelearn.dataprocessing package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="spikelearn.dataprocessing.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spikelearn.dataprocessing.html#module-spikelearn.dataprocessing.io">spikelearn.dataprocessing.io module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spikelearn.dataprocessing.html#module-spikelearn.dataprocessing.selection">spikelearn.dataprocessing.selection module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spikelearn.dataprocessing.html#module-spikelearn.dataprocessing.utils">spikelearn.dataprocessing.utils module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spikelearn.dataprocessing.html#module-spikelearn.dataprocessing">Module contents</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="spikelearn.visuals.html">spikelearn.visuals package</a><ul>
@@ -61,6 +61,81 @@
 </li>
 </ul>
 </div>
+</div>
+<div class="section" id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="module-spikelearn.api">
+<span id="spikelearn-api-module"></span><h2>spikelearn.api module<a class="headerlink" href="#module-spikelearn.api" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="spikelearn.api.Analyzer">
+<em class="property">class </em><code class="descclassname">spikelearn.api.</code><code class="descname">Analyzer</code><span class="sig-paren">(</span><em>ratNumber</em>, <em>sigma=None</em>, <em>binSize=120</em>, <em>label=None</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spikelearn/api.html#Analyzer"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#spikelearn.api.Analyzer" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<dl class="method">
+<dt id="spikelearn.api.Analyzer.cubicNeuronTimeTrial">
+<code class="descname">cubicNeuronTimeTrial</code><span class="sig-paren">(</span><em>z_transform=False</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spikelearn/api.html#Analyzer.cubicNeuronTimeTrial"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#spikelearn.api.Analyzer.cubicNeuronTimeTrial" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="spikelearn.api.Analyzer.decode">
+<code class="descname">decode</code><span class="sig-paren">(</span><em>clf</em>, <em>mode</em>, <em>train_size=0.5</em>, <em>test_size=0.5</em>, <em>init_size=None</em>, <em>n_shuffles=40</em>, <em>predict_or_proba='predict'</em>, <em>scoring=False</em>, <em>id_kwargs={}</em>, <em>other_rat=None</em>, <em>pca=False</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spikelearn/api.html#Analyzer.decode"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#spikelearn.api.Analyzer.decode" title="Permalink to this definition">¶</a></dt>
+<dd><p>Trains and tests the given classifier on data, according to the mode selected.
+Returns a pandas DataFrame with prediction and trial-specific score.</p>
+<blockquote>
+<div>Parameters of id_kwargs are also saved as identifier variables on the DataFrame.</div></blockquote>
+<p>Currently supported modes are:
+&gt;&gt;&gt; fixInit_shuffleEnd -&gt; fix an initial subset of trials to test, and shuffle trains on the rest
+&gt;&gt;&gt; fullShuffle -&gt; selects trials at random to fit and predict</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="spikelearn.api.Analyzer.describe">
+<code class="descname">describe</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spikelearn/api.html#Analyzer.describe"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#spikelearn.api.Analyzer.describe" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="spikelearn.api.Analyzer.getTrialsBy">
+<code class="descname">getTrialsBy</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spikelearn/api.html#Analyzer.getTrialsBy"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#spikelearn.api.Analyzer.getTrialsBy" title="Permalink to this definition">¶</a></dt>
+<dd><p>NOT COMPLETED FUNCTION
+DO NOT USE IT
+Options are: first, after_first
+e.g. getTrialsBy({‘first’:30})
+e.g. getTrialsBy({‘after_first’:30})</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="spikelearn.api.Analyzer.interact">
+<code class="descname">interact</code><span class="sig-paren">(</span><em>realTime=False</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spikelearn/api.html#Analyzer.interact"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#spikelearn.api.Analyzer.interact" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="spikelearn.api.Analyzer.manualSelectTrials">
+<code class="descname">manualSelectTrials</code><span class="sig-paren">(</span><em>trialsOfInterest</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spikelearn/api.html#Analyzer.manualSelectTrials"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#spikelearn.api.Analyzer.manualSelectTrials" title="Permalink to this definition">¶</a></dt>
+<dd><p>Give an array of booleans of the size of total trials, or an array of integers for the trials of interest</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="spikelearn.api.Analyzer.selecTimes">
+<code class="descname">selecTimes</code><span class="sig-paren">(</span><em>tmin</em>, <em>tmax=None</em>, <em>z_transform=False</em>, <em>pca=False</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spikelearn/api.html#Analyzer.selecTimes"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#spikelearn.api.Analyzer.selecTimes" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="spikelearn.api.Analyzer.selecTrials">
+<code class="descname">selecTrials</code><span class="sig-paren">(</span><em>restrictions</em>, <em>outliers=False</em>, <em>verbose=0</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spikelearn/api.html#Analyzer.selecTrials"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#spikelearn.api.Analyzer.selecTrials" title="Permalink to this definition">¶</a></dt>
+<dd><p>Select trialsToUse via a restrictions dict of the form {property : value}
+Accepted properties are:
+‘minDuration’, ‘maxDuration’ (in milisseconds),
+‘trialMin’, ‘trialMax’ (Absolute number of the trial)
+‘ntrialsBeg’ (turns off last trials to get a total of ntrials)</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="spikelearn.api.Analyzer.shuffleTimes">
+<code class="descname">shuffleTimes</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spikelearn/api.html#Analyzer.shuffleTimes"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#spikelearn.api.Analyzer.shuffleTimes" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
 </div>
 <div class="section" id="module-spikelearn">
 <span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-spikelearn" title="Permalink to this headline">¶</a></h2>

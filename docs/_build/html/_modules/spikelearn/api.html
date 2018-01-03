@@ -1,0 +1,432 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>spikelearn.api &#8212; spikelearn 0.1.2 documentation</title>
+    <link rel="stylesheet" href="../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.1.2',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+   
+  <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for spikelearn.api</h1><div class="highlight"><pre>
+<div class="viewcode-block" id="Analyzer"><a class="viewcode-back" href="../../source/spikelearn.html#spikelearn.api.Analyzer">[docs]</a><span></span><span class="k">class</span> <span class="nc">Analyzer</span><span class="p">():</span>
+
+    <span class="c1"># PRIVATE METHODS</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">ratNumber</span><span class="p">,</span> <span class="n">sigma</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">binSize</span><span class="o">=</span><span class="mi">120</span><span class="p">,</span> <span class="n">label</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_ratNumber</span> <span class="o">=</span> <span class="n">ratNumber</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_sigma</span> <span class="o">=</span> <span class="n">sigma</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_binSize</span> <span class="o">=</span> <span class="n">binSize</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_isShuffled</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_trialSpecs</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_trialRestrictions</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;minDuration&#39;</span><span class="p">:</span><span class="kc">None</span><span class="p">,</span> <span class="s1">&#39;maxDuration&#39;</span><span class="p">:</span><span class="kc">None</span><span class="p">,</span>
+                                    <span class="s1">&#39;trialMin&#39;</span><span class="p">:</span><span class="kc">None</span><span class="p">,</span><span class="s1">&#39;trialMax&#39;</span><span class="p">:</span><span class="kc">None</span><span class="p">,</span>
+                                    <span class="s1">&#39;ntrials&#39;</span><span class="p">:</span><span class="kc">None</span><span class="p">}</span>
+
+
+        <span class="k">if</span> <span class="n">label</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">label</span> <span class="o">=</span> <span class="s1">&#39;Rat &#39;</span><span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">ratNumber</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="s1">&#39;autoshape&#39;</span> <span class="ow">in</span> <span class="n">label</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">label</span> <span class="o">=</span> <span class="s1">&#39;rato_</span><span class="si">%d</span><span class="s1">_autoshape&#39;</span><span class="o">%</span><span class="n">ratNumber</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">label</span> <span class="o">=</span> <span class="n">label</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_dset</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_loadFile</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">trialsToUse</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">X</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">y</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">trial</span> <span class="o">=</span> <span class="kc">None</span>
+
+    <span class="k">def</span> <span class="nf">_getData</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="k">pass</span>
+
+
+    <span class="c1"># PUBLIC METHODS</span>
+
+<div class="viewcode-block" id="Analyzer.selecTrials"><a class="viewcode-back" href="../../source/spikelearn.html#spikelearn.api.Analyzer.selecTrials">[docs]</a>    <span class="k">def</span> <span class="nf">selecTrials</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">restrictions</span><span class="p">,</span> <span class="n">outliers</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span><span class="n">verbose</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span><span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+
+        <span class="sd">&#39;&#39;&#39;Select trialsToUse via a restrictions dict of the form {property : value}</span>
+<span class="sd">        Accepted properties are:</span>
+<span class="sd">        &#39;minDuration&#39;, &#39;maxDuration&#39; (in milisseconds),</span>
+<span class="sd">        &#39;trialMin&#39;, &#39;trialMax&#39; (Absolute number of the trial)</span>
+<span class="sd">        &#39;ntrialsBeg&#39; (turns off last trials to get a total of ntrials)</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="c1"># Reset restrictions</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_trialRestrictions</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;minDuration&#39;</span><span class="p">:</span><span class="kc">None</span><span class="p">,</span> <span class="s1">&#39;maxDuration&#39;</span><span class="p">:</span><span class="kc">None</span><span class="p">,</span>
+                                    <span class="s1">&#39;trialMin&#39;</span><span class="p">:</span><span class="kc">None</span><span class="p">,</span><span class="s1">&#39;trialMax&#39;</span><span class="p">:</span><span class="kc">None</span><span class="p">,</span>
+                                    <span class="s1">&#39;ntrials&#39;</span><span class="p">:</span><span class="kc">None</span><span class="p">}</span>
+
+        <span class="k">for</span> <span class="n">propertyi</span> <span class="ow">in</span> <span class="n">restrictions</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_trialRestrictions</span><span class="p">[</span><span class="n">propertyi</span><span class="p">]</span> <span class="o">=</span> <span class="n">restrictions</span><span class="p">[</span><span class="n">propertyi</span><span class="p">]</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">trialsToUse</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_trialSpecs</span><span class="p">[</span><span class="s1">&#39;Trial number&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="k">for</span> <span class="n">propertyi</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;minDuration&#39;</span><span class="p">,</span> <span class="s1">&#39;maxDuration&#39;</span><span class="p">,</span><span class="s1">&#39;trialMin&#39;</span><span class="p">,</span><span class="s1">&#39;trialMax&#39;</span><span class="p">,</span><span class="s1">&#39;ntrials&#39;</span><span class="p">]:</span> <span class="c1"># enforcing order, leaving ntrials for last</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">trialsToUse</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">logical_and</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">trialsToUse</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_trialHas</span><span class="p">(</span><span class="n">propertyi</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_trialRestrictions</span><span class="p">[</span><span class="n">propertyi</span><span class="p">])</span> <span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">outliers</span> <span class="o">==</span> <span class="s1">&#39;drop&#39;</span><span class="p">:</span>
+            <span class="k">if</span> <span class="s1">&#39;zmax&#39;</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="p">:</span>
+                <span class="n">zmax</span> <span class="o">=</span> <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;zmax&#39;</span><span class="p">]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">zmax</span> <span class="o">=</span> <span class="mi">3</span>
+            <span class="n">max_zscore_per_trial</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">zscore</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">nanmean</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_dset</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">))</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">verbose</span> <span class="o">&gt;=</span><span class="mi">1</span><span class="p">:</span> <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;There are </span><span class="si">%d</span><span class="s1"> outlier (z&gt;</span><span class="si">%s</span><span class="s1">) trials being dropped&#39;</span><span class="o">%</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">max_zscore_per_trial</span><span class="o">&gt;=</span><span class="n">zmax</span><span class="p">),</span><span class="n">zmax</span><span class="p">))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">trialsToUse</span><span class="p">[</span><span class="n">max_zscore_per_trial</span><span class="o">&gt;=</span><span class="n">zmax</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">X</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">y</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">trial</span> <span class="o">=</span> <span class="kc">None</span></div>
+
+<div class="viewcode-block" id="Analyzer.manualSelectTrials"><a class="viewcode-back" href="../../source/spikelearn.html#spikelearn.api.Analyzer.manualSelectTrials">[docs]</a>    <span class="k">def</span> <span class="nf">manualSelectTrials</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">trialsOfInterest</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39; Give an array of booleans of the size of total trials, or an array of integers for the trials of interest&#39;&#39;&#39;</span>
+
+        <span class="k">if</span> <span class="n">trialsOfInterest</span><span class="o">.</span><span class="n">unique</span><span class="p">()</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="k">assert</span> <span class="n">trialsOfInterest</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dset</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">trialsToUse</span> <span class="o">=</span> <span class="n">trialsOfInterest</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">assert</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">diff</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">trialsOfInterest</span><span class="p">))</span><span class="o">==</span><span class="mi">0</span><span class="p">)</span> <span class="o">==</span><span class="mi">0</span> <span class="c1">#there are no repetitions</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">trialsToUse</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">trial</span> <span class="ow">in</span> <span class="n">trialsOfInterest</span> <span class="k">for</span> <span class="n">trial</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_trialSpecs</span><span class="p">[</span><span class="s1">&#39;Trial number&#39;</span><span class="p">]</span> <span class="p">])</span></div>
+
+
+<div class="viewcode-block" id="Analyzer.selecTimes"><a class="viewcode-back" href="../../source/spikelearn.html#spikelearn.api.Analyzer.selecTimes">[docs]</a>    <span class="k">def</span> <span class="nf">selecTimes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tmin</span><span class="p">,</span> <span class="n">tmax</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">z_transform</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span><span class="n">pca</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span><span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">trialsToUse</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">trialsToUse</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_trialSpecs</span><span class="p">[</span><span class="s1">&#39;Trial number&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+
+
+        <span class="n">X</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_dset</span><span class="p">[:,:,</span><span class="bp">self</span><span class="o">.</span><span class="n">trialsToUse</span><span class="p">])</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">_dset</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="n">y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">X</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span><span class="o">%</span><span class="bp">self</span><span class="o">.</span><span class="n">_dset</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">trial</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">_dset</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">*</span><span class="p">[</span><span class="n">t</span><span class="p">]</span> <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_trialSpecs</span><span class="p">[</span><span class="s1">&#39;Trial number&#39;</span><span class="p">][</span><span class="bp">self</span><span class="o">.</span><span class="n">trialsToUse</span><span class="p">]])</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">tmax</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">tmax</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_trialSpecs</span><span class="p">[</span><span class="s1">&#39;Trial duration&#39;</span><span class="p">][</span><span class="bp">self</span><span class="o">.</span><span class="n">trialsToUse</span><span class="p">]</span><span class="o">.</span><span class="n">min</span><span class="p">()</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_binSize</span> <span class="o">==</span> <span class="s1">&#39;norm&#39;</span><span class="p">:</span> <span class="c1"># Lets consider the smaller bin, to correctly remove motor activity</span>
+            <span class="n">binSize</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_trialSpecs</span><span class="p">[</span><span class="s1">&#39;Trial duration&#39;</span><span class="p">][</span><span class="bp">self</span><span class="o">.</span><span class="n">trialsToUse</span><span class="p">]</span><span class="o">.</span><span class="n">min</span><span class="p">()</span><span class="o">/</span><span class="mi">10</span>
+            <span class="n">leftMostBin</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span><span class="n">tmin</span><span class="o">/</span><span class="n">binSize</span><span class="p">)</span>
+            <span class="n">rightMostBin</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">floor</span><span class="p">(</span><span class="n">tmax</span><span class="o">/</span><span class="n">binSize</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span> <span class="c1"># in this case, account for the baseline which is 500ms</span>
+            <span class="n">leftMostBin</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ceil</span><span class="p">((</span><span class="n">tmin</span><span class="o">+</span><span class="mi">500</span><span class="p">)</span><span class="o">/</span><span class="bp">self</span><span class="o">.</span><span class="n">_binSize</span><span class="p">)</span>
+            <span class="n">rightMostBin</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">floor</span><span class="p">((</span><span class="n">tmax</span><span class="o">+</span><span class="mi">500</span><span class="p">)</span><span class="o">/</span><span class="bp">self</span><span class="o">.</span><span class="n">_binSize</span><span class="p">)</span>
+
+        <span class="n">toUseTimes</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">logical_and</span><span class="p">(</span><span class="n">y</span> <span class="o">&gt;=</span> <span class="n">leftMostBin</span><span class="p">,</span> <span class="n">y</span> <span class="o">&lt;</span> <span class="n">rightMostBin</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">X</span> <span class="o">=</span> <span class="n">X</span><span class="p">[</span><span class="n">toUseTimes</span><span class="p">,:]</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_binSize</span> <span class="o">==</span> <span class="s1">&#39;norm&#39;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">y</span> <span class="o">=</span> <span class="n">y</span><span class="p">[</span><span class="n">toUseTimes</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">y</span> <span class="o">=</span> <span class="n">y</span><span class="p">[</span><span class="n">toUseTimes</span><span class="p">]</span> <span class="o">-</span> <span class="nb">int</span><span class="p">(</span><span class="mi">500</span><span class="o">/</span><span class="bp">self</span><span class="o">.</span><span class="n">_binSize</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">trial</span> <span class="o">=</span> <span class="n">trial</span><span class="p">[</span><span class="n">toUseTimes</span><span class="p">]</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_isShuffled</span> <span class="o">=</span> <span class="kc">False</span>
+
+
+        <span class="k">if</span> <span class="n">z_transform</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;full&#39;</span><span class="p">,</span><span class="s1">&#39;fa&#39;</span><span class="p">]:</span>
+            <span class="n">scaler</span> <span class="o">=</span> <span class="n">StandardScaler</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">X</span> <span class="o">=</span> <span class="n">scaler</span><span class="o">.</span><span class="n">fit_transform</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">X</span><span class="p">)</span>
+
+        <span class="k">elif</span> <span class="n">z_transform</span> <span class="ow">is</span> <span class="s1">&#39;baseline&#39;</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">trial_i</span> <span class="ow">in</span> <span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">trial</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">X</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">trial</span> <span class="o">==</span> <span class="n">trial_i</span><span class="p">,:]</span>
+
+                <span class="n">baseline_mean</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dset</span><span class="p">[:,:</span><span class="nb">int</span><span class="p">(</span><span class="mi">500</span><span class="o">/</span><span class="bp">self</span><span class="o">.</span><span class="n">_binSize</span><span class="p">),</span><span class="n">trial_i</span><span class="p">]</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">transpose</span><span class="p">()</span>
+                <span class="n">baseline_std</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dset</span><span class="p">[:,:</span><span class="nb">int</span><span class="p">(</span><span class="mi">500</span><span class="o">/</span><span class="bp">self</span><span class="o">.</span><span class="n">_binSize</span><span class="p">),</span><span class="n">trial_i</span><span class="p">]</span><span class="o">.</span><span class="n">std</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">transpose</span><span class="p">()</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">X</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">trial</span> <span class="o">==</span> <span class="n">trial_i</span><span class="p">,:]</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">X</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">trial</span> <span class="o">==</span> <span class="n">trial_i</span><span class="p">,:]</span><span class="o">-</span><span class="n">baseline_mean</span><span class="p">)</span><span class="o">/</span><span class="n">np</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span><span class="n">baseline_std</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="kc">None</span><span class="p">)</span>
+
+        <span class="k">elif</span> <span class="n">z_transform</span><span class="o">==</span><span class="s1">&#39;robust&#39;</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">neuron</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">X</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]):</span>
+                <span class="n">meanActivity</span><span class="p">,</span> <span class="n">stdActivity</span> <span class="o">=</span> <span class="n">huber</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">X</span><span class="p">[:,</span><span class="n">neuron</span><span class="p">],</span><span class="n">initscale</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">X</span><span class="p">[:,</span><span class="n">neuron</span><span class="p">]</span><span class="o">.</span><span class="n">std</span><span class="p">()</span><span class="o">/</span><span class="mi">3</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">X</span><span class="p">[:,</span><span class="n">neuron</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">X</span><span class="p">[:,</span><span class="n">neuron</span><span class="p">]</span><span class="o">-</span><span class="n">meanActivity</span><span class="p">)</span><span class="o">/</span><span class="n">stdActivity</span>
+
+        <span class="k">elif</span> <span class="n">z_transform</span> <span class="ow">is</span> <span class="kc">False</span><span class="p">:</span>
+            <span class="k">pass</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;The value </span><span class="si">{}</span><span class="s1"> is not accepted for z_transform&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">z_transform</span><span class="p">))</span></div>
+
+
+
+<div class="viewcode-block" id="Analyzer.shuffleTimes"><a class="viewcode-back" href="../../source/spikelearn.html#spikelearn.api.Analyzer.shuffleTimes">[docs]</a>    <span class="k">def</span> <span class="nf">shuffleTimes</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">trial_i</span> <span class="ow">in</span> <span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">trial</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">y</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">trial</span><span class="o">==</span><span class="n">trial_i</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">permutation</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">y</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">trial</span><span class="o">==</span><span class="n">trial_i</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_isShuffled</span> <span class="o">=</span> <span class="kc">True</span></div>
+
+<div class="viewcode-block" id="Analyzer.cubicNeuronTimeTrial"><a class="viewcode-back" href="../../source/spikelearn.html#spikelearn.api.Analyzer.cubicNeuronTimeTrial">[docs]</a>    <span class="k">def</span> <span class="nf">cubicNeuronTimeTrial</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">z_transform</span> <span class="o">=</span> <span class="kc">False</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_binSize</span> <span class="o">==</span> <span class="s1">&#39;norm&#39;</span><span class="p">:</span>
+            <span class="n">useTimes</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">y</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">useTimes</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">y</span><span class="p">)</span> <span class="o">+</span> <span class="nb">int</span><span class="p">(</span><span class="mi">500</span><span class="o">/</span><span class="bp">self</span><span class="o">.</span><span class="n">_binSize</span><span class="p">)</span>
+
+        <span class="n">dsetOfInterest</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dset</span><span class="p">[:,:,</span><span class="bp">self</span><span class="o">.</span><span class="n">trialsToUse</span><span class="p">][:,</span><span class="n">useTimes</span><span class="p">,:]</span>
+
+        <span class="k">if</span> <span class="n">z_transform</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">dsetOfInterest</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]):</span>
+                <span class="n">dsetOfInterest</span><span class="p">[</span><span class="n">i</span><span class="p">,:,:]</span> <span class="o">=</span> <span class="p">(</span><span class="n">dsetOfInterest</span><span class="p">[</span><span class="n">i</span><span class="p">,:,:]</span><span class="o">-</span> <span class="n">dsetOfInterest</span><span class="p">[</span><span class="n">i</span><span class="p">,:,:]</span><span class="o">.</span><span class="n">mean</span><span class="p">())</span><span class="o">/</span><span class="n">dsetOfInterest</span><span class="p">[</span><span class="n">i</span><span class="p">,:,:]</span><span class="o">.</span><span class="n">std</span><span class="p">()</span>
+
+        <span class="k">return</span> <span class="n">dsetOfInterest</span></div>
+
+<div class="viewcode-block" id="Analyzer.describe"><a class="viewcode-back" href="../../source/spikelearn.html#spikelearn.api.Analyzer.describe">[docs]</a>    <span class="k">def</span> <span class="nf">describe</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Label: </span><span class="si">%s</span><span class="s1">&#39;</span><span class="o">%</span><span class="bp">self</span><span class="o">.</span><span class="n">label</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Bin size: </span><span class="si">%s</span><span class="s1">&#39;</span><span class="o">%</span><span class="bp">self</span><span class="o">.</span><span class="n">_binSize</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Sigma: </span><span class="si">%s</span><span class="s1">&#39;</span><span class="o">%</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_sigma</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_sigma</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="s1">&#39;Not smoothed&#39;</span><span class="p">))</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">trialsToUse</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">Using </span><span class="si">%d</span><span class="s1"> trials, according to following restrictions:&#39;</span><span class="o">%</span><span class="bp">self</span><span class="o">.</span><span class="n">trialsToUse</span><span class="o">.</span><span class="n">sum</span><span class="p">())</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">No selected trials.&#39;</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">restr</span> <span class="ow">in</span> <span class="p">[</span><span class="n">k</span> <span class="o">+</span><span class="s1">&#39;: &#39;</span><span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_trialRestrictions</span><span class="p">[</span><span class="n">k</span><span class="p">])</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_trialRestrictions</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_trialRestrictions</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">]:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="n">restr</span><span class="p">)</span>
+
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">y</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">_isShuffled</span> <span class="o">==</span> <span class="kc">False</span><span class="p">:</span>
+            <span class="n">bins</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">y</span><span class="p">)</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_binSize</span> <span class="o">==</span> <span class="s1">&#39;norm&#39;</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Using normalized bins &#39;</span><span class="p">,</span> <span class="n">bins</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">Using </span><span class="si">%s</span><span class="s1"> time bins:&#39;</span><span class="o">%</span><span class="nb">len</span><span class="p">(</span><span class="n">bins</span><span class="p">))</span>
+
+            <span class="k">def</span> <span class="nf">printBins</span><span class="p">(</span><span class="n">bins</span><span class="p">):</span>
+                <span class="k">for</span> <span class="n">b</span> <span class="ow">in</span> <span class="n">bins</span><span class="p">:</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;From </span><span class="si">%s</span><span class="s1"> to </span><span class="si">%d</span><span class="s1">ms&#39;</span><span class="o">%</span><span class="p">(</span><span class="n">b</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">_binSize</span><span class="p">,</span> <span class="p">(</span><span class="n">b</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">_binSize</span> <span class="p">)</span> <span class="p">)</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">bins</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="mi">5</span><span class="p">:</span>
+                <span class="n">printBins</span><span class="p">(</span><span class="n">bins</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">printBins</span><span class="p">(</span><span class="n">bins</span><span class="p">[:</span><span class="mi">3</span><span class="p">])</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;.</span><span class="se">\n</span><span class="s1">.</span><span class="se">\n</span><span class="s1">.&#39;</span><span class="p">)</span>
+                <span class="n">printBins</span><span class="p">(</span><span class="n">bins</span><span class="p">[</span><span class="o">-</span><span class="mi">2</span><span class="p">:])</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">_isShuffled</span> <span class="o">==</span> <span class="kc">True</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;The </span><span class="si">%d</span><span class="s1"> bins have been shuffled&#39;</span><span class="o">%</span><span class="nb">len</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">y</span><span class="p">)))</span>
+
+        <span class="k">else</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">Time bins not selected.&#39;</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Analyzer.getTrialsBy"><a class="viewcode-back" href="../../source/spikelearn.html#spikelearn.api.Analyzer.getTrialsBy">[docs]</a>    <span class="k">def</span> <span class="nf">getTrialsBy</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        NOT COMPLETED FUNCTION</span>
+<span class="sd">        DO NOT USE IT</span>
+<span class="sd">        Options are: first, after_first</span>
+<span class="sd">        e.g. getTrialsBy({&#39;first&#39;:30})</span>
+<span class="sd">        e.g. getTrialsBy({&#39;after_first&#39;:30})</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">trialOrder</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">trial</span><span class="p">)</span>
+
+        <span class="n">X</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">X</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">trial</span><span class="o">&lt;</span> <span class="mi">1</span><span class="p">]</span>
+
+        <span class="k">return</span> <span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">trial</span></div>
+
+<div class="viewcode-block" id="Analyzer.interact"><a class="viewcode-back" href="../../source/spikelearn.html#spikelearn.api.Analyzer.interact">[docs]</a>    <span class="k">def</span> <span class="nf">interact</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">realTime</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="n">interactWithActivity</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cubicNeuronTimeTrial</span><span class="p">(),</span><span class="n">realTime</span><span class="o">=</span><span class="n">realTime</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Analyzer.decode"><a class="viewcode-back" href="../../source/spikelearn.html#spikelearn.api.Analyzer.decode">[docs]</a>    <span class="k">def</span> <span class="nf">decode</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">clf</span><span class="p">,</span> <span class="n">mode</span><span class="p">,</span> <span class="n">train_size</span><span class="o">=.</span><span class="mi">5</span><span class="p">,</span> <span class="n">test_size</span><span class="o">=.</span><span class="mi">5</span><span class="p">,</span> <span class="n">init_size</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">n_shuffles</span><span class="o">=</span><span class="mi">40</span><span class="p">,</span>
+                <span class="n">predict_or_proba</span><span class="o">=</span><span class="s1">&#39;predict&#39;</span><span class="p">,</span> <span class="n">scoring</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span><span class="n">id_kwargs</span><span class="o">=</span><span class="p">{},</span> <span class="n">other_rat</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">pca</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Trains and tests the given classifier on data, according to the mode selected.</span>
+<span class="sd">        Returns a pandas DataFrame with prediction and trial-specific score.</span>
+<span class="sd">            Parameters of id_kwargs are also saved as identifier variables on the DataFrame.</span>
+
+
+<span class="sd">        Currently supported modes are:</span>
+<span class="sd">        &gt;&gt;&gt; fixInit_shuffleEnd -&gt; fix an initial subset of trials to test, and shuffle trains on the rest</span>
+<span class="sd">        &gt;&gt;&gt; fullShuffle -&gt; selects trials at random to fit and predict</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">counter</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+        <span class="k">def</span> <span class="nf">get_predictions_or_proba</span><span class="p">(</span><span class="n">clf</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">mode</span><span class="p">):</span>
+            <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">            Local helper function to ease the switching between predict_proba and predict</span>
+<span class="sd">            &quot;&quot;&quot;</span>
+            <span class="k">if</span> <span class="n">mode</span> <span class="o">==</span> <span class="s1">&#39;predict&#39;</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">clf</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">mode</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;proba&#39;</span><span class="p">,</span><span class="s1">&#39;probability&#39;</span><span class="p">]:</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="k">return</span> <span class="n">clf</span><span class="o">.</span><span class="n">predict_proba</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
+                <span class="k">except</span><span class="p">:</span>
+                    <span class="k">return</span> <span class="n">clf</span><span class="o">.</span><span class="n">decision_function</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">pca</span><span class="p">:</span>
+            <span class="k">assert</span> <span class="nb">type</span><span class="p">(</span><span class="n">pca</span><span class="p">)</span> <span class="ow">is</span> <span class="nb">int</span>
+            <span class="n">clf</span> <span class="o">=</span> <span class="n">Pipeline</span><span class="p">(</span><span class="n">steps</span><span class="o">=</span><span class="p">[(</span><span class="s1">&#39;pca&#39;</span><span class="p">,</span> <span class="n">mPCA</span><span class="p">(</span><span class="n">n_components</span><span class="o">=</span><span class="n">pca</span><span class="p">)</span> <span class="p">),(</span><span class="s1">&#39;classifier&#39;</span><span class="p">,</span> <span class="n">clf</span><span class="p">)])</span>
+            <span class="n">pca</span><span class="o">=</span><span class="n">PCA</span><span class="p">()</span>
+            <span class="n">pca</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cubicNeuronTimeTrial</span><span class="p">()</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">transpose</span><span class="p">())</span>
+
+        <span class="c1"># Each mode</span>
+        <span class="k">if</span> <span class="n">mode</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;fixInit_shuffleEnd&#39;</span><span class="p">,</span><span class="s1">&#39;init&#39;</span><span class="p">]:</span>
+            <span class="n">results</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">columns</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;trial&#39;</span><span class="p">,</span> <span class="s1">&#39;shuffle&#39;</span><span class="p">,</span> <span class="s1">&#39;predictions&#39;</span><span class="p">,</span><span class="s1">&#39;true&#39;</span><span class="p">])</span>
+            <span class="n">X_test</span><span class="p">,</span> <span class="n">y_test</span><span class="p">,</span> <span class="n">trial_test</span><span class="p">,</span> <span class="n">X_train</span><span class="p">,</span> <span class="n">y_train</span><span class="p">,</span> <span class="n">trial_train</span> <span class="o">=</span>  <span class="n">splitFirstNtrials</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">X</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">y</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">trial</span><span class="p">,</span> <span class="n">n_before_split</span> <span class="o">=</span> <span class="n">init_size</span><span class="p">)</span>
+
+            <span class="k">assert</span> <span class="ow">not</span> <span class="nb">any</span> <span class="p">([</span><span class="n">trial</span> <span class="ow">in</span> <span class="n">trial_test</span> <span class="k">for</span> <span class="n">trial</span> <span class="ow">in</span> <span class="n">trial_train</span><span class="p">])</span>
+            <span class="k">assert</span> <span class="n">init_size</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_shuffles</span><span class="p">):</span>
+                <span class="n">sh_idx</span> <span class="o">=</span> <span class="n">get_n_random_trials_indices</span><span class="p">(</span><span class="n">trial_train</span><span class="p">,</span> <span class="n">train_size</span><span class="p">)</span>
+                <span class="n">clf_local</span> <span class="o">=</span> <span class="n">clone</span><span class="p">(</span><span class="n">clf</span><span class="p">)</span>
+                <span class="n">clf_local</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X_train</span><span class="p">[</span><span class="n">sh_idx</span><span class="p">,:],</span> <span class="n">y_train</span><span class="p">[</span><span class="n">sh_idx</span><span class="p">])</span>
+
+                <span class="n">true</span> <span class="o">=</span> <span class="p">[</span><span class="n">y_test</span><span class="p">[</span><span class="n">trial_test</span><span class="o">==</span><span class="n">ti</span><span class="p">]</span> <span class="k">for</span> <span class="n">ti</span> <span class="ow">in</span> <span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">trial_test</span><span class="p">)]</span>
+                <span class="n">predictions</span> <span class="o">=</span> <span class="p">[</span><span class="n">get_predictions_or_proba</span><span class="p">(</span><span class="n">clf_local</span><span class="p">,</span> <span class="n">X_test</span><span class="p">[</span><span class="n">trial_test</span><span class="o">==</span><span class="n">ti</span><span class="p">,:],</span> <span class="n">predict_or_proba</span> <span class="p">)</span> <span class="k">for</span> <span class="n">ti</span> <span class="ow">in</span> <span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">trial_test</span><span class="p">)</span> <span class="p">]</span>
+                <span class="c1">#predictions = [clf_local.predict(X_test[trial_test==ti,:]) for ti in np.unique(trial_test)]</span>
+                <span class="n">results</span> <span class="o">=</span> <span class="n">results</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span><span class="s1">&#39;shuffle&#39;</span><span class="p">:</span><span class="n">i</span><span class="p">,</span> <span class="s1">&#39;predictions&#39;</span><span class="p">:</span> <span class="n">predictions</span><span class="p">,</span><span class="s1">&#39;true&#39;</span><span class="p">:</span><span class="n">true</span><span class="p">,</span> <span class="s1">&#39;trial&#39;</span><span class="p">:</span><span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">trial_test</span><span class="p">)}))</span>
+
+        <span class="k">elif</span> <span class="n">mode</span> <span class="ow">is</span> <span class="s1">&#39;fullShuffle&#39;</span><span class="p">:</span>
+            <span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">trial</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">X</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">y</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">trial</span>
+
+            <span class="n">results</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">columns</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;trial&#39;</span><span class="p">,</span> <span class="s1">&#39;shuffle&#39;</span><span class="p">,</span> <span class="s1">&#39;predictions&#39;</span><span class="p">,</span><span class="s1">&#39;true&#39;</span><span class="p">])</span>
+            <span class="n">sh</span> <span class="o">=</span> <span class="n">ShuffleSplit</span><span class="p">(</span><span class="n">n_splits</span><span class="o">=</span><span class="n">n_shuffles</span><span class="p">,</span> <span class="n">train_size</span><span class="o">=</span><span class="n">train_size</span><span class="p">,</span><span class="n">test_size</span><span class="o">=</span><span class="n">test_size</span><span class="p">)</span>
+
+            <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="p">(</span><span class="n">train_trials</span><span class="p">,</span> <span class="n">test_trials</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">sh</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">trial</span><span class="p">))):</span>
+                <span class="n">train_trials</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">trial</span><span class="p">)[</span><span class="n">train_trials</span><span class="p">]</span>
+                <span class="n">test_trials</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">trial</span><span class="p">)[</span><span class="n">test_trials</span><span class="p">]</span>
+
+                <span class="n">train_idx</span> <span class="o">=</span> <span class="n">n_to_idx</span><span class="p">(</span><span class="n">train_trials</span><span class="p">,</span> <span class="n">trial</span><span class="p">)</span>
+                <span class="n">clf_local</span> <span class="o">=</span> <span class="n">clone</span><span class="p">(</span><span class="n">clf</span><span class="p">)</span>
+                <span class="n">clf_local</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X</span><span class="p">[</span><span class="n">train_idx</span><span class="p">,:],</span><span class="n">y</span><span class="p">[</span><span class="n">train_idx</span><span class="p">])</span>
+
+                <span class="k">assert</span> <span class="ow">not</span> <span class="nb">any</span> <span class="p">([</span><span class="n">tri</span> <span class="ow">in</span> <span class="n">test_trials</span> <span class="k">for</span> <span class="n">tri</span> <span class="ow">in</span> <span class="n">train_trials</span><span class="p">])</span>
+
+                <span class="n">predictions</span> <span class="o">=</span> <span class="p">[</span><span class="n">get_predictions_or_proba</span><span class="p">(</span><span class="n">clf_local</span><span class="p">,</span> <span class="n">X</span><span class="p">[</span><span class="n">trial</span><span class="o">==</span><span class="n">ti</span><span class="p">,:],</span> <span class="n">predict_or_proba</span> <span class="p">)</span> <span class="k">for</span> <span class="n">ti</span> <span class="ow">in</span> <span class="n">test_trials</span> <span class="p">]</span>
+                <span class="n">true</span> <span class="o">=</span> <span class="p">[</span><span class="n">y</span><span class="p">[</span><span class="n">trial</span><span class="o">==</span><span class="n">ti</span><span class="p">]</span> <span class="k">for</span> <span class="n">ti</span> <span class="ow">in</span> <span class="n">test_trials</span><span class="p">]</span>
+                <span class="n">results</span> <span class="o">=</span> <span class="n">results</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span><span class="s1">&#39;shuffle&#39;</span><span class="p">:</span><span class="n">i</span><span class="p">,</span> <span class="s1">&#39;predictions&#39;</span><span class="p">:</span> <span class="n">predictions</span><span class="p">,</span>
+                                                        <span class="s1">&#39;trial&#39;</span><span class="p">:</span><span class="n">test_trials</span><span class="p">,</span> <span class="s1">&#39;true&#39;</span><span class="p">:</span><span class="n">true</span><span class="p">}))</span>
+        <span class="k">elif</span> <span class="n">mode</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;kfold&#39;</span><span class="p">,</span><span class="s1">&#39;kf&#39;</span><span class="p">]:</span>
+            <span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">trial</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">X</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">y</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">trial</span>
+
+            <span class="n">results</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">columns</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;trial&#39;</span><span class="p">,</span> <span class="s1">&#39;shuffle&#39;</span><span class="p">,</span> <span class="s1">&#39;predictions&#39;</span><span class="p">,</span><span class="s1">&#39;true&#39;</span><span class="p">])</span>
+            <span class="n">sh</span> <span class="o">=</span> <span class="n">KFold</span><span class="p">(</span><span class="n">n_splits</span><span class="o">=</span><span class="n">n_shuffles</span><span class="p">,</span> <span class="n">shuffle</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+            <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="p">(</span><span class="n">train_trials</span><span class="p">,</span> <span class="n">test_trials</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">sh</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">trial</span><span class="p">))):</span>
+                <span class="n">train_trials</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">trial</span><span class="p">)[</span><span class="n">train_trials</span><span class="p">]</span>
+                <span class="n">test_trials</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">trial</span><span class="p">)[</span><span class="n">test_trials</span><span class="p">]</span>
+
+                <span class="n">train_idx</span> <span class="o">=</span> <span class="n">n_to_idx</span><span class="p">(</span><span class="n">train_trials</span><span class="p">,</span> <span class="n">trial</span><span class="p">)</span>
+                <span class="n">clf_local</span> <span class="o">=</span> <span class="n">clone</span><span class="p">(</span><span class="n">clf</span><span class="p">)</span>
+                <span class="n">clf_local</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X</span><span class="p">[</span><span class="n">train_idx</span><span class="p">,:],</span><span class="n">y</span><span class="p">[</span><span class="n">train_idx</span><span class="p">])</span>
+
+                <span class="k">assert</span> <span class="ow">not</span> <span class="nb">any</span> <span class="p">([</span><span class="n">tri</span> <span class="ow">in</span> <span class="n">test_trials</span> <span class="k">for</span> <span class="n">tri</span> <span class="ow">in</span> <span class="n">train_trials</span><span class="p">])</span>
+
+                <span class="n">predictions</span> <span class="o">=</span> <span class="p">[</span><span class="n">get_predictions_or_proba</span><span class="p">(</span><span class="n">clf_local</span><span class="p">,</span> <span class="n">X</span><span class="p">[</span><span class="n">trial</span><span class="o">==</span><span class="n">ti</span><span class="p">,:],</span> <span class="n">predict_or_proba</span> <span class="p">)</span> <span class="k">for</span> <span class="n">ti</span> <span class="ow">in</span> <span class="n">test_trials</span> <span class="p">]</span>
+                <span class="n">true</span> <span class="o">=</span> <span class="p">[</span><span class="n">y</span><span class="p">[</span><span class="n">trial</span><span class="o">==</span><span class="n">ti</span><span class="p">]</span> <span class="k">for</span> <span class="n">ti</span> <span class="ow">in</span> <span class="n">test_trials</span><span class="p">]</span>
+                <span class="n">results</span> <span class="o">=</span> <span class="n">results</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span><span class="s1">&#39;shuffle&#39;</span><span class="p">:</span><span class="n">i</span><span class="p">,</span> <span class="s1">&#39;predictions&#39;</span><span class="p">:</span> <span class="n">predictions</span><span class="p">,</span>
+                                                        <span class="s1">&#39;trial&#39;</span><span class="p">:</span><span class="n">test_trials</span><span class="p">,</span> <span class="s1">&#39;true&#39;</span><span class="p">:</span><span class="n">true</span><span class="p">}))</span>
+
+
+        <span class="k">elif</span> <span class="n">mode</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;cross&#39;</span><span class="p">]:</span>
+            <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">other_rat</span><span class="p">,</span><span class="n">Rat</span><span class="p">)</span>
+
+            <span class="c1"># Fit on local, test other</span>
+            <span class="n">clf_local</span> <span class="o">=</span> <span class="n">clone</span><span class="p">(</span><span class="n">clf</span><span class="p">)</span>
+            <span class="n">clf_local</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">X</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">y</span><span class="p">)</span>
+            <span class="n">predictions</span> <span class="o">=</span> <span class="n">get_predictions_or_proba</span><span class="p">(</span><span class="n">clf_local</span><span class="p">,</span> <span class="n">other_rat</span><span class="o">.</span><span class="n">X</span><span class="p">,</span> <span class="n">predict_or_proba</span><span class="p">)</span>
+            <span class="n">true</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">y</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">trial</span><span class="o">==</span><span class="n">ti</span><span class="p">]</span> <span class="k">for</span> <span class="n">ti</span> <span class="ow">in</span> <span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">trial</span><span class="p">)]</span>
+            <span class="n">results</span> <span class="o">=</span> <span class="n">results</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span><span class="s1">&#39;shuffle&#39;</span><span class="p">:</span><span class="n">i</span><span class="p">,</span> <span class="s1">&#39;predictions&#39;</span><span class="p">:</span> <span class="n">predictions</span><span class="p">,</span>
+                                                    <span class="s1">&#39;trial&#39;</span><span class="p">:</span><span class="n">test_trials</span><span class="p">,</span> <span class="s1">&#39;true&#39;</span><span class="p">:</span><span class="n">true</span><span class="p">,</span><span class="s1">&#39;trained on&#39;</span><span class="p">:</span><span class="s1">&#39;local&#39;</span><span class="p">,</span><span class="s1">&#39;tested on&#39;</span><span class="p">:</span><span class="s1">&#39;other&#39;</span><span class="p">}))</span>
+            <span class="c1"># Fit on other, test local</span>
+
+            <span class="n">clf_other</span> <span class="o">=</span> <span class="n">clone</span><span class="p">(</span><span class="n">clf</span><span class="p">)</span>
+            <span class="n">clf_other</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">other_rat</span><span class="o">.</span><span class="n">X</span><span class="p">,</span> <span class="n">other_rat</span><span class="o">.</span><span class="n">y</span><span class="p">)</span>
+            <span class="n">get_predictions_or_proba</span><span class="p">(</span><span class="n">clf_other</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">X</span><span class="p">,</span> <span class="n">predict_or_proba</span><span class="p">)</span>
+            <span class="n">true</span> <span class="o">=</span> <span class="p">[</span><span class="n">other_rat</span><span class="o">.</span><span class="n">y</span><span class="p">[</span><span class="n">other_rat</span><span class="o">.</span><span class="n">trial</span><span class="o">==</span><span class="n">ti</span><span class="p">]</span> <span class="k">for</span> <span class="n">ti</span> <span class="ow">in</span> <span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">other_rat</span><span class="o">.</span><span class="n">trial</span><span class="p">)]</span>
+            <span class="n">results</span> <span class="o">=</span> <span class="n">results</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span><span class="s1">&#39;shuffle&#39;</span><span class="p">:</span><span class="n">i</span><span class="p">,</span> <span class="s1">&#39;predictions&#39;</span><span class="p">:</span> <span class="n">predictions</span><span class="p">,</span>
+                                                    <span class="s1">&#39;trial&#39;</span><span class="p">:</span><span class="n">test_trials</span><span class="p">,</span> <span class="s1">&#39;true&#39;</span><span class="p">:</span><span class="n">true</span><span class="p">,</span><span class="s1">&#39;trained on&#39;</span><span class="p">:</span><span class="s1">&#39;other&#39;</span><span class="p">,</span><span class="s1">&#39;tested on&#39;</span><span class="p">:</span><span class="s1">&#39;local&#39;</span><span class="p">}))</span>
+
+
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;The mode </span><span class="si">%s</span><span class="s1"> is not supported&#39;</span><span class="o">%</span><span class="n">mode</span><span class="p">)</span>
+
+        <span class="c1"># Calculate score if requested</span>
+        <span class="k">if</span> <span class="n">scoring</span><span class="p">:</span>
+            <span class="k">assert</span> <span class="n">predict_or_proba</span> <span class="ow">is</span> <span class="s1">&#39;predict&#39;</span>
+            <span class="n">results</span><span class="p">[</span><span class="s1">&#39;kappa&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">results</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">cohen_kappa_score</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="s1">&#39;true&#39;</span><span class="p">],</span><span class="n">x</span><span class="p">[</span><span class="s1">&#39;predictions&#39;</span><span class="p">],</span> <span class="n">weights</span><span class="o">=</span><span class="s1">&#39;quadratic&#39;</span><span class="p">),</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+            <span class="n">results</span><span class="p">[</span><span class="s1">&#39;corr&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">results</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">nan_to_num</span><span class="p">(</span><span class="n">pearsonr</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="s1">&#39;true&#39;</span><span class="p">],</span><span class="n">x</span><span class="p">[</span><span class="s1">&#39;predictions&#39;</span><span class="p">])[</span><span class="mi">0</span><span class="p">]),</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+        <span class="c1"># Add identification labels requested at function call</span>
+        <span class="k">for</span> <span class="n">arg</span> <span class="ow">in</span> <span class="n">id_kwargs</span><span class="p">:</span>
+            <span class="n">results</span><span class="p">[</span><span class="n">arg</span><span class="p">]</span> <span class="o">=</span> <span class="n">id_kwargs</span><span class="p">[</span><span class="n">arg</span><span class="p">]</span>
+
+        <span class="c1"># Add base identification variables</span>
+        <span class="n">results</span><span class="p">[</span><span class="s1">&#39;rat_number&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ratNumber</span>
+        <span class="n">results</span><span class="p">[</span><span class="s1">&#39;time&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">counter</span>
+        <span class="n">results</span><span class="p">[</span><span class="s1">&#39;PCA&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">pca</span>
+
+        <span class="k">return</span> <span class="n">results</span></div></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../index.html">spikelearn</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../index.html">Documentation overview</a><ul>
+  <li><a href="../index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2017, Estevão Uyrá Pardillos Vieira.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.6.5</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

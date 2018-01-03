@@ -1,0 +1,15 @@
+{
+	"Name_example": {
+		"basepath": "/home/user/Documents/project_name/data",
+		"/home/user/Documents/project_name/data": {
+			"raw": "filename located in /raw/",
+			"interim": "filename located in /interim/",
+			"processed": {
+				"data_label": "corresponding file full path/name",
+				"example": "example.mat #located in base/processed",
+				"another_example": "smoothed.pickle"
+			}
+		},
+		"results": "another_filepath_or_dict"
+	}
+}
