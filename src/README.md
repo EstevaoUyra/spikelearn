@@ -1,5 +1,5 @@
 # Scripts (src)
-Every line of code written to process data or generate results has to be in this folder. 
+Every line of code written to process data or generate results has to be in this folder.
 
 Also use this folder to create pipelines, processing or analysis that are not general enough to deserve a function in to the package.
 
@@ -21,7 +21,7 @@ Any visualization script should have its filename beginning with its scope, foll
 
 # Files location
 ## Load
-There are helper io functions in the module that use simple labels to get access to many different types of data. This specifications are directly accessible and modifiable from the file shortcuts.json, located on spikelearn/data/.
+There are helper io functions in the module that use simple labels to get access to many different types of data. This specifications are directly accessible and modifiable from the file shortcuts.json.
 Models should only load from data/, not from models/, with the exception of loading optimized Hyperparameters or full Models. Processing of models's results is to be done entirely in the same script.
 Visualization scripts can load from data/ and from models/s.
 

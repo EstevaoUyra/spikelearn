@@ -1,0 +1,82 @@
+{
+	"Name_example": {
+		"basepath": "/home/user/Documents/project_name",
+		"/home/user/Documents/project_name": {
+			"raw": "filename located in /raw/",
+			"interim": "filename located in /interim/",
+			"processed": {
+				"data_label": "corresponding file full path/name",
+				"example": "example.mat #located in base/processed",
+				"another_example": "smoothed.pickle"
+			}
+		},
+		"results": "another_filepath_or_dict"
+	},
+	"DRRD 7": {
+		"basepath": "/home/tevo/Documents/UFABC/SingleUnit Spike Learning",
+		"data": {
+			"raw": {
+				"spikesorted": "rato7tudo.mat"
+			},
+			"interim": {
+				"spikes": "spikesDRRD 7.pickle",
+				"behavior": "behaviorDRRD 7.pickle"
+			},
+			"processed": {},
+			"external": {}
+		},
+		"results": {},
+		"": {
+			"data": {
+				"interim": {
+					"spikes": {}
+				}
+			}
+		}
+	},
+	"DRRD 8": {
+		"basepath": "/home/tevo/Documents/UFABC/SingleUnit Spike Learning",
+		"data": {
+			"raw": {
+				"spikesorted": "rato8tudo.mat"
+			},
+			"interim": {
+				"spikes": "spikesDRRD 8.pickle",
+				"behavior": "behaviorDRRD 8.pickle"
+			},
+			"processed": {},
+			"external": {}
+		},
+		"results": {}
+	},
+	"DRRD 9": {
+		"basepath": "/home/tevo/Documents/UFABC/SingleUnit Spike Learning",
+		"data": {
+			"raw": {
+				"spikesorted": "rato9tudo.mat"
+			},
+			"interim": {
+				"spikes": "spikesDRRD 9.pickle",
+				"behavior": "behaviorDRRD 9.pickle"
+			},
+			"processed": {},
+			"external": {}
+		},
+		"results": {}
+	},
+	"DRRD 10": {
+		"basepath": "/home/tevo/Documents/UFABC/SingleUnit Spike Learning",
+		"data": {
+			"raw": {
+				"spikesorted": "rato10tudo.mat"
+			},
+			"interim": {
+				"spikes": "spikesDRRD 10.pickle",
+				"behavior": "behaviorDRRD 10.pickle"
+			},
+			"processed": {},
+			"external": {}
+		},
+		"results": {}
+	}
+}

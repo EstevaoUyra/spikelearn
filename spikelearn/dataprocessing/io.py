@@ -7,8 +7,12 @@ import pandas as pd
 import json
 from scipy.io import loadmat
 from datetime import datetime
+from .utils import get_filepaths_from_shortcut
+import os
+import numpy as np
+import pickle
 
-def spikes_behavior_from_mat(filepath):
+def spikes_behavior_from_mat(filename):
     """
     Loads a mat-file into two DataFrames
 
@@ -31,7 +35,7 @@ def spikes_behavior_from_mat(filepath):
         'duration' is equal to offset - onset
     """
     #TODO decide if it would make sense to keep sortIdx and sortLabel
-    data = loadmat(filepath)
+    data = loadmat(filename)
 
     spikes = data['dados'][0,0][1]
     behavior = data['dados'][0,0][0]
@@ -53,28 +57,39 @@ class DataShortcut():
     Parameters
     ----------
     base_label : string
-    Base dataset label. If not contained in shortcuts.json, then the filepath
-    parameter is needed.
+        Base dataset label. If not contained in shortcuts.json, then the filename
+        parameter is needed.
 
-    dataset_name : string or list of strings
-    Name of the specific dataset to load. If list of strings,
-        enters the hierarchy from left to right, at last loading
-        dataset[-1].
-        Listing is only needed when the dataset name is repeated in shortcuts
+    dataset_name : string, default None
+        Name of the specific dataset to load.
+        if None (default), raises TypeError and
+        prints a list of all datasets
 
-    filepath : string, path-to-file, optional
-    Name of the path of datafile. If provided jointly with label, the
-    overwrite flag must be explicitly set to True.
+    dataset_type : string, default 'auto'
+        Can be "raw", "interim", "processed", "results" or 'auto'
+        If 'auto' searches for the dataset in all folders
+
+    filename : string, path-to-file, optional
+        Name of the path of datafile. If provided jointly with label, the
+        overwrite flag must be explicitly set to True.
 
     basepath : string, optional
-    full path of some folder in filepath hierarchy
-    serves to make shortcuts.json identation less polluted
+        full path of some folder in filename hierarchy
+        serves to make shortcuts.json identation less polluted
 
     overwrite : bool, optional, default False
-    Which to overwrite label with filepath
+        Whether to overwrite label with filename
 
-    annotations : str, optional
-    Observations to add to the file description
+    annotations : str or list of str, optional
+        Observations to add to the file description
+
+    getpath : bool, optional, default False
+        Whether to get only the path to file,
+        Avoiding loading and/or creating
+
+    extension : string, optional, default 'auto'
+        Must be specified for creating or overwritting datasets.
+        Options are 'pickle', 'csv'
 
     Keyword Arguments
     -----------------
@@ -86,67 +101,93 @@ class DataShortcut():
     Uses the datafiles.json to search and load data using simple
     name labels.
     """
-    def __init__(self,base_label, dataset_name, filepath=None, basepath=None, overwrite=False, data = None, annotations='', **kwargs):
-        self.base_label = label
-        self.dataset_name = dataset
-        if filepath is None:
-            self.filepath = self._get_filepath
-        else:
-            self.filepath = filepath
-
+    def __init__(self, base_label, dataset_name=None, dataset_type='auto', filename=None, basepath=None, overwrite=False, data = None, annotations='', getpath=False, extension='auto', **kwargs):
+        self.base_label = base_label
+        self.dataset_name = dataset_name
         self.overwrite = overwrite
+        self.getpath = getpath
+
+        if dataset_type in ['raw', 'interim', 'processed']:
+            self.dataset_type = 'data/'+dataset_type
+        else:
+            self.dataset_type = dataset_type
 
         # Make sure inputs are consistent
-        self._assertions()
+        #TODO self._assertions()
 
         # Load the shortcuts
         self.shortcuts = json.load(open('shortcuts.json','r') )
-        if label in shortcuts:
-            self._soi_fullpath = recursive_full_name_recovery(self.shortcuts[label])
+        if base_label in self.shortcuts:
+            self._soi_fullpath = get_filepaths_from_shortcut(self.shortcuts[base_label])
             self._dataset_exists = True
+            self.basepath = self.shortcuts[base_label]['basepath']
         else:
             self._dataset_exists = False
             assert basepath is not None
             self.basepath = basepath
 
-        # Load data at last
+        # Specific case of no dataset listed
+        if dataset_name is None:
+            dataset_names = np.array([name.split('/')[-2] for name in self._soi_fullpath])
+            raise TypeError('You must input the dataset name. For {}, possible datasets are {}'.format(base_label, dataset_names))
+
+        # Get data at last
         if data is None:
-            self.data = self._load()
+            self.filename = self._get_filename()
+            self._get_extension(extension)
             self._functioning = "loader"
-        else:
+            self.data = self._load()
+
+        elif not overwrite: # Dataset is new
             self.data = data
             self._functioning = "creator"
+            if filename is None:
+                self.filename = dataset_name+base_label
+            else:
+                self.filename = filename
+            self._get_extension(extension)
+            self._create()
 
         # Add identifiers
+        # TODO identifiers in numpy arrays
+        # TODO identifiers before saving
         for key in kwargs:
-            if key in self.columns:
+            if key in self.data.columns:
                 raise ValueError("Identifier {} already exists")
             else:
                 self.data[key] = kwargs[key]
 
         # Overwritting
+        if self.overwrite:
+            self._overwrite()
 
+
+    def _get_extension(self, extension):
+        if extension == 'auto':
+            self.extension = self.filename.split('.')[-1]
+        else:
+            self.extension = extension
 
     def _assertions(self):
         """
         Assert class inputs are consistent.
         """
-        # TODO correct full function
+        # TODO correct whole function
 
         assert type(label) is str
-        if filepath is not None:
+        if filename is not None:
             if overwrite or dataset not in _soi_fullpath:
                 print('Overwritting dataset {}\n Previous dataset still stored in trash'.format(dataset, self.base_label))
             elif label not in _soi_fullpath:
                 print('Adding {} to dataset'.format(label))
             else:
-                raise IOError('When not overwritting, do not input filepath')
+                raise IOError('When not overwritting, do not input filename')
         else:
             assert overwrite is False
             try:
                 assert label in _soi_fullpath
             except:
-                raise IOError('If label is not pre-saved, must provide filepath')
+                raise IOError('If label is not pre-saved, must provide filename')
         for key in kwargs:
             try:
                 assert type(kwargs[key]) is float or type(kwargs[key]) is str or type(kwargs[key]) is int
@@ -154,58 +195,90 @@ class DataShortcut():
                 raise TypeError('keyword argument {} was not accepted, because it was not integer/float/string'.format(key))
 
 
-    def _get_filepath(self):
-        all_datasets = np.array([name.split('/')[-2] for name in self._soi_fullpath])
-        if type(dataset_name) is str:
-            assert len(all_datasets == self.dataset_name)
-            return self._soi_fullpath[all_datasets==self.dataset_name]
-        elif type(dataset_name) is list:
+    def _get_filename(self):
+        dataset_names = np.array([name.split('/')[-2] for name in self._soi_fullpath])
+
+        # Last ([-1]) is filename, next to last ([-2]) is dataset_name
+        if type(self.dataset_name) is str:
+            if self.dataset_type == 'auto':
+                index = dataset_names==self.dataset_name
+            else:
+                index = np.logical_and((dataset_names==self.dataset_name,
+                          [self.dataset_type in name for name in self._soi_fullpath]))
+            assert sum(index) == 1
+            return self._soi_fullpath[index][0]
+        elif type(self.dataset_name) is list:
             raise NotImplementedError
         else:
             return TypeError('The dataset_name shoud be str or list, not {}'.format(type(dataset_name)))
 
-    def _detect_extension(self):
-        ext = self.filepath.split('.')[-1]
-        if ext in ['pickle', 'pkl', 'pk']:
-            if self._functioning is "loading":
+    def _enforce_extension(self):
+        if self.extension in ['pickle', 'pkl']:
+            if self._functioning is "loader":
                 return lambda f: pickle.load(open(f, 'rb'))
             else:
                 return lambda d, f: pickle.dump(d, open(f,'wb'))
-        elif ext in ['csv']:
-            if self._functioning is "loading":
+        elif self.extension in ['csv']:
+            if self._functioning is "loader":
                 return lambda f: pd.load_csv(f)
             else:
                 return lambda d, f: pd.to_csv(d, f)
-        elif ext in ['h5', 'hdf5', 'h5py']:
+        elif self.extension in ['h5', 'hdf5', 'h5py']:
+            raise NotImplementedError
+        elif self.extension == 'mat':
             raise NotImplementedError
         else:
-            raise ValueError("The detected extension {} is not supported. Please input a pickle, csv or hdf5 file".format(ext))
+            raise ValueError("The detected extension .{} is not supported. Please input a pickle, csv or hdf5 file".format(ext))
 
     def _load(self):
-        return self._detect_extension()(self.filepath)
+        if self.getpath:
+            return self.filename
+        else:
+            print('inside')
+            return self._enforce_extension()(self.filename)
 
     def _overwrite(self):
         # TODO overwrite file, saving previous one if filename
         # or carrying annotations if just adding identifiers
         pass
+
+    def _create_path(self):
+        if self.basepath not in self.filename:
+            self.filename = '{}/{}/{}/{}.{}'.format(self.basepath, self.dataset_type, self.dataset_name, self.filename,self.extension)
+
+    def _create_annotations(self):
+        with open(self.filename[:-1]+'_annotations.txt', 'w') as f:
+            f.write('Created in {}'.format(str(datetime.today())))
+            if type(self.annotations) is str:
+                f.write('\n{}'.format(self.annotations))
+            elif type(self.annotations) is list:
+                [f.write('\n{}'.format(annot)) for annot in self.annotations]
+            else:
+                raise TypeError('Annotations must be strings or lists of strings')
+
     def _create(self):
         if self._dataset_exists:
-            self.basepath = self.shortcuts[self.label]['basepath']
+            self.basepath = self.shortcuts[self.base_label]['basepath']
+        self._create_path()
+
         assert self.basepath is not None
-        assert path[:len(self.basepath)] == self.basepath
+        assert self.filename[:len(self.basepath)] == self.basepath
 
         # Updating shortcuts
-        path = self.filepath.replace(self.basepath,'').split('/')
+        path = self.filename.replace(self.basepath,'').split('/')
         assert type(path) is list
-        insidecut = self.shortcuts[self.label][self.basepath]
-
-        for folder in path[:-1]:
+        insidecut = self.shortcuts[self.base_label]
+        for folder in path[1:-1]:
+            folderpath = self.filename[:self.filename.index(folder)]+folder
+            if not os.path.exists(folderpath):
+                os.makedirs(folderpath)
             if folder not in insidecut:
                 insidecut[folder] = {}
-            insidecut = insidecut[folder]
+            if folder is not path[-2]:
+                insidecut = insidecut[folder]
 
-        insidecut[path[-1]] = 'Created in {}, {}'.format(str(datetime.today()),self.annotations)
+        insidecut[self.dataset_name] = path[-1]
         json.dump(self.shortcuts, open('shortcuts.json','w'), indent='\t')
 
         # Creating datafile
-        self._detect_extension()(self.data, self.filepath)
+        self._enforce_extension()(self.data, self.filename)

@@ -91,16 +91,22 @@ def slashed(path):
     else:
         return '/'+path
 
-def recursive_full_name_recovery(one_shortcuts):
+def recursive_full_name_recovery(inside_folder_shortcuts):
     """
     Receives a nested dictionary in which keys are folder names,
     and values are filenames, and returns the fullpaths of each.
     """
-    if type(one_shortcuts) is str:
-        return [slashed(one_shortcuts)]
-    elif type(one_shortcuts) is dict:
+    if type(inside_folder_shortcuts) is str:
+        return [slashed(inside_folder_shortcuts)]
+    elif type(inside_folder_shortcuts) is dict:
         paths = []
-        for folder in one_shortcuts:
-            for path in recursive_full_name_recovery(one_shortcuts[folder]):
+        for folder in inside_folder_shortcuts:
+            for path in recursive_full_name_recovery(inside_folder_shortcuts[folder]):
                 paths+= [slashed(folder)+path]
         return paths
+
+def get_filepaths_from_shortcut(one_shortcuts):
+    all_paths = []
+    for folder in ['data','results']:
+        all_paths+= ['{}/{}{}'.format(one_shortcuts['basepath'],folder,path) for path in recursive_full_name_recovery(one_shortcuts[folder])]
+    return np.array(all_paths)

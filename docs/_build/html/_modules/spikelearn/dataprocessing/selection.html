@@ -60,21 +60,38 @@
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
-<span class="sd">    X : (n_examples, n_features) ndarray</span>
-<span class="sd">        Sklearn-style example matrix</span>
+<span class="sd">    X : numpy ndarray or pandas DataFrame</span>
+<span class="sd">        Data container to be sliced.</span>
 
-<span class="sd">    y : (n_examples, 1) ndarray</span>
-<span class="sd">        Label of each example.</span>
+<span class="sd">    y :  ndarray(n_examples, 1) or int, optional</span>
+<span class="sd">        If ndarray, label of each example.</span>
+<span class="sd">        If int, the axis that defines the label.</span>
 
-<span class="sd">    axis : int or string</span>
-<span class="sd">        Dimension to be sliced and served in batches. Accepts integer axis number, or &#39;last&#39;, &#39;first&#39;, and abbreviations.</span>
+<span class="sd">    axis : int or str</span>
+<span class="sd">        If int, dimension to be sliced and served in batches,</span>
+<span class="sd">        requiring ndarray.</span>
+<span class="sd">        If string, field used to choose examples, requiring DataFrame.</span>
+<span class="sd">        n_examples = X.shape[axis]</span>
 
-<span class="sd">    group : np.ndarray (n_examples, 1)</span>
-<span class="sd">        Use it to make examples always part of the same fold. *Default:* The label itself (no preferential grouping).</span>
+<span class="sd">    group : np.ndarray (n_examples, 1) or string, optional, default None</span>
+<span class="sd">        Use it to make examples always part of the same fold. Defaults to The position in axis (no preferential grouping).</span>
+<span class="sd">        If string, X must be a DataFrame, and defines the grouping index</span>
 
 <span class="sd">    mode : string or sklearn generator, optional, default</span>
 <span class="sd">        Which kind of splitting will be used for batching.</span>
 <span class="sd">        Currently accepts &#39;shuffle&#39; and &#39;kfold&#39;.</span>
+
+<span class="sd">    flatten : bool</span>
+<span class="sd">        Whether to return an Sklearn-style matrix.</span>
+
+<span class="sd">    ylabels : tuple, optional</span>
+<span class="sd">        If y is given as an int, its position on the axis is used to access</span>
+<span class="sd">        the corresponding label in ylabels. defaults to the position itself</span>
+
+<span class="sd">    Keyword arguments</span>
+<span class="sd">    -----------------</span>
+<span class="sd">    Arguments to be passed to the splitting function.</span>
+<span class="sd">    Common kwargs are</span>
 
 <span class="sd">    train_size : (int) or (float), optional, default: 0.5</span>
 <span class="sd">        If int, total number of groups in the train set. If float, proportion of groups.</span>
@@ -82,26 +99,35 @@
 <span class="sd">    test_size : (int) or (float), optional, default: 0.5</span>
 <span class="sd">        If int, total number of groups in the test set. If float, proportion of groups.</span>
 
-<span class="sd">    **kwargs :</span>
-<span class="sd">        Extra keyword arguments will be passed to the splitting function.</span>
-
 
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="c1">#TODO make better &#39;yields&#39; description</span>
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="s1">&#39;Last&#39;</span><span class="p">,</span> <span class="n">group</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;sh&#39;</span><span class="p">,</span> <span class="n">train_size</span><span class="o">=.</span><span class="mi">5</span><span class="p">,</span> <span class="n">test_size</span><span class="o">=.</span><span class="mi">5</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="s1">&#39;Last&#39;</span><span class="p">,</span> <span class="n">group</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;sh&#39;</span><span class="p">,</span>
+                <span class="n">flatten</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">ylabels</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 
-        <span class="c1">## Attributes</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">X</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">y</span> <span class="o">=</span> <span class="n">X</span><span class="p">,</span> <span class="n">y</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">train_size</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">test_size</span> <span class="o">=</span> <span class="n">train_size</span><span class="p">,</span> <span class="n">test_size</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">mode</span> <span class="o">=</span> <span class="n">mode</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">cv</span> <span class="o">=</span> <span class="n">cv</span>
+        <span class="c1">## Data container</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">X</span> <span class="o">=</span> <span class="n">X</span>
+        <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">X</span><span class="p">)</span> <span class="ow">is</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+            <span class="k">assert</span> <span class="nb">type</span><span class="p">(</span><span class="n">axis</span><span class="p">)</span> <span class="ow">is</span> <span class="nb">int</span>
+            <span class="k">if</span> <span class="n">group</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">assert</span> <span class="nb">type</span><span class="p">(</span><span class="n">group</span><span class="p">)</span> <span class="ow">is</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span>
+                <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">group</span><span class="p">)</span> <span class="o">==</span> <span class="n">X</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="n">axis</span><span class="p">]</span>
+        <span class="k">elif</span> <span class="nb">type</span><span class="p">(</span><span class="n">X</span><span class="p">)</span> <span class="ow">is</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+            <span class="k">assert</span> <span class="nb">type</span><span class="p">(</span><span class="n">axis</span><span class="p">)</span> <span class="ow">is</span> <span class="nb">str</span>
+            <span class="k">assert</span> <span class="nb">str</span> <span class="ow">in</span> <span class="n">X</span><span class="o">.</span><span class="n">columns</span>
+            <span class="k">if</span> <span class="n">group</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">assert</span> <span class="nb">type</span>
+
+        <span class="c1"># Labels</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">y</span> <span class="o">=</span> <span class="n">y</span>
+        <span class="k">if</span> <span class="n">y</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">y</span><span class="p">)</span> <span class="ow">is</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+                <span class="c1"># TODO assertion</span>
+                <span class="k">pass</span>
+
         <span class="c1"># Axis string to number</span>
-        <span class="k">if</span> <span class="n">axis</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;Last&#39;</span><span class="p">,</span> <span class="s1">&#39;last&#39;</span><span class="p">,</span> <span class="s1">&#39;l&#39;</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">]:</span>
-            <span class="n">axis</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">X</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span>
-        <span class="k">elif</span> <span class="n">axis</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;First&#39;</span><span class="p">,</span> <span class="s1">&#39;first&#39;</span><span class="p">,</span> <span class="s1">&#39;f&#39;</span><span class="p">,</span> <span class="s1">&#39;row&#39;</span><span class="p">,</span> <span class="s1">&#39;rows&#39;</span><span class="p">]:</span>
-            <span class="n">axis</span> <span class="o">=</span> <span class="mi">0</span>
-        <span class="k">assert</span> <span class="nb">type</span><span class="p">(</span><span class="n">axis</span><span class="p">)</span> <span class="ow">is</span> <span class="nb">int</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">axis</span> <span class="o">=</span> <span class="n">axis</span>
+
         <span class="c1"># Grouping</span>
         <span class="k">if</span> <span class="n">group</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">group</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">X</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">axis</span><span class="p">])</span>
@@ -109,7 +135,8 @@
             <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">group</span><span class="p">)</span> <span class="o">==</span> <span class="n">X</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">axis</span><span class="p">]</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">group</span> <span class="o">=</span> <span class="n">group</span>
 
-        <span class="c1">## Private attributes</span>
+        <span class="c1"># Start batching</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mode</span> <span class="o">=</span> <span class="n">mode</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_init_mode</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_i</span> <span class="o">=</span> <span class="mi">0</span>
 
@@ -117,13 +144,19 @@
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Initializes the splitting function.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="c1">#TODO implement cross-validator function initializer</span>
+        <span class="k">if</span> <span class="n">callable</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mode</span><span class="p">):</span>
+            <span class="k">return</span> <span class="ne">NotImplementedError</span>
+        <span class="k">assert</span> <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mode</span><span class="p">)</span> <span class="ow">is</span> <span class="nb">str</span>
+
         <span class="n">indexes</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">group</span><span class="p">)</span>
         <span class="k">if</span>  <span class="bp">self</span><span class="o">.</span><span class="n">mode</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;sh&#39;</span><span class="p">,</span> <span class="s1">&#39;shuffle&#39;</span><span class="p">,</span> <span class="s1">&#39;shufflesplit&#39;</span><span class="p">,</span> <span class="s1">&#39;markov&#39;</span><span class="p">]:</span>
             <span class="n">splitter</span> <span class="o">=</span> <span class="n">ShuffleSplit</span><span class="p">(</span><span class="n">n_splits</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">cv</span><span class="p">,</span> <span class="n">test_size</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">test_size</span><span class="p">,</span><span class="n">train_size</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">train_size</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 
         <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">mode</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;kfold&#39;</span><span class="p">,</span> <span class="s1">&#39;kf&#39;</span><span class="p">]:</span>
             <span class="n">splitter</span> <span class="o">=</span> <span class="n">KFold</span><span class="p">(</span><span class="n">n_splits</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">cv</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;The mode </span><span class="si">{}</span><span class="s2"> is not supported. Try &#39;kf&#39; or &#39;sh&#39;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mode</span><span class="p">))</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_batcher_gen</span> <span class="o">=</span> <span class="n">splitter</span><span class="o">.</span><span class="n">split</span><span class="p">(</span> <span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">group</span><span class="p">))</span>
 

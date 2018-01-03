@@ -133,19 +133,25 @@
     <span class="k">else</span><span class="p">:</span>
         <span class="k">return</span> <span class="s1">&#39;/&#39;</span><span class="o">+</span><span class="n">path</span></div>
 
-<div class="viewcode-block" id="recursive_full_name_recovery"><a class="viewcode-back" href="../../../source/spikelearn.dataprocessing.html#spikelearn.dataprocessing.utils.recursive_full_name_recovery">[docs]</a><span class="k">def</span> <span class="nf">recursive_full_name_recovery</span><span class="p">(</span><span class="n">one_shortcuts</span><span class="p">):</span>
+<div class="viewcode-block" id="recursive_full_name_recovery"><a class="viewcode-back" href="../../../source/spikelearn.dataprocessing.html#spikelearn.dataprocessing.utils.recursive_full_name_recovery">[docs]</a><span class="k">def</span> <span class="nf">recursive_full_name_recovery</span><span class="p">(</span><span class="n">inside_folder_shortcuts</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Receives a nested dictionary in which keys are folder names,</span>
 <span class="sd">    and values are filenames, and returns the fullpaths of each.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">one_shortcuts</span><span class="p">)</span> <span class="ow">is</span> <span class="nb">str</span><span class="p">:</span>
-        <span class="k">return</span> <span class="p">[</span><span class="n">slashed</span><span class="p">(</span><span class="n">one_shortcuts</span><span class="p">)]</span>
-    <span class="k">elif</span> <span class="nb">type</span><span class="p">(</span><span class="n">one_shortcuts</span><span class="p">)</span> <span class="ow">is</span> <span class="nb">dict</span><span class="p">:</span>
+    <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">inside_folder_shortcuts</span><span class="p">)</span> <span class="ow">is</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="k">return</span> <span class="p">[</span><span class="n">slashed</span><span class="p">(</span><span class="n">inside_folder_shortcuts</span><span class="p">)]</span>
+    <span class="k">elif</span> <span class="nb">type</span><span class="p">(</span><span class="n">inside_folder_shortcuts</span><span class="p">)</span> <span class="ow">is</span> <span class="nb">dict</span><span class="p">:</span>
         <span class="n">paths</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="k">for</span> <span class="n">folder</span> <span class="ow">in</span> <span class="n">one_shortcuts</span><span class="p">:</span>
-            <span class="k">for</span> <span class="n">path</span> <span class="ow">in</span> <span class="n">recursive_full_name_recovery</span><span class="p">(</span><span class="n">one_shortcuts</span><span class="p">[</span><span class="n">folder</span><span class="p">]):</span>
+        <span class="k">for</span> <span class="n">folder</span> <span class="ow">in</span> <span class="n">inside_folder_shortcuts</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">path</span> <span class="ow">in</span> <span class="n">recursive_full_name_recovery</span><span class="p">(</span><span class="n">inside_folder_shortcuts</span><span class="p">[</span><span class="n">folder</span><span class="p">]):</span>
                 <span class="n">paths</span><span class="o">+=</span> <span class="p">[</span><span class="n">slashed</span><span class="p">(</span><span class="n">folder</span><span class="p">)</span><span class="o">+</span><span class="n">path</span><span class="p">]</span>
         <span class="k">return</span> <span class="n">paths</span></div>
+
+<div class="viewcode-block" id="get_filepaths_from_shortcut"><a class="viewcode-back" href="../../../source/spikelearn.dataprocessing.html#spikelearn.dataprocessing.utils.get_filepaths_from_shortcut">[docs]</a><span class="k">def</span> <span class="nf">get_filepaths_from_shortcut</span><span class="p">(</span><span class="n">one_shortcuts</span><span class="p">):</span>
+    <span class="n">all_paths</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">folder</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;data&#39;</span><span class="p">,</span><span class="s1">&#39;results&#39;</span><span class="p">]:</span>
+        <span class="n">all_paths</span><span class="o">+=</span> <span class="p">[</span><span class="s1">&#39;</span><span class="si">{}</span><span class="s1">/</span><span class="si">{}{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">one_shortcuts</span><span class="p">[</span><span class="s1">&#39;basepath&#39;</span><span class="p">],</span><span class="n">folder</span><span class="p">,</span><span class="n">path</span><span class="p">)</span> <span class="k">for</span> <span class="n">path</span> <span class="ow">in</span> <span class="n">recursive_full_name_recovery</span><span class="p">(</span><span class="n">one_shortcuts</span><span class="p">[</span><span class="n">folder</span><span class="p">])]</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">all_paths</span><span class="p">)</span></div>
 </pre></div>
 
           </div>

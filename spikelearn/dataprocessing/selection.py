@@ -18,21 +18,38 @@ class Batcher():
 
     Parameters
     ----------
-    X : (n_examples, n_features) ndarray
-        Sklearn-style example matrix
+    X : numpy ndarray or pandas DataFrame
+        Data container to be sliced.
 
-    y : (n_examples, 1) ndarray
-        Label of each example.
+    y :  ndarray(n_examples, 1) or int, optional
+        If ndarray, label of each example.
+        If int, the axis that defines the label.
 
-    axis : int or string
-        Dimension to be sliced and served in batches. Accepts integer axis number, or 'last', 'first', and abbreviations.
+    axis : int or str
+        If int, dimension to be sliced and served in batches,
+        requiring ndarray.
+        If string, field used to choose examples, requiring DataFrame.
+        n_examples = X.shape[axis]
 
-    group : np.ndarray (n_examples, 1)
-        Use it to make examples always part of the same fold. *Default:* The label itself (no preferential grouping).
+    group : np.ndarray (n_examples, 1) or string, optional, default None
+        Use it to make examples always part of the same fold. Defaults to The position in axis (no preferential grouping).
+        If string, X must be a DataFrame, and defines the grouping index
 
     mode : string or sklearn generator, optional, default
         Which kind of splitting will be used for batching.
         Currently accepts 'shuffle' and 'kfold'.
+
+    flatten : bool
+        Whether to return an Sklearn-style matrix.
+
+    ylabels : tuple, optional
+        If y is given as an int, its position on the axis is used to access
+        the corresponding label in ylabels. defaults to the position itself
+
+    Keyword arguments
+    -----------------
+    Arguments to be passed to the splitting function.
+    Common kwargs are
 
     train_size : (int) or (float), optional, default: 0.5
         If int, total number of groups in the train set. If float, proportion of groups.
@@ -40,26 +57,36 @@ class Batcher():
     test_size : (int) or (float), optional, default: 0.5
         If int, total number of groups in the test set. If float, proportion of groups.
 
-    **kwargs :
-        Extra keyword arguments will be passed to the splitting function.
-
 
     """
     #TODO make better 'yields' description
-    def __init__(self, X, y=None, axis='Last', group=None, mode='sh', train_size=.5, test_size=.5, **kwargs):
+    #TODO change __init__ to __new__ to return data
+    def __init__(self, X, y=None, axis='Last', group=None, mode='sh',
+                flatten=False, ylabels=None, **kwargs):
 
-        ## Attributes
-        self.X, self.y = X, y
-        self.train_size, self.test_size = train_size, test_size
-        self.mode = mode
-        self.cv = cv
+        ## Data container
+        self.X = X
+        if type(X) is np.ndarray:
+            assert type(axis) is int
+            if group is not None:
+                assert type(group) is np.ndarray
+                assert len(group) == X.shape[axis]
+        elif type(X) is pd.DataFrame:
+            assert type(axis) is str
+            assert str in X.columns
+            if group is not None:
+                assert type
+
+        # Labels
+        self.y = y
+        if y is not None:
+            if type(y) is np.ndarray:
+                # TODO assertion
+                pass
+
         # Axis string to number
-        if axis in ['Last', 'last', 'l', -1]:
-            axis = len(X.shape)-1
-        elif axis in ['First', 'first', 'f', 'row', 'rows']:
-            axis = 0
-        assert type(axis) is int
         self.axis = axis
+
         # Grouping
         if group is None:
             self.group = np.arange(X.shape[self.axis])
@@ -67,7 +94,8 @@ class Batcher():
             assert len(group) == X.shape[self.axis]
             self.group = group
 
-        ## Private attributes
+        # Start batching
+        self.mode = mode
         self._init_mode(**kwargs)
         self._i = 0
 
@@ -75,13 +103,19 @@ class Batcher():
         """
         Initializes the splitting function.
         """
-        #TODO implement cross-validator function initializer
+        if callable(self.mode):
+            return NotImplementedError
+        assert type(self.mode) is str
+
         indexes = np.unique(self.group)
         if  self.mode.lower() in ['sh', 'shuffle', 'shufflesplit', 'markov']:
             splitter = ShuffleSplit(n_splits=self.cv, test_size=self.test_size,train_size=self.train_size, **kwargs)
 
         elif self.mode.lower() in ['kfold', 'kf']:
             splitter = KFold(n_splits=self.cv, **kwargs)
+
+        else:
+            raise ValueError("The mode {} is not supported. Try 'kf' or 'sh'".format(self.mode))
 
         self._batcher_gen = splitter.split( np.unique( self.group))
 
@@ -138,30 +172,30 @@ def select(dataframe, maxlen=None, takefrom=None, **kwargs):
     Parameters
     ----------
     dataframe : pandas DataFrame
-    The data that will be under selection
+        The data that will be under selection
 
     maxlen : int
-    Maximum number of rows of resulting dataframe.
-    Acts after all selection by kwargs.
-    Has no effect if dataframe is already smaller than maxlen by then.
+        Maximum number of rows of resulting dataframe.
+        Acts after all selection by kwargs.
+        Has no effect if dataframe is already smaller than maxlen by then.
 
     takefrom : str
-    Only functional when maxlen is not None.
-    Specifies where to get the rows.
-    May be one of 'shuffle', 'init', 'end'
+        Only functional when maxlen is not None.
+        Specifies where to get the rows.
+        May be one of 'shuffle', 'init', 'end'
 
 
     Keyword Arguments
     -----------------
     Key : string
-    The index of any field in the DataFrame
-    If type is numerical, may be preceded or succeded by max, min,
-    maxeq or mineq, inside underlines
-    it may also receive special key "maxshape", in which case
+        The index of any field in the DataFrame
+        If type is numerical, may be preceded or succeded by max, min,
+        maxeq or mineq, inside underlines
+        it may also receive special key "maxshape", in which case
 
 
     Value : string or numerical
-    The value used for selecting.
+        The value used for selecting.
 
     Examples
     --------
