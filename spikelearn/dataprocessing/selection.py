@@ -8,7 +8,7 @@ import pandas as pd
 import numpy as np
 from sklearn.model_selection import ShuffleSplit, KFold
 import operator
-#import spikeutils as spku
+
 
 
 
@@ -60,7 +60,6 @@ class Batcher():
 
     """
     #TODO make better 'yields' description
-    #TODO change __init__ to __new__ to return data
     def __init__(self, X, y=None, axis='Last', group=None, mode='sh',
                 flatten=False, ylabels=None, **kwargs):
 
@@ -167,7 +166,8 @@ class Batcher():
             raise StopIteration()
 
 
-def select(dataframe, maxlen=None, takefrom=None, **kwargs):
+def select(dataframe, maxlen=None, takefrom=None, accept_smaller=False,
+                **kwargs):
     """
     Parameters
     ----------
@@ -177,21 +177,25 @@ def select(dataframe, maxlen=None, takefrom=None, **kwargs):
     maxlen : int
         Maximum number of rows of resulting dataframe.
         Acts after all selection by kwargs.
-        Has no effect if dataframe is already smaller than maxlen by then.
+        If dataframe is already smaller than maxlen by then,
+        resides on accept_smaller parameter.
 
     takefrom : str
         Only functional when maxlen is not None.
         Specifies where to get the rows.
         May be one of 'shuffle', 'init', 'end'
 
+    accept_smaller : bool
+        Whether to silently accept dataframes smaller than maxlen.
+        If False and it is smaller, raises an exception
+        Defaults to False
 
     Keyword Arguments
     -----------------
     Key : string
         The index of any field in the DataFrame
-        If type is numerical, may be preceded or succeded by max, min,
-        maxeq or mineq, inside underlines
-        it may also receive special key "maxshape", in which case
+        If type is numerical, may be preceded or succeded by _in_, _max_, _min_,
+        _maxeq_ or _mineq_, inside underlines.
 
 
     Value : string or numerical
@@ -199,34 +203,47 @@ def select(dataframe, maxlen=None, takefrom=None, **kwargs):
 
     Examples
     --------
-    >>> select(data, _min_duration=1000)
+    >>> selected_by_duration = select(data, _min_duration=1000)
+    >>> selected_neurons = select(data, _in_unit=[1,2,3,8])
+
+    Notes
+    -----
+    The wordparts _in_, _min_, _mineq_, _maxeq_, _max_ should not be
+    part of identifier variables,
+    and have to be reserved for using the comparisons.
     """
     localdata = dataframe.copy()
     ops = { '_mineq_': operator.ge,
             '_min_': operator.gt,
             '_maxeq_': operator.le,
-            '_max_': operator.lt}
+            '_max_': operator.lt,
+            '_in_': lambda x, y: x.isin(y)}
 
     # Select by the wanted values
     operation = None
     for key in kwargs:
+        field = key
         for op in ops:
             if op in key:
                 operation = ops[op]
                 field = key.replace(op,'')
                 assert field in dataframe.columns
+
         if operation is None:
             operation = operator.eq
         localdata = localdata[ operation(localdata[field],kwargs[key]) ]
 
     # Return dataframe of expected size
     size = localdata.shape[0]
-    if maxlen is None or size <= maxlen:
+    if maxlen is None or size == maxlen:
+        return localdata
+    elif size < maxlen:
+        assert accept_smaller
         return localdata
     else:
         if takefrom is 'init':
-            return localdata[:maxlen]
+            return localdata.iloc[:maxlen]
         elif takefrom is 'end':
-            return localdata[-maxlen:]
+            return localdata.iloc[-maxlen:]
         elif takefrom is 'shuffle':
             return localdata.sample(maxlen)

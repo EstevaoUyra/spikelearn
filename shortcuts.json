@@ -1,36 +1,19 @@
 {
-	"Name_example": {
-		"basepath": "/home/user/Documents/project_name",
-		"/home/user/Documents/project_name": {
-			"raw": "filename located in /raw/",
-			"interim": "filename located in /interim/",
-			"processed": {
-				"data_label": "corresponding file full path/name",
-				"example": "example.mat #located in base/processed",
-				"another_example": "smoothed.pickle"
-			}
-		},
-		"results": "another_filepath_or_dict"
-	},
 	"DRRD 7": {
 		"basepath": "/home/tevo/Documents/UFABC/SingleUnit Spike Learning",
 		"data": {
 			"raw": {
-				"spikesorted": "rato7tudo.mat"
+				"spikesorted": "DRRD 7.mat"
+			},
+			"external": {
+				"selected_neurons": "selected_neurons_DRRD 7.pickle"
 			},
 			"interim": {
-				"spikes": "spikesDRRD 7.pickle",
-				"behavior": "behaviorDRRD 7.pickle"
+				"spikes": "spikes_DRRD 7.pickle",
+				"behavior": "behavior_DRRD 7.pickle"
 			},
-			"processed": {},
-			"external": {}
-		},
-		"results": {},
-		"": {
-			"data": {
-				"interim": {
-					"spikes": {}
-				}
+			"processed": {
+				"epoched_spikes": "epoched_spikes_DRRD 7.pickle"
 			}
 		}
 	},
@@ -38,45 +21,118 @@
 		"basepath": "/home/tevo/Documents/UFABC/SingleUnit Spike Learning",
 		"data": {
 			"raw": {
-				"spikesorted": "rato8tudo.mat"
+				"spikesorted": "DRRD 8.mat"
+			},
+			"external": {
+				"selected_neurons": "selected_neurons_DRRD 8.pickle"
 			},
 			"interim": {
-				"spikes": "spikesDRRD 8.pickle",
-				"behavior": "behaviorDRRD 8.pickle"
+				"spikes": "spikes_DRRD 8.pickle",
+				"behavior": "behavior_DRRD 8.pickle"
 			},
-			"processed": {},
-			"external": {}
-		},
-		"results": {}
+			"processed": {
+				"epoched_spikes": "epoched_spikes_DRRD 8.pickle"
+			}
+		}
 	},
 	"DRRD 9": {
 		"basepath": "/home/tevo/Documents/UFABC/SingleUnit Spike Learning",
 		"data": {
 			"raw": {
-				"spikesorted": "rato9tudo.mat"
+				"spikesorted": "DRRD 9.mat"
+			},
+			"external": {
+				"selected_neurons": "selected_neurons_DRRD 9.pickle"
 			},
 			"interim": {
-				"spikes": "spikesDRRD 9.pickle",
-				"behavior": "behaviorDRRD 9.pickle"
+				"spikes": "spikes_DRRD 9.pickle",
+				"behavior": "behavior_DRRD 9.pickle"
 			},
-			"processed": {},
-			"external": {}
-		},
-		"results": {}
+			"processed": {
+				"epoched_spikes": "epoched_spikes_DRRD 9.pickle"
+			}
+		}
 	},
 	"DRRD 10": {
 		"basepath": "/home/tevo/Documents/UFABC/SingleUnit Spike Learning",
 		"data": {
 			"raw": {
-				"spikesorted": "rato10tudo.mat"
+				"spikesorted": "DRRD 10.mat"
+			},
+			"external": {
+				"selected_neurons": "selected_neurons_DRRD 10.pickle"
 			},
 			"interim": {
-				"spikes": "spikesDRRD 10.pickle",
-				"behavior": "behaviorDRRD 10.pickle"
+				"spikes": "spikes_DRRD 10.pickle",
+				"behavior": "behavior_DRRD 10.pickle"
 			},
-			"processed": {},
-			"external": {}
-		},
-		"results": {}
+			"processed": {
+				"epoched_spikes": "epoched_spikes_DRRD 10.pickle"
+			}
+		}
+	},
+	"Autoshape 7": {
+		"basepath": "/home/tevo/Documents/UFABC/SingleUnit Spike Learning",
+		"data": {
+			"raw": {
+				"spikesorted": "Autoshape 7.mat"
+			},
+			"external": {},
+			"interim": {
+				"spikes": "spikes_Autoshape 7.pickle",
+				"behavior": "behavior_Autoshape 7.pickle"
+			},
+			"processed": {
+				"epoched_spikes": "epoched_spikes_Autoshape 7.pickle"
+			}
+		}
+	},
+	"Autoshape 8": {
+		"basepath": "/home/tevo/Documents/UFABC/SingleUnit Spike Learning",
+		"data": {
+			"raw": {
+				"spikesorted": "Autoshape 8.mat"
+			},
+			"external": {},
+			"interim": {
+				"spikes": "spikes_Autoshape 8.pickle",
+				"behavior": "behavior_Autoshape 8.pickle"
+			},
+			"processed": {
+				"epoched_spikes": "epoched_spikes_Autoshape 8.pickle"
+			}
+		}
+	},
+	"Autoshape 9": {
+		"basepath": "/home/tevo/Documents/UFABC/SingleUnit Spike Learning",
+		"data": {
+			"raw": {
+				"spikesorted": "Autoshape 9.mat"
+			},
+			"external": {},
+			"interim": {
+				"spikes": "spikes_Autoshape 9.pickle",
+				"behavior": "behavior_Autoshape 9.pickle"
+			},
+			"processed": {
+				"epoched_spikes": "epoched_spikes_Autoshape 9.pickle"
+			}
+		}
+	},
+	"Autoshape 10": {
+		"basepath": "/home/tevo/Documents/UFABC/SingleUnit Spike Learning",
+		"data": {
+			"raw": {
+				"spikesorted": "Autoshape 10.mat"
+			},
+			"external": {},
+			"interim": {
+				"spikes": "spikes_Autoshape 10.pickle",
+				"behavior": "behavior_Autoshape 10.pickle"
+			},
+			"processed": {
+				"epoched_spikes": "epoched_spikes_Autoshape 10.pickle"
+			}
+		}
 	}
 }

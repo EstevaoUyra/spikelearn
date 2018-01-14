@@ -1,4 +1,18 @@
+
 class Analyzer():
+    def __init__():
+
+
+
+def 
+
+def decode(data, clf, features, target, group, mode, **kwargs):
+    """
+
+    """
+
+
+class esqueleto():
 
     # PRIVATE METHODS
     def __init__(self,ratNumber, sigma=None, binSize=120, label = None, **kwargs):

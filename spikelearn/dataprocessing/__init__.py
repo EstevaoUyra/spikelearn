@@ -17,23 +17,23 @@ else: # if not, create with default example
     default_example = {
         "Name_example":{
           "basepath" : "/home/user/Documents/project_name/data",
-          "/home/user/Documents/project_name/data":{
+          'data':{
             "raw" : "filename located in /raw/",
             "interim" : "filename located in /interim/",
             "processed" : {
-              "data_label" : "corresponding file full path/name",
+              "data_label" : "filename",
               "example" : "example.mat #located in base/processed",
               "another_example" : "smoothed.pickle"
-            }
-          },
-          "results" : "another_filepath_or_dict"
+            },
+            "results" : "another_filepath_or_dict"
+          }
         }
     }
     json.dump(default_example, open('shortcuts.json','w'), indent='\t')
 
-
 SHORTCUTS = json.load(open('shortcuts.json','r') )
-del SHORTCUTS['Name_example']
+if 'Name_example' in SHORTCUTS:
+    del SHORTCUTS['Name_example']
 # If there are saves in shortcuts, make sure folders and files exist.
 for label in SHORTCUTS:
     all_files = get_filepaths_from_shortcut(SHORTCUTS[label])

@@ -6,7 +6,7 @@ from sklearn.datasets import make_moons, make_circles, make_classification
 from sklearn.ensemble import RandomForestClassifier, AdaBoostClassifier
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.naive_bayes import GaussianNB
-from sklearn.linear_model import LogisticRegression
+from sklearn.linear_model import LogisticRegression, SGDClassifier
 from sklearn.neural_network import MLPClassifier
 from sklearn.model_selection import ShuffleSplit
 from sklearn.gaussian_process import GaussianProcessClassifier
@@ -14,6 +14,9 @@ from sklearn.discriminant_analysis import LinearDiscriminantAnalysis, QuadraticD
 from xgboost import XGBClassifier
 
 
+# Customized classifiers
+elasticSGD = lambda **params: SGDClassifier(loss='log', penalty='elasticnet',
+                                    tol=1e-5, **params)
 
 def makeClassifierList():
     classifiers =   [{'name':  'knn',
@@ -46,7 +49,7 @@ def makeClassifierList():
                     'func': DecisionTreeClassifier        #class_weight predict_proba
                     },
 
-                    {'name':  'Random forest',
+                    {'name':  'Random_forest',
                     'hyperparameter_space': [(2, 8),                    # max_depth
                                             (2,80),                     # n_estimators
                                             [.7,'sqrt','log2']],          # max_features
@@ -55,7 +58,7 @@ def makeClassifierList():
                     'func': RandomForestClassifier      # class_weight, predict_proba, oob_decision_function_
                     },
 
-                    {'name':  'Neural network',
+                    {'name':  'Neural_network',
                     'hyperparameter_space': [(1e-12,1e-1, "log-uniform"),   # alpha
                                             (2,40)],                        # hidden_layer_sizes,
                     'hyperparameter_names': ['alpha', 'hidden_layer_sizes'],
@@ -63,7 +66,7 @@ def makeClassifierList():
                     'func': MLPClassifier               # predict_proba
                     },
 
-                    {'name':  'Naive bayes',
+                    {'name':  'Naive_bayes',
                     'hyperparameter_space': (),
                     'hyperparameter_names': (),
                     'n_calls':{'rand':() ,'opt':() },
@@ -84,7 +87,7 @@ def makeClassifierList():
                     'func': LinearDiscriminantAnalysis   # priors, predict_proba
                     },
 
-                    {'name':  'Logistic Regression',
+                    {'name':  'Logistic_Regression',
                     'hyperparameter_space': (),
                     'hyperparameter_names': (),
                     'n_calls':{'rand':() ,'opt':() },
@@ -102,6 +105,14 @@ def makeClassifierList():
                     'hyperparameter_names': ['max_depth', 'learning_rate', 'n_estimators', 'gamma', 'min_child_weight', 'reg_alpha', 'reg_lambda'],
                     'n_calls':{'rand':(60) ,'opt':(300) },
                     'func': XGBClassifier
+                    },
+
+                    {'name' : 'elasticnet_SGD',
+                    'hyperparameter_space': [(0.,1.),
+                                            (1e-6, 1e-1, "log-uniform")],
+                    'hyperparameter_names': ['l1_ratio', 'alpha'],
+                    'n_calls':{'rand':50, 'opt':150},
+                    'func': elasticSGD
                     }
-]
+                    ]
     return classifiers

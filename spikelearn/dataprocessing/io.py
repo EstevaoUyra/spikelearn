@@ -12,6 +12,9 @@ import os
 import numpy as np
 import pickle
 
+DATA_SUBFOLDERS = ('raw', 'interim', 'processed')
+RESULTS_SUBFOLDERS = ()
+
 def spikes_behavior_from_mat(filename):
     """
     Loads a mat-file into two DataFrames
@@ -43,6 +46,8 @@ def spikes_behavior_from_mat(filename):
     spikes = pd.DataFrame([[ spikes[0,i][0][:,0], spikes[0,i][0][:,1]] for i in range(spikes.shape[1]) if spikes[0,i][0].shape[1]==2], columns=['times','trial'])
 
     behavior = pd.DataFrame(np.transpose(behavior[0,0][0]),   columns=['one','onset','offset','zero', 'duration', 'sortIdx', 'sortLabel']).drop(['one', 'zero', 'sortIdx', 'sortLabel'], axis=1)
+    behavior['trial'] = np.arange(1, behavior.shape[0]+1)
+    behavior=behavior.set_index('trial')
 
     # Calculate relative spike time
     spikes['trial_time'] = pd.DataFrame(np.transpose([spikes.times[i] - behavior.iloc[spikes.trial[i]-1].onset.as_matrix() for i in range(spikes.shape[0])]))
@@ -106,6 +111,7 @@ class DataShortcut():
         self.dataset_name = dataset_name
         self.overwrite = overwrite
         self.getpath = getpath
+        self.annotations = annotations
 
         if dataset_type in ['raw', 'interim', 'processed']:
             self.dataset_type = 'data/'+dataset_type
@@ -125,6 +131,7 @@ class DataShortcut():
             self._dataset_exists = False
             assert basepath is not None
             self.basepath = basepath
+            self._new_label()
 
         # Specific case of no dataset listed
         if dataset_name is None:
@@ -142,7 +149,7 @@ class DataShortcut():
             self.data = data
             self._functioning = "creator"
             if filename is None:
-                self.filename = dataset_name+base_label
+                self.filename = '_'.join([dataset_name,base_label])
             else:
                 self.filename = filename
             self._get_extension(extension)
@@ -161,6 +168,14 @@ class DataShortcut():
         if self.overwrite:
             self._overwrite()
 
+    def _new_label(self, basepath):
+        self.shortcuts[self.base_label] = {}
+        labeldict = self.shortcuts[self.base_label]
+        labeldict['basepath'] = basepath
+        labeldict['data'] = {subfolder : {} for subfolder
+                                    in DATA_SUBFOLDERS}
+        labeldict['results'] = {subfolder : {} for subfolder
+                                    in RESULTS_SUBFOLDERS}
 
     def _get_extension(self, extension):
         if extension == 'auto':
@@ -177,7 +192,7 @@ class DataShortcut():
         assert type(label) is str
         if filename is not None:
             if overwrite or dataset not in _soi_fullpath:
-                print('Overwritting dataset {}\n Previous dataset still stored in trash'.format(dataset, self.base_label))
+                print('Overwritting dataset {}\n Previous dataset still stored in folder'.format(dataset, self.base_label))
             elif label not in _soi_fullpath:
                 print('Adding {} to dataset'.format(label))
             else:
@@ -205,8 +220,12 @@ class DataShortcut():
             else:
                 index = np.logical_and((dataset_names==self.dataset_name,
                           [self.dataset_type in name for name in self._soi_fullpath]))
-            assert sum(index) == 1
-            return self._soi_fullpath[index][0]
+            if sum(index) == 1:
+                return self._soi_fullpath[index][0]
+            elif sum(index) == 0:
+                raise IOError(0, self.dataset_name)
+            elif sum(index) > 1:
+                raise IOError(999, self.dataset_name)
         elif type(self.dataset_name) is list:
             raise NotImplementedError
         else:
@@ -228,13 +247,12 @@ class DataShortcut():
         elif self.extension == 'mat':
             raise NotImplementedError
         else:
-            raise ValueError("The detected extension .{} is not supported. Please input a pickle, csv or hdf5 file".format(ext))
+            raise ValueError("The detected extension .{} is not supported. Please input a pickle, csv or hdf5 file".format(self.extension))
 
     def _load(self):
         if self.getpath:
             return self.filename
         else:
-            print('inside')
             return self._enforce_extension()(self.filename)
 
     def _overwrite(self):
@@ -247,7 +265,7 @@ class DataShortcut():
             self.filename = '{}/{}/{}/{}.{}'.format(self.basepath, self.dataset_type, self.dataset_name, self.filename,self.extension)
 
     def _create_annotations(self):
-        with open(self.filename[:-1]+'_annotations.txt', 'w') as f:
+        with open(''.join(self.filename.split('.')[:-1])+'_annotations.txt', 'w') as f:
             f.write('Created in {}'.format(str(datetime.today())))
             if type(self.annotations) is str:
                 f.write('\n{}'.format(self.annotations))
@@ -257,8 +275,7 @@ class DataShortcut():
                 raise TypeError('Annotations must be strings or lists of strings')
 
     def _create(self):
-        if self._dataset_exists:
-            self.basepath = self.shortcuts[self.base_label]['basepath']
+        self.basepath = self.shortcuts[self.base_label]['basepath']
         self._create_path()
 
         assert self.basepath is not None
@@ -282,3 +299,37 @@ class DataShortcut():
 
         # Creating datafile
         self._enforce_extension()(self.data, self.filename)
+        self._create_annotations()
+
+
+
+def load(base_label, dataset_name, getpath=False, dataset_type='auto'):
+    """
+    Lightweight loader that used DataShortcut under the hood.
+
+    See also
+    --------
+    DataShortcut
+    """
+    return DataShortcut(base_label, dataset_name, getpath=getpath, dataset_type=dataset_type).data
+
+
+def save(data, base_label, dataset_name, dataset_type= 'processed', extension='pickle', annotatons='', **kwargs):
+    """
+    Lightweight saver that used DataShortcut under the hood.
+
+    See also
+    --------
+    DataShortcut
+    """
+    DataShortcut(base_label, dataset_name, dataset_type=dataset_type,  annotatons=annotatons, data=data, extension=extension, **kwargs)
+
+def dataset_exist(base_label, dataset_name):
+    try:
+        load(base_label, dataset_name, getpath=True)
+        return True
+    except IOError as e:
+        if e.errno == 0:
+            return False
+        elif e.errno > 1:
+            raise NotImplementedError

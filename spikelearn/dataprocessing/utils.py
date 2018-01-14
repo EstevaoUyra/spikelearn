@@ -107,6 +107,16 @@ def recursive_full_name_recovery(inside_folder_shortcuts):
 
 def get_filepaths_from_shortcut(one_shortcuts):
     all_paths = []
-    for folder in ['data','results']:
+    for folder in ['data']:
         all_paths+= ['{}/{}{}'.format(one_shortcuts['basepath'],folder,path) for path in recursive_full_name_recovery(one_shortcuts[folder])]
     return np.array(all_paths)
+
+def df_to_array(df, axis_fields, field_values=None):
+    if field_values is None:
+        field_values = {field:df[field].unique() for field in axis_fields}
+    out_shape = (len(field_values[field]) for field in axis_fields)
+    arr = np.full(out_shape, np.nan)
+    raise NotImplementedError
+
+def ndarray_to_df(arr, field_names):
+    raise NotImplementedError
