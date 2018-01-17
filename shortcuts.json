@@ -6,14 +6,20 @@
 				"spikesorted": "DRRD 7.mat"
 			},
 			"external": {
-				"selected_neurons": "selected_neurons_DRRD 7.pickle"
+				"selected_neurons": "selected_neurons_DRRD 7.pickle",
+				"tiredness": "DRRD 7.csv"
 			},
 			"interim": {
 				"spikes": "spikes_DRRD 7.pickle",
 				"behavior": "behavior_DRRD 7.pickle"
 			},
 			"processed": {
-				"epoched_spikes": "epoched_spikes_DRRD 7.pickle"
+				"behav_stats": "behav_stats_DRRD 7.pickle",
+				"epoched_spikes": "epoched_spikes_DRRD 7.pickle",
+				"wide_smoothed": "wide_smoothed_DRRD 7.pickle",
+				"narrow_smoothed": "narrow_smoothed_DRRD 7.pickle",
+				"wide_smoothed_viz": "wide_smoothed_viz_DRRD 7.pickle",
+				"narrow_smoothed_viz": "narrow_smoothed_viz_DRRD 7.pickle"
 			}
 		}
 	},
@@ -24,14 +30,20 @@
 				"spikesorted": "DRRD 8.mat"
 			},
 			"external": {
-				"selected_neurons": "selected_neurons_DRRD 8.pickle"
+				"selected_neurons": "selected_neurons_DRRD 8.pickle",
+				"tiredness": "DRRD 8.csv"
 			},
 			"interim": {
 				"spikes": "spikes_DRRD 8.pickle",
 				"behavior": "behavior_DRRD 8.pickle"
 			},
 			"processed": {
-				"epoched_spikes": "epoched_spikes_DRRD 8.pickle"
+				"behav_stats": "behav_stats_DRRD 8.pickle",
+				"epoched_spikes": "epoched_spikes_DRRD 8.pickle",
+				"wide_smoothed": "wide_smoothed_DRRD 8.pickle",
+				"narrow_smoothed": "narrow_smoothed_DRRD 8.pickle",
+				"wide_smoothed_viz": "wide_smoothed_viz_DRRD 8.pickle",
+				"narrow_smoothed_viz": "narrow_smoothed_viz_DRRD 8.pickle"
 			}
 		}
 	},
@@ -42,14 +54,20 @@
 				"spikesorted": "DRRD 9.mat"
 			},
 			"external": {
-				"selected_neurons": "selected_neurons_DRRD 9.pickle"
+				"selected_neurons": "selected_neurons_DRRD 9.pickle",
+				"tiredness": "DRRD 9.csv"
 			},
 			"interim": {
 				"spikes": "spikes_DRRD 9.pickle",
 				"behavior": "behavior_DRRD 9.pickle"
 			},
 			"processed": {
-				"epoched_spikes": "epoched_spikes_DRRD 9.pickle"
+				"behav_stats": "behav_stats_DRRD 9.pickle",
+				"epoched_spikes": "epoched_spikes_DRRD 9.pickle",
+				"wide_smoothed": "wide_smoothed_DRRD 9.pickle",
+				"narrow_smoothed": "narrow_smoothed_DRRD 9.pickle",
+				"wide_smoothed_viz": "wide_smoothed_viz_DRRD 9.pickle",
+				"narrow_smoothed_viz": "narrow_smoothed_viz_DRRD 9.pickle"
 			}
 		}
 	},
@@ -60,14 +78,20 @@
 				"spikesorted": "DRRD 10.mat"
 			},
 			"external": {
-				"selected_neurons": "selected_neurons_DRRD 10.pickle"
+				"selected_neurons": "selected_neurons_DRRD 10.pickle",
+				"tiredness": "DRRD 10.csv"
 			},
 			"interim": {
 				"spikes": "spikes_DRRD 10.pickle",
 				"behavior": "behavior_DRRD 10.pickle"
 			},
 			"processed": {
-				"epoched_spikes": "epoched_spikes_DRRD 10.pickle"
+				"behav_stats": "behav_stats_DRRD 10.pickle",
+				"epoched_spikes": "epoched_spikes_DRRD 10.pickle",
+				"wide_smoothed": "wide_smoothed_DRRD 10.pickle",
+				"narrow_smoothed": "narrow_smoothed_DRRD 10.pickle",
+				"wide_smoothed_viz": "wide_smoothed_viz_DRRD 10.pickle",
+				"narrow_smoothed_viz": "narrow_smoothed_viz_DRRD 10.pickle"
 			}
 		}
 	},
@@ -83,6 +107,7 @@
 				"behavior": "behavior_Autoshape 7.pickle"
 			},
 			"processed": {
+				"behav_stats": "behav_stats_Autoshape 7.pickle",
 				"epoched_spikes": "epoched_spikes_Autoshape 7.pickle"
 			}
 		}
@@ -99,6 +124,7 @@
 				"behavior": "behavior_Autoshape 8.pickle"
 			},
 			"processed": {
+				"behav_stats": "behav_stats_Autoshape 8.pickle",
 				"epoched_spikes": "epoched_spikes_Autoshape 8.pickle"
 			}
 		}
@@ -115,6 +141,7 @@
 				"behavior": "behavior_Autoshape 9.pickle"
 			},
 			"processed": {
+				"behav_stats": "behav_stats_Autoshape 9.pickle",
 				"epoched_spikes": "epoched_spikes_Autoshape 9.pickle"
 			}
 		}
@@ -131,6 +158,7 @@
 				"behavior": "behavior_Autoshape 10.pickle"
 			},
 			"processed": {
+				"behav_stats": "behav_stats_Autoshape 10.pickle",
 				"epoched_spikes": "epoched_spikes_Autoshape 10.pickle"
 			}
 		}

@@ -112,6 +112,8 @@ def get_filepaths_from_shortcut(one_shortcuts):
     return np.array(all_paths)
 
 def df_to_array(df, axis_fields, field_values=None):
+    # Assert there is exactly one value for each combination of fields
+    assert all(df.groupby(axis_fields).agg(lambda x: x.shape[0])==1)
     if field_values is None:
         field_values = {field:df[field].unique() for field in axis_fields}
     out_shape = (len(field_values[field]) for field in axis_fields)
