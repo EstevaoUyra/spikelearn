@@ -1,7 +1,7 @@
 import scipy.stats as st
 import numpy as np
 
-def kernel_smooth(spike_vector, sigma, edges, bin_size=None, precision_factor=10):
+def kernel_smooth(spike_vector, sigma, edges, bin_size=None):
     """
     Receives an array of spike times (point-process like), and smoothes it
     by convolving with a _gaussian_ kernel, of width *sigma*. The time
@@ -41,6 +41,7 @@ def kernel_smooth(spike_vector, sigma, edges, bin_size=None, precision_factor=10
     Convolution borders are edge-padded.
     Total kernel size is 6*sigma, 3 sigma for each size.
     """
+    precision_factor = sigma
     tp = int(sigma/precision_factor)
     if bin_size is None:
         bin_size = tp
