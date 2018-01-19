@@ -74,11 +74,10 @@ class DataShortcut():
         self.getpath = getpath
         self.annotations = annotations
 
-        if dataset_type in ['raw', 'interim', 'processed']:
+        if dataset_type in ['raw', 'interim', 'processed', 'results']:
             self.dataset_type = 'data/'+dataset_type
         else:
             self.dataset_type = dataset_type
-
         # Make sure inputs are consistent
         #TODO self._assertions()
 
@@ -110,9 +109,10 @@ class DataShortcut():
             self.data = data
             self._functioning = "creator"
             if filename is None:
-                self.filename = '_'.join([dataset_name,base_label])
+                self.filename = '_'.join([dataset_name.split('/')[-1],base_label])
             else:
                 self.filename = filename
+            print(self.filename)
             self._get_extension(extension)
             self._create()
 
@@ -239,11 +239,13 @@ class DataShortcut():
         self.basepath = self.shortcuts[self.base_label]['basepath']
         self._create_path()
 
+
         assert self.basepath is not None
         assert self.filename[:len(self.basepath)] == self.basepath
 
         # Updating shortcuts
         path = self.filename.replace(self.basepath,'').split('/')
+        print(path)
         assert type(path) is list
         insidecut = self.shortcuts[self.base_label]
         for folder in path[1:-1]:
@@ -255,7 +257,7 @@ class DataShortcut():
             if folder is not path[-2]:
                 insidecut = insidecut[folder]
 
-        insidecut[self.dataset_name] = path[-1]
+        insidecut[self.dataset_name.split('/')[-1]] = path[-1]
         json.dump(self.shortcuts, open('shortcuts.json','w'), indent='\t')
 
         # Creating datafile
@@ -276,6 +278,17 @@ def load(base_label, dataset_name, getpath=False, dataset_type='auto'):
 
 
 def save(data, base_label, dataset_name, dataset_type= 'processed', extension='pickle', annotatons='', **kwargs):
+    """
+    Lightweight saver that used DataShortcut under the hood.
+
+    See also
+    --------
+    DataShortcut
+    """
+    DataShortcut(base_label, dataset_name, dataset_type=dataset_type,  annotatons=annotatons, data=data, extension=extension, **kwargs)
+
+
+def save_result(data, base_label, dataset_name, dataset_type= 'processed', extension='pickle', annotatons='', **kwargs):
     """
     Lightweight saver that used DataShortcut under the hood.
 

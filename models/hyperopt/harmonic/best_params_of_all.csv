@@ -1,0 +1,5 @@
+clf,label,alpha,l1_ratio,annotatons
+elasticnet_SGD,DRRD 7,0.0001477842031567197,0.32278644177370036,
+elasticnet_SGD,DRRD 8,1e-06,0.7635229745684933,
+elasticnet_SGD,DRRD 9,1e-06,0.0,
+elasticnet_SGD,DRRD 10,1.727758454097212e-05,1.0,

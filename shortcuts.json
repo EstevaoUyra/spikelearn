@@ -20,6 +20,13 @@
 				"narrow_smoothed": "narrow_smoothed_DRRD 7.pickle",
 				"wide_smoothed_viz": "wide_smoothed_viz_DRRD 7.pickle",
 				"narrow_smoothed_viz": "narrow_smoothed_viz_DRRD 7.pickle"
+			},
+			"results": {
+				"hyperopt": {
+					"elasticnet_SGD": "elasticnet_SGD_DRRD 7.pickle",
+					"rbfSVM": "rbfSVM_DRRD 7.pickle",
+					"XGboost": "XGboost_DRRD 7.pickle"
+				}
 			}
 		}
 	},
@@ -44,6 +51,11 @@
 				"narrow_smoothed": "narrow_smoothed_DRRD 8.pickle",
 				"wide_smoothed_viz": "wide_smoothed_viz_DRRD 8.pickle",
 				"narrow_smoothed_viz": "narrow_smoothed_viz_DRRD 8.pickle"
+			},
+			"results": {
+				"hyperopt": {
+					"elasticnet_SGD": "elasticnet_SGD_DRRD 8.pickle"
+				}
 			}
 		}
 	},
@@ -68,6 +80,11 @@
 				"narrow_smoothed": "narrow_smoothed_DRRD 9.pickle",
 				"wide_smoothed_viz": "wide_smoothed_viz_DRRD 9.pickle",
 				"narrow_smoothed_viz": "narrow_smoothed_viz_DRRD 9.pickle"
+			},
+			"results": {
+				"hyperopt": {
+					"elasticnet_SGD": "elasticnet_SGD_DRRD 9.pickle"
+				}
 			}
 		}
 	},
@@ -92,6 +109,11 @@
 				"narrow_smoothed": "narrow_smoothed_DRRD 10.pickle",
 				"wide_smoothed_viz": "wide_smoothed_viz_DRRD 10.pickle",
 				"narrow_smoothed_viz": "narrow_smoothed_viz_DRRD 10.pickle"
+			},
+			"results": {
+				"hyperopt": {
+					"elasticnet_SGD": "elasticnet_SGD_DRRD 10.pickle"
+				}
 			}
 		}
 	},

@@ -220,9 +220,8 @@ def select(dataframe, maxlen=None, takefrom=None, accept_smaller=False,
             '_in_': lambda x, y: x.isin(y)}
 
     # Select by the wanted values
-    operation = None
     for key in kwargs:
-        field = key
+        field = key; operation = None;
         for op in ops:
             if op in key:
                 operation = ops[op]
@@ -247,3 +246,31 @@ def select(dataframe, maxlen=None, takefrom=None, accept_smaller=False,
             return localdata.iloc[-maxlen:]
         elif takefrom is 'shuffle':
             return localdata.sample(maxlen)
+
+def to_feature_array(df, Xyt = True, subset='cropped'):
+    """
+    Receives an epoched smoothed dataframe, and transforms it to put the each
+    unit into a column.
+    """
+    subset= [subset, subset+'_times']
+    df = df.copy()[subset]
+
+    bins = df.applymap(len).min()[0]
+    df = df.applymap(lambda x: x[:bins])
+
+    rates = pd.DataFrame(df[subset[0]].tolist(),
+                index=df.index).reset_index().melt(['trial','unit'])
+    times = pd.DataFrame(df[subset[1]].tolist(),
+                index=df.index).reset_index().melt(['trial','unit'])
+
+    rates['time'] = times.value
+    rates = rates.drop('variable',axis=1)
+    rates = rates.set_index(['trial', 'time','unit']).unstack()
+    if Xyt:
+        X = rates.values
+        rates = rates.reset_index()
+        y = rates['time'].values
+        trial = rates['trial'].values
+        return X, y, trial
+    else:
+        return rates

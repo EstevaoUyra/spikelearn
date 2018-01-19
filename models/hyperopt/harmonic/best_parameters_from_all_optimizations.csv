@@ -1,0 +1,5 @@
+,alpha,annotatons,classifier,clf,l1_ratio,parameters,rat,time
+DRRD 7,0.0023760847872185747,,,elasticnet_SGD,0.869849612724345,,,
+DRRD 8,0.0010748153479708772,,,elasticnet_SGD,0.558444995923846,,,
+DRRD 9,1e-06,,,elasticnet_SGD,1.0,,,
+DRRD 10,0.05010903810128604,,,elasticnet_SGD,0.7012078299456198,,,

@@ -41,7 +41,7 @@ def makeClassifierList():
                     'func': SVC
                     },
 
-                    {'name':  'Decision tree',
+                    {'name':  'Decision_tree',
                     'hyperparameter_space': [(2, 8),                     # max_depth
                                             [.7,'sqrt','log2']],          # max_features
                     'hyperparameter_names': ['max_depth', 'max_features'],
@@ -88,8 +88,9 @@ def makeClassifierList():
                     },
 
                     {'name':  'Logistic_Regression',
-                    'hyperparameter_space': (),
-                    'hyperparameter_names': (),
+                    'hyperparameter_space': (['l1','l2'],
+                                             [(1., 1e7, "log-uniform")),
+                    'hyperparameter_names': ['penalty', 'C'],
                     'n_calls':{'rand':() ,'opt':() },
                     'func': LogisticRegression          # class_weight, predict_proba
                     },
