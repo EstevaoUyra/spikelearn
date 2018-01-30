@@ -29,7 +29,7 @@ def normalized_distance(mean, observations, max_qdist):
     norm_dist = np.sum((observations-mean)**2)/max_qdist
     return 1 - norm_dist/len(observations)
 
-def multiclass_pessimistic_score(y_true, y_pred, composite='harmonic',
+def multiclass_pessimistic_score(y_true, y_pred, composite='min',
                         one_class_score_func=normalized_distance, labels=None):
     if labels is None:
         labels = np.unique(y_true)
@@ -41,6 +41,8 @@ def multiclass_pessimistic_score(y_true, y_pred, composite='harmonic',
     elif composite == 'harmonic':
         eps = 1e-6
         return len(each_score)/(np.sum(1/(each_score+eps)))
+    elif composite == 'min':
+        return min(each_score)
 
 score = make_scorer(multiclass_pessimistic_score)
 
@@ -147,8 +149,8 @@ if __name__ == '__main__':
 
                 init_time = time.time()
                 res = optimize(clf, X, y, trial, train_size=.8,
-                     n_calls=3,#classifier['n_calls']['opt'],
-                      n_random_starts=2,#classifier['n_calls']['rand'],
+                     n_calls=classifier['n_calls']['opt'],
+                      n_random_starts=classifier['n_calls']['rand'],
                      space=classifier['hyperparameter_space'], parameter_names=classifier['hyperparameter_names'])
                 end_time = time.time()
 
@@ -164,4 +166,4 @@ if __name__ == '__main__':
                 single_results['clf'] = classifier['name']
                 single_results = single_results.reset_index().set_index(['clf','label'])
                 best_params_of_all = best_params_of_all.append(single_results)
-    best_params_of_all.to_csv(saveDir+'/best_params_of_all.csv')
+        best_params_of_all.to_csv(saveDir+'/best_params_of_all.csv')

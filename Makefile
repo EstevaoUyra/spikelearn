@@ -11,3 +11,7 @@ test-data :
 
 test-package :
 			echo NotImplemented
+
+temp :
+			python src/data/kernel_smoothing.py
+			python src/models/tune_hyperparameters.py -clf XGboost elasticnet_SGD -o models/hyperopt/harmonic -ow -vvv

@@ -14,6 +14,8 @@ The dataset names will accord to the following:
     { 50, 100} narrow_smoothed
     {100,  20} wide_smoothed_viz
     { 50,  20} narrow_smoothed_viz
+    { 50, 100} norm_smoothed
+    { 50,  20} norm_smoothed_viz
 
 """
 import sys
@@ -33,11 +35,17 @@ DSET_PARAMS = {'wide_smoothed' : { 'sigma' : 100,
                                       'bin_size' : 20},
 
               'narrow_smoothed_viz' : { 'sigma' : 50,
-                                        'bin_size' : 20}
+                                        'bin_size' : 20},
+
+              'norm_smoothed' : { 'sigma': 50,
+                                  'bin_size': 100},
+
+              'norm_smoothed_viz' : { 'sigma': 50,
+                                      'bin_size': 20},
                 }
 
 
-for rat_label in SHORTCUTS:
+for rat_label in ['DRRD 7','DRRD 8','DRRD 9','DRRD 10']: #SHORTCUTS:
     epoched = io.load(rat_label, 'epoched_spikes')
     epoched = epoched.groupby('is_selected').get_group(True)
     epoched = epoched.reset_index().set_index(['trial','unit'])
@@ -45,22 +53,33 @@ for rat_label in SHORTCUTS:
         # Create dataset and add identifiers
         smoothed_dataset = pd.DataFrame(index=epoched.index)
 
-        # Put firing_rates with motor activity and baseline
-        f = lambda x: kernel_smooth( 1000*x['with_baseline'], **params,
-                                      edges=(BASELINE, 1000*x.duration))
-        out = epoched.reset_index().apply(f, axis=1)
-        out = pd.DataFrame(out.tolist(), index = epoched.index,
-                            columns = ['full', 'full_times'])
-        smoothed_dataset = smoothed_dataset.join(out)
+        if dset_name[:4] == 'norm':
+            # Put firing_rates with motor activity and baseline
+            f = lambda x: kernel_smooth( 1000*x['normalized_time'], **params,
+                                          edges=(0, 1000))
+            out = epoched.reset_index().apply(f, axis=1)
+            out = pd.DataFrame(out.tolist(), index = epoched.index,
+                                columns = ['full', 'full_times'])
+            smoothed_dataset = smoothed_dataset.join(out)
 
-        # Then without motor activity (200, -300)
-        f = lambda x: kernel_smooth( 1000*x['time'], **params,
-                                      edges=(200, 1000*x.duration-300))
-        out = epoched.reset_index().apply(f, axis=1)
-        out = pd.DataFrame(out.tolist(), index = epoched.index,
-                            columns = ['cropped', 'cropped_times'])
-        smoothed_dataset = smoothed_dataset.join(out)
+        else:
+            # Put firing_rates with motor activity and baseline
+            f = lambda x: kernel_smooth( 1000*x['with_baseline'], **params,
+                                          edges=(BASELINE, 1000*x.duration))
+            out = epoched.reset_index().apply(f, axis=1)
+            out = pd.DataFrame(out.tolist(), index = epoched.index,
+                                columns = ['full', 'full_times'])
+            smoothed_dataset = smoothed_dataset.join(out)
 
+            # Then without motor activity (200, -300)
+            f = lambda x: kernel_smooth( 1000*x['time'], **params,
+                                          edges=(200, 1000*x.duration-300))
+            out = epoched.reset_index().apply(f, axis=1)
+            out = pd.DataFrame(out.tolist(), index = epoched.index,
+                                columns = ['cropped', 'cropped_times'])
+            smoothed_dataset = smoothed_dataset.join(out)
+
+        # Add behavioral identifiers
         behav = io.load(rat_label, 'behav_stats')
         smoothed_dataset = smoothed_dataset.reset_index().set_index('trial').join(behav)
 

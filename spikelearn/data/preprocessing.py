@@ -1,7 +1,7 @@
 import scipy.stats as st
 import numpy as np
 
-def kernel_smooth(spike_vector, sigma, edges, bin_size=None):
+def kernel_smooth(spike_vector, sigma, edges, bin_size=None, padding='mean'):
     """
     Receives an array of spike times (point-process like), and smoothes it
     by convolving with a _gaussian_ kernel, of width *sigma*. The time
@@ -28,6 +28,11 @@ def kernel_smooth(spike_vector, sigma, edges, bin_size=None):
         Must be a multiple of tp (n*tp). The returning bin value is the *sum*
         of each n bins, with no superposition.
 
+    padding : str, default mean
+        The kind of padding on array edges. Possible values are
+        'constant', 'edge', 'maximum', 'mean', 'median', 'minimum', 'reflect',
+        'symmetric', 'wrap', or a <function>.
+
     Returns
     -------
     smoothed_data : array
@@ -40,6 +45,10 @@ def kernel_smooth(spike_vector, sigma, edges, bin_size=None):
     -----
     Convolution borders are edge-padded.
     Total kernel size is 6*sigma, 3 sigma for each size.
+
+    See also
+    --------
+    numpy.pad for padding options and information.
     """
     precision_factor = sigma
     tp = int(sigma/precision_factor)
@@ -61,11 +70,11 @@ def kernel_smooth(spike_vector, sigma, edges, bin_size=None):
     spike_count, times = np.histogram(spike_vector, bins=n_bins, range=edges)
 
     each_size_len = int(3*tp*precision_factor + 1)
-    padded = np.pad(spike_count, each_size_len, 'edge')
+    padded = np.pad(spike_count, each_size_len, padding)
 
     s=sigma # Just for one-lining below
     kernel = st.norm(0,s).pdf( np.linspace(-3*s, 3*s, 2*each_size_len + 1) )
     smoothed = np.convolve(padded, kernel, 'valid')
 
     cs = np.hstack((0, smoothed.cumsum()))
-    return np.diff(cs)[::nbins_to_agg], times[:-nbins_to_agg:nbins_to_agg]
+    return np.diff(cs[::nbins_to_agg]), times[:-nbins_to_agg:nbins_to_agg]

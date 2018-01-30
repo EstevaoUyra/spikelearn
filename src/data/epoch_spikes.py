@@ -25,8 +25,12 @@ for rat in SHORTCUTS:
     behav = io.load(rat, 'behav_stats')
     epoched = epoched.join(behav)
 
+    # Importing manual selection
     selected_neurons = io.load(rat, 'selected_neurons') if io.dataset_exist(rat,'selected_neurons') else np.array([-1])
-    epoched['is_selected'] = epoched.unit.apply(lambda x: x in selected_neurons)
+    selected_neurons = selected_neuronn.groupby('selected').get_group('yes')
+
+    epoched['is_selected'] = epoched.unit.apply(lambda x: x in selected_neurons.index)
+    epoched['comments'] = epoched.unit.apply(lambda x: selected_neurons.loc[x].comments)
 
     # Make redundant yet useful data
     epoched['with_baseline'] = epoched['time']

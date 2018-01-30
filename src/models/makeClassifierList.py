@@ -89,22 +89,24 @@ def makeClassifierList():
 
                     {'name':  'Logistic_Regression',
                     'hyperparameter_space': (['l1','l2'],
-                                             [(1., 1e7, "log-uniform")),
+                                             (1., 1e7, "log-uniform")),
                     'hyperparameter_names': ['penalty', 'C'],
                     'n_calls':{'rand':() ,'opt':() },
                     'func': LogisticRegression          # class_weight, predict_proba
                     },
 
                     {'name':  'XGboost',
-                    'hyperparameter_space': [(1,20),
-                                             (0.001,1.),
-                                             (20,300),
+                    'hyperparameter_space': [(1,15),
+                                             (0.01,1.),
+                                             (10,300),
                                              (1e-6,10.,"log-uniform"),
-                                             (1,50),
+                                             (1,30),
+                                             (1e-6,1.,"log-uniform"),
+                                             (1e-6,1.,"log-uniform"),
                                              (1e-6,1.,"log-uniform"),
                                              (1e-6,1.,"log-uniform")],
-                    'hyperparameter_names': ['max_depth', 'learning_rate', 'n_estimators', 'gamma', 'min_child_weight', 'reg_alpha', 'reg_lambda'],
-                    'n_calls':{'rand':(60) ,'opt':(300) },
+                    'hyperparameter_names': ['max_depth', 'learning_rate', 'n_estimators', 'gamma', 'min_child_weight', 'reg_alpha', 'reg_lambda', 'colsample_bytree', 'subsample'],
+                    'n_calls':{'rand':(30) ,'opt':(100) },
                     'func': XGBClassifier
                     },
 

@@ -54,7 +54,8 @@
 			},
 			"results": {
 				"hyperopt": {
-					"elasticnet_SGD": "elasticnet_SGD_DRRD 8.pickle"
+					"elasticnet_SGD": "elasticnet_SGD_DRRD 8.pickle",
+					"XGboost": "XGboost_DRRD 8.pickle"
 				}
 			}
 		}
@@ -83,7 +84,8 @@
 			},
 			"results": {
 				"hyperopt": {
-					"elasticnet_SGD": "elasticnet_SGD_DRRD 9.pickle"
+					"elasticnet_SGD": "elasticnet_SGD_DRRD 9.pickle",
+					"XGboost": "XGboost_DRRD 9.pickle"
 				}
 			}
 		}
