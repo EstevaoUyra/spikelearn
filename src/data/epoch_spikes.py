@@ -26,11 +26,12 @@ for rat in SHORTCUTS:
     epoched = epoched.join(behav)
 
     # Importing manual selection
-    selected_neurons = io.load(rat, 'selected_neurons') if io.dataset_exist(rat,'selected_neurons') else np.array([-1])
-    selected_neurons = selected_neuronn.groupby('selected').get_group('yes')
-
-    epoched['is_selected'] = epoched.unit.apply(lambda x: x in selected_neurons.index)
-    epoched['comments'] = epoched.unit.apply(lambda x: selected_neurons.loc[x].comments)
+    if io.dataset_exist(rat,'selected_neurons'):
+        selection_neurons = io.load(rat, 'selected_neurons')
+        epoched['is_selected'] = epoched.unit.apply(lambda x: x in selection_neurons)
+        #selected_neurons = selection_neurons.groupby('selected').get_group(' yes')
+        #epoched['is_selected'] = epoched.unit.apply(lambda x: x in selected_neurons.index)
+        #epoched['comments'] = epoched.unit.apply(lambda x: (selection_neurons.loc[x,' comments'] if x in selection_neurons.index else ''))
 
     # Make redundant yet useful data
     epoched['with_baseline'] = epoched['time']
@@ -38,6 +39,5 @@ for rat in SHORTCUTS:
     epoched['time'] = epoched.apply(lambda x: [x.time[x.time>0]] if len(x.time)>0 else [[]], axis=1).apply(lambda x: x[0])
     epoched['time_from_offset'] = epoched.apply(lambda x: [x.time - x.duration] if len(x.time)>0 else [[]], axis=1).apply(lambda x: x[0])
     epoched['normalized_time'] = epoched.apply(lambda x: [x.time[x.time>0]/x.duration] if len(x.time)>0 else [[]], axis=1).apply(lambda x: x[0])
-
 
     io.save(epoched.reset_index().set_index(['trial', 'unit']), rat, 'epoched_spikes', 'processed')

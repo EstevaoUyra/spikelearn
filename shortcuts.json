@@ -1,4 +1,12 @@
 {
+	"groups":{
+		"DRRD":{
+			"DRRD 7":"",
+			"DRRD 8":"",
+			"DRRD 9":"",
+			"DRRD 10":""
+		}
+	},
 	"DRRD 7": {
 		"basepath": "/home/tevo/Documents/UFABC/SingleUnit Spike Learning",
 		"data": {
@@ -11,22 +19,20 @@
 			},
 			"interim": {
 				"spikes": "spikes_DRRD 7.pickle",
-				"behavior": "behavior_DRRD 7.pickle"
+				"behavior": "behavior_DRRD 7.pickle",
+				"behav_stats": "behav_stats_DRRD 7.pickle"
 			},
 			"processed": {
-				"behav_stats": "behav_stats_DRRD 7.pickle",
 				"epoched_spikes": "epoched_spikes_DRRD 7.pickle",
 				"wide_smoothed": "wide_smoothed_DRRD 7.pickle",
+				"medium_smoothed": "medium_smoothed_DRRD 7.pickle",
 				"narrow_smoothed": "narrow_smoothed_DRRD 7.pickle",
 				"wide_smoothed_viz": "wide_smoothed_viz_DRRD 7.pickle",
-				"narrow_smoothed_viz": "narrow_smoothed_viz_DRRD 7.pickle"
-			},
-			"results": {
-				"hyperopt": {
-					"elasticnet_SGD": "elasticnet_SGD_DRRD 7.pickle",
-					"rbfSVM": "rbfSVM_DRRD 7.pickle",
-					"XGboost": "XGboost_DRRD 7.pickle"
-				}
+				"medium_smoothed_viz": "medium_smoothed_viz_DRRD 7.pickle",
+				"narrow_smoothed_viz": "narrow_smoothed_viz_DRRD 7.pickle",
+				"medium_smoothed_norm": "medium_smoothed_norm_DRRD 7.pickle",
+				"narrow_smoothed_norm": "narrow_smoothed_norm_DRRD 7.pickle",
+				"narrow_smoothed_norm_viz": "narrow_smoothed_norm_viz_DRRD 7.pickle"
 			}
 		}
 	},
@@ -42,21 +48,20 @@
 			},
 			"interim": {
 				"spikes": "spikes_DRRD 8.pickle",
-				"behavior": "behavior_DRRD 8.pickle"
+				"behavior": "behavior_DRRD 8.pickle",
+				"behav_stats": "behav_stats_DRRD 8.pickle"
 			},
 			"processed": {
-				"behav_stats": "behav_stats_DRRD 8.pickle",
 				"epoched_spikes": "epoched_spikes_DRRD 8.pickle",
 				"wide_smoothed": "wide_smoothed_DRRD 8.pickle",
+				"medium_smoothed": "medium_smoothed_DRRD 8.pickle",
 				"narrow_smoothed": "narrow_smoothed_DRRD 8.pickle",
 				"wide_smoothed_viz": "wide_smoothed_viz_DRRD 8.pickle",
-				"narrow_smoothed_viz": "narrow_smoothed_viz_DRRD 8.pickle"
-			},
-			"results": {
-				"hyperopt": {
-					"elasticnet_SGD": "elasticnet_SGD_DRRD 8.pickle",
-					"XGboost": "XGboost_DRRD 8.pickle"
-				}
+				"medium_smoothed_viz": "medium_smoothed_viz_DRRD 8.pickle",
+				"narrow_smoothed_viz": "narrow_smoothed_viz_DRRD 8.pickle",
+				"medium_smoothed_norm": "medium_smoothed_norm_DRRD 8.pickle",
+				"narrow_smoothed_norm": "narrow_smoothed_norm_DRRD 8.pickle",
+				"narrow_smoothed_norm_viz": "narrow_smoothed_norm_viz_DRRD 8.pickle"
 			}
 		}
 	},
@@ -72,21 +77,20 @@
 			},
 			"interim": {
 				"spikes": "spikes_DRRD 9.pickle",
-				"behavior": "behavior_DRRD 9.pickle"
+				"behavior": "behavior_DRRD 9.pickle",
+				"behav_stats": "behav_stats_DRRD 9.pickle"
 			},
 			"processed": {
-				"behav_stats": "behav_stats_DRRD 9.pickle",
 				"epoched_spikes": "epoched_spikes_DRRD 9.pickle",
 				"wide_smoothed": "wide_smoothed_DRRD 9.pickle",
+				"medium_smoothed": "medium_smoothed_DRRD 9.pickle",
 				"narrow_smoothed": "narrow_smoothed_DRRD 9.pickle",
 				"wide_smoothed_viz": "wide_smoothed_viz_DRRD 9.pickle",
-				"narrow_smoothed_viz": "narrow_smoothed_viz_DRRD 9.pickle"
-			},
-			"results": {
-				"hyperopt": {
-					"elasticnet_SGD": "elasticnet_SGD_DRRD 9.pickle",
-					"XGboost": "XGboost_DRRD 9.pickle"
-				}
+				"medium_smoothed_viz": "medium_smoothed_viz_DRRD 9.pickle",
+				"narrow_smoothed_viz": "narrow_smoothed_viz_DRRD 9.pickle",
+				"medium_smoothed_norm": "medium_smoothed_norm_DRRD 9.pickle",
+				"narrow_smoothed_norm": "narrow_smoothed_norm_DRRD 9.pickle",
+				"narrow_smoothed_norm_viz": "narrow_smoothed_norm_viz_DRRD 9.pickle"
 			}
 		}
 	},
@@ -102,20 +106,17 @@
 			},
 			"interim": {
 				"spikes": "spikes_DRRD 10.pickle",
-				"behavior": "behavior_DRRD 10.pickle"
+				"behavior": "behavior_DRRD 10.pickle",
+				"behav_stats": "behav_stats_DRRD 10.pickle"
 			},
 			"processed": {
-				"behav_stats": "behav_stats_DRRD 10.pickle",
 				"epoched_spikes": "epoched_spikes_DRRD 10.pickle",
 				"wide_smoothed": "wide_smoothed_DRRD 10.pickle",
+				"medium_smoothed": "medium_smoothed_DRRD 10.pickle",
 				"narrow_smoothed": "narrow_smoothed_DRRD 10.pickle",
 				"wide_smoothed_viz": "wide_smoothed_viz_DRRD 10.pickle",
+				"medium_smoothed_viz": "medium_smoothed_viz_DRRD 10.pickle",
 				"narrow_smoothed_viz": "narrow_smoothed_viz_DRRD 10.pickle"
-			},
-			"results": {
-				"hyperopt": {
-					"elasticnet_SGD": "elasticnet_SGD_DRRD 10.pickle"
-				}
 			}
 		}
 	},
@@ -128,10 +129,10 @@
 			"external": {},
 			"interim": {
 				"spikes": "spikes_Autoshape 7.pickle",
-				"behavior": "behavior_Autoshape 7.pickle"
+				"behavior": "behavior_Autoshape 7.pickle",
+				"behav_stats": "behav_stats_Autoshape 7.pickle"
 			},
 			"processed": {
-				"behav_stats": "behav_stats_Autoshape 7.pickle",
 				"epoched_spikes": "epoched_spikes_Autoshape 7.pickle"
 			}
 		}
@@ -145,10 +146,10 @@
 			"external": {},
 			"interim": {
 				"spikes": "spikes_Autoshape 8.pickle",
-				"behavior": "behavior_Autoshape 8.pickle"
+				"behavior": "behavior_Autoshape 8.pickle",
+				"behav_stats": "behav_stats_Autoshape 8.pickle"
 			},
 			"processed": {
-				"behav_stats": "behav_stats_Autoshape 8.pickle",
 				"epoched_spikes": "epoched_spikes_Autoshape 8.pickle"
 			}
 		}
@@ -162,10 +163,10 @@
 			"external": {},
 			"interim": {
 				"spikes": "spikes_Autoshape 9.pickle",
-				"behavior": "behavior_Autoshape 9.pickle"
+				"behavior": "behavior_Autoshape 9.pickle",
+				"behav_stats": "behav_stats_Autoshape 9.pickle"
 			},
 			"processed": {
-				"behav_stats": "behav_stats_Autoshape 9.pickle",
 				"epoched_spikes": "epoched_spikes_Autoshape 9.pickle"
 			}
 		}
@@ -179,10 +180,10 @@
 			"external": {},
 			"interim": {
 				"spikes": "spikes_Autoshape 10.pickle",
-				"behavior": "behavior_Autoshape 10.pickle"
+				"behavior": "behavior_Autoshape 10.pickle",
+				"behav_stats": "behav_stats_Autoshape 10.pickle"
 			},
 			"processed": {
-				"behav_stats": "behav_stats_Autoshape 10.pickle",
 				"epoched_spikes": "epoched_spikes_Autoshape 10.pickle"
 			}
 		}

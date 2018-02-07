@@ -5,6 +5,7 @@ A module for data loading, processing and saving.
 import glob
 import json
 from .utils import get_filepaths_from_shortcut
+from .selection import select, to_feature_array
 #module_path = os.path.abspath(os.path.dirname(__file__))
 #shortcuts_path = module_path+'/shortcuts.json'
 #print(module_path)
@@ -36,5 +37,6 @@ if 'Name_example' in SHORTCUTS:
     del SHORTCUTS['Name_example']
 # If there are saves in shortcuts, make sure folders and files exist.
 for label in SHORTCUTS:
-    all_files = get_filepaths_from_shortcut(SHORTCUTS[label])
-    assert all([len(glob.glob(filepath))==1 for filepath in all_files if len(filepath)>0])
+    if label != 'groups':
+        all_files = get_filepaths_from_shortcut(SHORTCUTS[label])
+        assert all([len(glob.glob(filepath))==1 for filepath in all_files if len(filepath)>0])

@@ -76,6 +76,7 @@ def raster_multiple(spike_trains, time='time', yaxis='trial', xlim=None,
         kde_kwargs = {}
     if fig_kwargs is None:
         fig_kwargs = {}
+        
     # Auxilliary columns
     if col is None:
         col = 'aux_col'

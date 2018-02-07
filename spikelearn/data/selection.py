@@ -266,6 +266,7 @@ def to_feature_array(df, Xyt = True, subset='cropped'):
     rates['time'] = times.value
     rates = rates.drop('variable',axis=1)
     rates = rates.set_index(['trial', 'time','unit']).unstack()
+    rates.columns = rates.columns.droplevel()
     if Xyt:
         X = rates.values
         rates = rates.reset_index()

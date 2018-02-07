@@ -33,5 +33,8 @@ for rat in DRRD_RATS:
     shortcuts[rat]['data']['external']['selected_neurons'] = 'selected_neurons_{}.csv'.format(rat)
     shortcuts[rat]['data']['external']['tiredness'] = '{}.csv'.format(rat)
 
+# Add group for easy access
+shortcuts['groups'] = {}
+shortcuts['DRRD'] = DRRD_RATS
 
 json.dump(shortcuts, open('shortcuts.json','w'), indent='\t')
