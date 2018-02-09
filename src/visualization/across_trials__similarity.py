@@ -25,6 +25,7 @@ savedir = 'reports/figures/across_trials/similarity/'
 for label in SHORTCUTS['groups']['DRRD']:
     similarities = pd.read_csv(filename(label)).set_index(['unit','trial'])
     units = similarities.reset_index().unit.unique()
+    # One image for each neuron
     for unit in units:
         fig = plt.figure()
         sns.heatmap(similarities.loc[unit])
@@ -32,4 +33,4 @@ for label in SHORTCUTS['groups']['DRRD']:
         plt.savefig('{}sim_evo_{}_unit_{}'.format(savedir, label, unit),
                         dpi=200)
         plt.close(fig)
-    
+    # Plus one image for the mean

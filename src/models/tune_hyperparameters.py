@@ -22,6 +22,7 @@ from makeClassifierList import makeClassifierList
 from spikelearn.data.selection import select, to_feature_array
 from spikelearn.data import io
 
+print('teste', 10)
 
 kappa = make_scorer(cohen_kappa_score, weights = 'quadratic')
 
