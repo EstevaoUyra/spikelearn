@@ -4,6 +4,7 @@ import numpy as np
 import sys
 sys.path.append('.')
 
+from spikelearn.data import SHORTCUTS
 
 from numpy import dot
 import matplotlib.pyplot as plt
@@ -13,26 +14,31 @@ from itertools import product, count
 from sklearn.preprocessing import StandardScaler
 ss = StandardScaler()
 
-
+# Load results data
 data = pd.read_csv('data/results/across_trials/feature_importance.csv')
 actv = pd.read_csv('data/results/across_trials/feature_importance_activity.csv')
-
-id_vars = ['rat','dataset','num_trials', 'unit', 'time','logC']
-
-DRRD_RATS = data.groupby('num_trials').get_group(50).rat.unique()
-LOGCS = sorted(data.groupby('num_trials').get_group(50).logC.unique())[::-1]
-
-each_mean = data.groupby(id_vars + ['when']).mean().reset_index(-1)
-same_mean = data.groupby(id_vars).mean()
-same_std = data.groupby(id_vars).std()
-aux = (each_mean-same_mean)/same_std
-
-aux['when'] = each_mean.when.values
-data = aux.reset_index()
-
 score = pd.read_csv('data/results/across_trials/feature_importance_predictions.csv')
+
+# WIll use a single train_size to compare scores
 score = score.groupby('num_trials').get_group(50)
 
+# Definitions used at generation
+id_vars = ['rat','dataset','num_trials', 'unit', 'time','logC']
+
+DRRD_RATS = SHORTCUTS['groups']['DRRD']
+LOGCS = sorted(data.groupby('num_trials').get_group(50).logC.unique())[::-1]
+
+# Preprocessing to get changes
+each_mean = data.groupby(id_vars + ['when']).mean().reset_index(-1)
+single_mean = data.groupby(id_vars).mean()
+single_std = data.groupby(id_vars).std()
+
+z_scored = (each_mean-single_mean)/single_std
+z_scored['when'] = each_mean.when.values
+data = z_scored.reset_index()
+
+# Calculating score from predictions
+score = score.groupby('num_trials').get_group(50)
 score = pd.DataFrame(score.groupby(['rat', 'set', 'logC','cv','when']).apply(lambda x: x[['predictions','true']].corr().iloc[0,1]), columns=['score']).reset_index()
 
 
