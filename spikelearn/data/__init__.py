@@ -4,6 +4,7 @@ A module for data loading, processing and saving.
 
 import glob
 import json
+import numpy as np
 from .utils import get_filepaths_from_shortcut
 from .selection import select, to_feature_array
 #module_path = os.path.abspath(os.path.dirname(__file__))
@@ -39,4 +40,8 @@ if 'Name_example' in SHORTCUTS:
 for label in SHORTCUTS:
     if label != 'groups':
         all_files = get_filepaths_from_shortcut(SHORTCUTS[label])
-        assert all([len(glob.glob(filepath))==1 for filepath in all_files if len(filepath)>0])
+        try:
+            file_exists = np.array([len(glob.glob(filepath))==1 for filepath in all_files if len(filepath)>0])
+            assert all(file_exists)
+        except AssertionError:
+            raise IOError('Filepaths %s do not exist'%all_files[np.where(file_exists == 0)])

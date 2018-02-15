@@ -8,7 +8,7 @@
 		}
 	},
 	"DRRD 7": {
-		"basepath": "/home/tevo/Documents/UFABC/SingleUnit Spike Learning",
+		"basepath": "/home/tevo/Documents/UFABC/spikelearn",
 		"data": {
 			"raw": {
 				"spikesorted": "DRRD 7.mat"
@@ -37,7 +37,7 @@
 		}
 	},
 	"DRRD 8": {
-		"basepath": "/home/tevo/Documents/UFABC/SingleUnit Spike Learning",
+		"basepath": "/home/tevo/Documents/UFABC/spikelearn",
 		"data": {
 			"raw": {
 				"spikesorted": "DRRD 8.mat"
@@ -66,7 +66,7 @@
 		}
 	},
 	"DRRD 9": {
-		"basepath": "/home/tevo/Documents/UFABC/SingleUnit Spike Learning",
+		"basepath": "/home/tevo/Documents/UFABC/spikelearn",
 		"data": {
 			"raw": {
 				"spikesorted": "DRRD 9.mat"
@@ -95,7 +95,7 @@
 		}
 	},
 	"DRRD 10": {
-		"basepath": "/home/tevo/Documents/UFABC/SingleUnit Spike Learning",
+		"basepath": "/home/tevo/Documents/UFABC/spikelearn",
 		"data": {
 			"raw": {
 				"spikesorted": "DRRD 10.mat"
@@ -121,7 +121,7 @@
 		}
 	},
 	"Autoshape 7": {
-		"basepath": "/home/tevo/Documents/UFABC/SingleUnit Spike Learning",
+		"basepath": "/home/tevo/Documents/UFABC/spikelearn",
 		"data": {
 			"raw": {
 				"spikesorted": "Autoshape 7.mat"
@@ -138,7 +138,7 @@
 		}
 	},
 	"Autoshape 8": {
-		"basepath": "/home/tevo/Documents/UFABC/SingleUnit Spike Learning",
+		"basepath": "/home/tevo/Documents/UFABC/spikelearn",
 		"data": {
 			"raw": {
 				"spikesorted": "Autoshape 8.mat"
@@ -155,7 +155,7 @@
 		}
 	},
 	"Autoshape 9": {
-		"basepath": "/home/tevo/Documents/UFABC/SingleUnit Spike Learning",
+		"basepath": "/home/tevo/Documents/UFABC/spikelearn",
 		"data": {
 			"raw": {
 				"spikesorted": "Autoshape 9.mat"
@@ -172,7 +172,7 @@
 		}
 	},
 	"Autoshape 10": {
-		"basepath": "/home/tevo/Documents/UFABC/SingleUnit Spike Learning",
+		"basepath": "/home/tevo/Documents/UFABC/spikelearn",
 		"data": {
 			"raw": {
 				"spikesorted": "Autoshape 10.mat"
