@@ -1,5 +1,5 @@
 /data
 *.mm
 shortcuts.json
-*__pycache__*
-*.pyc
+__pycache__/
+*.py[cod]
