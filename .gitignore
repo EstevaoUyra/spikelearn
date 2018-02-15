@@ -1,2 +1,5 @@
 /data
 *.mm
+shortcuts.json
+__pycache__
+*.pyc

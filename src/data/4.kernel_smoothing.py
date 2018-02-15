@@ -55,7 +55,7 @@ DSET_PARAMS = {'wide_smoothed' : { 'sigma' : 100,
                 }
 
 
-for rat_label in ['DRRD 7','DRRD 8','DRRD 9','DRRD 10']: #SHORTCUTS:
+for rat_label in SHORTCUTS['groups']['DRRD']: #SHORTCUTS:
     epoched = io.load(rat_label, 'epoched_spikes')
     # epoched = epoched.groupby('is_selected').get_group(True)
     # SELECTION above DEPRECATED 31/01. TODO Remove after 10/02.

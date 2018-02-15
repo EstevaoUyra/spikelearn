@@ -8,7 +8,7 @@ sys.path.append('.')
 from spikelearn.data import io, SHORTCUTS
 
 # Load into DataFrames each data
-for rat in SHORTCUTS:
+for rat in SHORTCUTS['groups']['ALL']:
     behav = io.load(rat, 'behavior')
     behav['intertrial_interval'] = np.hstack((0,behav.onset.values[1:]-behav.offset.values[:-1]))
 

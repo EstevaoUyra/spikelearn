@@ -52,7 +52,7 @@ def spikes_behavior_from_mat(filename):
     return spikes, behavior
 
 # Load into DataFrames each data
-for rat in SHORTCUTS:
+for rat in SHORTCUTS['groups']['ALL']:
     filepath = io.load(rat, 'spikesorted', getpath=True)
     spikes, behavior = spikes_behavior_from_mat(filepath)
 

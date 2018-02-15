@@ -12,7 +12,7 @@ sys.path.append('.')
 from spikelearn.data import io, SHORTCUTS
 
 # Load into DataFrames each data
-for rat in SHORTCUTS:
+for rat in SHORTCUTS['groups']['ALL']:
     spikes = io.load(rat, 'spikes')
     trials = np.unique(np.hstack(spikes.trial.apply(np.unique))).astype(int)
     epoched = np.array([[spikes.trial_time[iunit][spikes.trial[iunit]==itrial] for itrial in trials] for iunit in spikes.index ] )
@@ -29,6 +29,7 @@ for rat in SHORTCUTS:
     if io.dataset_exist(rat,'selected_neurons'):
         selection_neurons = io.load(rat, 'selected_neurons')
         epoched['is_selected'] = epoched.unit.apply(lambda x: x in selection_neurons)
+        epoched['comments'] = ''
         #selected_neurons = selection_neurons.groupby('selected').get_group(' yes')
         #epoched['is_selected'] = epoched.unit.apply(lambda x: x in selected_neurons.index)
         #epoched['comments'] = epoched.unit.apply(lambda x: (selection_neurons.loc[x,' comments'] if x in selection_neurons.index else ''))

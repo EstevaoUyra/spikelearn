@@ -30,11 +30,13 @@ for rat in ALL_RATS:
 
 # Add external data
 for rat in DRRD_RATS:
-    shortcuts[rat]['data']['external']['selected_neurons'] = 'selected_neurons_{}.csv'.format(rat)
+    shortcuts[rat]['data']['external']['selected_neurons'] = 'selected_neurons_{}.pickle'.format(rat)
     shortcuts[rat]['data']['external']['tiredness'] = '{}.csv'.format(rat)
 
 # Add group for easy access
 shortcuts['groups'] = {}
-shortcuts['DRRD'] = DRRD_RATS
+shortcuts['groups']['DRRD'] = {rat :'' for rat in DRRD_RATS}
+shortcuts['groups']['Autoshape'] = {rat :'' for rat in AUTOSHAPE_RATS}
+shortcuts['groups']['ALL'] = {rat :'' for rat in ALL_RATS}
 
 json.dump(shortcuts, open('shortcuts.json','w'), indent='\t')

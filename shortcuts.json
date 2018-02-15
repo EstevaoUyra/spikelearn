@@ -1,15 +1,6 @@
 {
-	"groups":{
-		"DRRD":{
-			"DRRD 7":"",
-			"DRRD 8":"",
-			"DRRD 9":"",
-			"DRRD 10":""
-		}
-	},
 	"DRRD 7": {
 		"basepath": "/home/tevo/Documents/UFABC/spikelearn",
-		"data": {
 			"raw": {
 				"spikesorted": "DRRD 7.mat"
 			},
@@ -116,7 +107,10 @@
 				"narrow_smoothed": "narrow_smoothed_DRRD 10.pickle",
 				"wide_smoothed_viz": "wide_smoothed_viz_DRRD 10.pickle",
 				"medium_smoothed_viz": "medium_smoothed_viz_DRRD 10.pickle",
-				"narrow_smoothed_viz": "narrow_smoothed_viz_DRRD 10.pickle"
+				"narrow_smoothed_viz": "narrow_smoothed_viz_DRRD 10.pickle",
+				"medium_smoothed_norm": "medium_smoothed_norm_DRRD 10.pickle",
+				"narrow_smoothed_norm": "narrow_smoothed_norm_DRRD 10.pickle",
+				"narrow_smoothed_norm_viz": "narrow_smoothed_norm_viz_DRRD 10.pickle"
 			}
 		}
 	},
@@ -186,6 +180,30 @@
 			"processed": {
 				"epoched_spikes": "epoched_spikes_Autoshape 10.pickle"
 			}
+		}
+	},
+	"groups": {
+		"DRRD": {
+			"DRRD 7": "",
+			"DRRD 8": "",
+			"DRRD 9": "",
+			"DRRD 10": ""
+		},
+		"Autoshape": {
+			"Autoshape 7": "",
+			"Autoshape 8": "",
+			"Autoshape 9": "",
+			"Autoshape 10": ""
+		},
+		"ALL": {
+			"DRRD 7": "",
+			"DRRD 8": "",
+			"DRRD 9": "",
+			"DRRD 10": "",
+			"Autoshape 7": "",
+			"Autoshape 8": "",
+			"Autoshape 9": "",
+			"Autoshape 10": ""
 		}
 	}
 }
