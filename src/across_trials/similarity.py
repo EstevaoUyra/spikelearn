@@ -20,7 +20,7 @@ WSIZE = 50; PRED_WSIZE = 50
 folder = 'data/results/across_trials/similarity/'
 
 # Prepare output folders
-#[os.makedirs(folder+dset) for dset in DSETS]
+[os.makedirs(folder+dset) for dset in DSETS]
 
 # Code cleaners
 def clean(df):
@@ -41,7 +41,6 @@ for label, dset in product(SHORTCUTS['groups']['DRRD'], DSETS):
     for unit in data.columns:
         sim_mat = unit_similarity_evolution(data[unit], WSIZE)
         sim_mat['unit'] = unit
-        sim_mat['dset'] = dset
         res_sim = res_sim.append(sim_mat)
 
 
