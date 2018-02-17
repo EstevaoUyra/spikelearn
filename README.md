@@ -4,3 +4,6 @@ This project is part of my Master of Sciences graduate studies at Federal Univer
 
 # TODO
 Add pip integration to the library
+
+
+- Start logging

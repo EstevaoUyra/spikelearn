@@ -34,7 +34,7 @@ def spikes_behavior_from_mat(filename):
         'offset' is the end of the trial
         'duration' is equal to offset - onset
     """
-    #TODO decide if it would make sense to keep sortIdx and sortLabel
+
     data = loadmat(filename)
 
     spikes = data['dados'][0,0][1]
