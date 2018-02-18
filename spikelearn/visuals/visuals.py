@@ -3,6 +3,11 @@ import pandas as pd
 import seaborn as sns
 import numpy as np
 from itertools import product
+import subprocess
+
+def to_video(listfile, outputfile,
+                fps=25, w=800, h=600, type='png'):
+    subprocess.run('mencoder mf://@{} -mf w={}:h={}:fps={}:type={} -ovc copy -oac copy -o {}.avi'.format(listfile, w, h, fps, type, outputfile).split(' ') )
 
 def raster_multiple(spike_trains, time='time', yaxis='trial', xlim=None,
         col=None, row=None, rows=None, hue=None,hue_order=None, title=None,sharey=False,
@@ -76,7 +81,7 @@ def raster_multiple(spike_trains, time='time', yaxis='trial', xlim=None,
         kde_kwargs = {}
     if fig_kwargs is None:
         fig_kwargs = {}
-        
+
     # Auxilliary columns
     if col is None:
         col = 'aux_col'

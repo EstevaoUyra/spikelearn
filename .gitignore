@@ -3,3 +3,4 @@
 shortcuts.json
 __pycache__/
 *.py[cod]
+*.png
