@@ -6,7 +6,27 @@ from itertools import product
 import subprocess
 
 def to_video(listfile, outputfile,
-                fps=25, w=800, h=600, type='png'):
+                fps=3, w=800, h=600, type='png'):
+    """
+    Simply runs mencoder to merge images into a .avi video.
+
+    Parameters
+    ----------
+    listfile : string, path-to-file
+        Path to a file containing the image names in its rows, in the order
+        that they should appear on the video.
+
+    outputfile : string
+        The name of the output video.
+        Obs: the name will be completed by .avi
+
+    fps, w, h : int
+        Parameters of the video. defaults 3, 800, 600
+        Frame rate, width and height.
+
+    type : string, default 'png'
+        Type of the images being transformed.
+    """
     subprocess.run('mencoder mf://@{} -mf w={}:h={}:fps={}:type={} -ovc copy -oac copy -o {}.avi'.format(listfile, w, h, fps, type, outputfile).split(' ') )
 
 def raster_multiple(spike_trains, time='time', yaxis='trial', xlim=None,
