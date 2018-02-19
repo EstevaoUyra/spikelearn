@@ -29,7 +29,7 @@ def to_video(listfile, outputfile,
     """
     subprocess.run(['mencoder',
                     'mf://@{}'.format(listfile)]+
-                    '-mf w={}:h={}:fps={}:type={} -ovc copy -oac copy -o'.format(w, h, fps, type).split(' ') +
+                    '-mf w={}:h={}:fps={}:type={} -ovc lavc -lavcopts vcodec=mpeg4:mbd=2:trell -oac copy -o'.format(w, h, fps, type).split(' ') +
                     ['{}.avi'.format(outputfile)])
 
 def raster_multiple(spike_trains, time='time', yaxis='trial', xlim=None,
