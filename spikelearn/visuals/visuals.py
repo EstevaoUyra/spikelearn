@@ -27,7 +27,10 @@ def to_video(listfile, outputfile,
     type : string, default 'png'
         Type of the images being transformed.
     """
-    subprocess.run('mencoder mf://@{} -mf w={}:h={}:fps={}:type={} -ovc copy -oac copy -o {}.avi'.format(listfile, w, h, fps, type, outputfile).split(' ') )
+    subprocess.run(['mencoder',
+                    'mf://@{}'.format(listfile)]+
+                    '-mf w={}:h={}:fps={}:type={} -ovc copy -oac copy -o'.format(w, h, fps, type).split(' ') +
+                    ['{}.avi'.format(outputfile)])
 
 def raster_multiple(spike_trains, time='time', yaxis='trial', xlim=None,
         col=None, row=None, rows=None, hue=None,hue_order=None, title=None,sharey=False,

@@ -19,7 +19,7 @@ folder = 'data/results/across_trials/cross_predictions/'
 DSETS = ['medium_smoothed', 'medium_smoothed_norm',
          'narrow_smoothed', 'narrow_smoothed_norm',
          'wide_smoothed']
-NSPLITS = 30
+NSPLITS = 5
 
 # Prepare output folders
 #[os.makedirs(folder+dset) for dset in DSETS]
@@ -41,6 +41,10 @@ for label, dset in product(SHORTCUTS['groups']['DRRD'], DSETS):
                             False, subset) for i in range(n_slices)]
     names = np.arange(n_slices)
     C1, C2 = np.linspace(-1.5, 5, 20), np.linspace(-5, 5, 20)
+
+    res_pred = pd.DataFrame()
+    res_weight = pd.DataFrame()
+
     for logC, regl in chain( zip(C1, cycle(['l1'])), zip(C2, cycle(['l2']))):
         clf = LogisticRegression( C=10**logC )
         one_p, one_w = shuffle_val_predict( clf, [df.reset_index() for df in dfs], names,
@@ -57,4 +61,4 @@ for label, dset in product(SHORTCUTS['groups']['DRRD'], DSETS):
     filename = '{}_cross_pred.csv'.format(label)
     res_pred.to_csv('{}{}/{}'.format(folder, dset, filename))
     filename = '{}_cross_weight.csv'.format(label)
-    res_weights.to_csv('{}{}/{}'.format(folder, dset, filename))
+    res_weight.to_csv('{}{}/{}'.format(folder, dset, filename))

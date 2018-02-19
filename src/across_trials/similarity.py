@@ -16,7 +16,7 @@ DSETS = ['medium_smoothed', 'medium_smoothed_norm',
          'narrow_smoothed', 'narrow_smoothed_norm',
          'wide_smoothed']
 TMIN = 1.5
-WSIZE = 50; PRED_WSIZE = 50
+WSIZE = 50;
 folder = 'data/results/across_trials/similarity/'
 
 # Prepare output folders
@@ -52,8 +52,8 @@ for label, dset in product(SHORTCUTS['groups']['DRRD'], DSETS):
                             False, subset).unstack(-1).reset_index()
 
     trials = data.trial.unique()
-    data['init'] = ((data['trial'] < trials[PRED_WSIZE]).astype(int) -
-                        (data['trial'] > trials[-PRED_WSIZE]).astype(int))
+    data['init'] = ((data['trial'] < trials[WSIZE]).astype(int) -
+                        (data['trial'] > trials[-WSIZE]).astype(int))
     train = data[ data.init != 0 ]
     X, y = clean(train), ((train.init + 1)/2)
 
@@ -71,7 +71,7 @@ for label, dset in product(SHORTCUTS['groups']['DRRD'], DSETS):
         # Add weights
         one_weight = pd.DataFrame(clf.coef_.transpose(),
                                         index=clean(data).columns)
-        one_weight = pd.DataFrame(one_weight.unstack('unit').mean(),
+        one_weight = pd.DataFrame(one_weight.unstack('unit').abs().mean(),
                                         columns=['w'])
         one_weight['logC'] = logC; one_weight['penalty'] = regl
         one_weight['dset'] = dset;

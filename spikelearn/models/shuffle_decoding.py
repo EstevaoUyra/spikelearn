@@ -102,44 +102,48 @@ def shuffle_val_predict(clf,dfs, names, X, y, group=None,
 
     weights = pd.DataFrame()
     results = pd.DataFrame()
-    n_y = len(np.unique(y))
+    classes = np.unique(dfs[0][y])
+    n_y = len(classes)
 
     # Make the cross validation on each dataset
+    print(len(dfs), names)
     for df, name in zip(dfs, names):
+        print('training', name)
         for i, (train_idx, test_idx) in enumerate(sh.split(df[X], df[y], df[group])):
-
             clf_local = clone(clf)
-            clf_local.fit( df[X][train_idx,:], df[y][train_idx] )
+            clf_local.fit( df[X].values[train_idx], df[y].values[train_idx] )
 
             # also test on each dataset
             for testdf, testname in zip(dfs, names):
+
                 if testname == name:
                     train_or_test = 'test'
                     idx = test_idx
                 else:
-                    train_or_test = 'test'
-                    idx = permutation(testdf.index)[:n_test]
-
-                predictions = clf_local.predict_proba( df[X][idx] )
+                    size = int(n_y*n_test)
+                    idx = permutation(testdf.index)[:size]
+                predictions = pd.DataFrame(clf_local.predict_proba( df[X].values[idx]), columns = classes)
                 predictions['predictions'] = predictions.apply(lambda x: x.index[np.argmax(x.values[:n_y])], axis=1)
-                predictions['mean'] = predictions.apply(lambda x: np.sum(predictions.columns[:len(np.unique(df[y]))].values*x.values[:len(np.unique(df[y]))]), axis=1)
+
+                predictions['mean'] = predictions.apply(lambda x: np.sum(predictions.columns[:len(np.unique(df[y].values))].values*x.values[:len(np.unique(df[y].values))]), axis=1)
 
                 # Add identifiers
                 predictions['cv'] = i
-                predictions['group'] = df[group][idx]
-                predictions['true'] = df[y][idx]
-                predictions['set'] = train_or_test
-                prediction['name'] = names
+                predictions['group'] = df[group].values[idx]
+                predictions['true'] = df[y].values[idx]
+                predictions['train'] = name
+                predictions['test'] = testname
+
                 results = results.append(predictions)
 
             if get_weights:
                 w = pd.DataFrame(clf_local.coef_,
-                                    columns = np.arange(X.shape[1]),
-                                    index = pd.Index( np.unique(df[y]).astype(int),
+                                    columns = np.arange(df[X].shape[1]),
+                                    index = pd.Index( classes.astype(int),
                                                       name=y )  )
                 w = w.reset_index().melt(var_name='unit', id_vars=['time'])
-                w['shuffle'] = i
-                w['name'] = names
+                w['cv'] = i
+                w['train'] = name
                 weights = weights.append(w)
 
         if get_weights:
