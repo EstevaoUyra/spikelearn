@@ -1,6 +1,10 @@
 /data
-*.mm
+
 shortcuts.json
 __pycache__/
 *.py[cod]
+
 *.local.*
+*.mm
+
+*.log
