@@ -29,6 +29,7 @@ from spikelearn.data.preprocessing import kernel_smooth
 from spikelearn.data import io, SHORTCUTS
 import pandas as pd
 
+MA_CUT = [200, 300]
 BASELINE = -500
 DSET_PARAMS = {'wide_smoothed' : { 'sigma' : 100,
                                   'bin_size' : 100},
@@ -65,9 +66,13 @@ for rat_label in SHORTCUTS['groups']['DRRD']: #SHORTCUTS:
         smoothed_dataset = pd.DataFrame(index=epoched.index)
 
         if 'norm' in dset_name:
-            # Put firing_rates with motor activity and baseline
-            # This returns a tuples for each index.
-            # We want a column for each, which is accomplished just below
+            cnames = ['normalized_time', 'normalized_without_edges']
+            edges_for_each = [lambda x: (0, 1000), lambda x: (0, 1000)]
+        else:
+            cnames = ['with_baseline', 'time']
+            edges_for_each = [lambda x: (BASELINE, 1000*x.duration),
+                              lambda x: (MA_CUT[0], 1000*x.duration-MA_CUT[1])]
+
             f = lambda x: kernel_smooth( 1000*x['normalized_time'], **params,
                                           edges=(0, 1000))
             out = epoched.reset_index().apply(f, axis=1)
@@ -75,22 +80,21 @@ for rat_label in SHORTCUTS['groups']['DRRD']: #SHORTCUTS:
                                 columns = ['full', 'full_times'])
             smoothed_dataset = smoothed_dataset.join(out)
 
-        else:
-            # Full activity, from baseline to trial ending
-            f = lambda x: kernel_smooth( 1000*x['with_baseline'], **params,
-                                          edges=(BASELINE, 1000*x.duration))
-            out = epoched.reset_index().apply(f, axis=1)
-            out = pd.DataFrame(out.tolist(), index = epoched.index,
-                                columns = ['full', 'full_times'])
-            smoothed_dataset = smoothed_dataset.join(out)
+        # Full activity, from baseline to trial ending
+        f = lambda x: kernel_smooth( 1000*x[ cnames[0] ], **params,
+                                      edges = edges_for_each[0](x))
+        out = epoched.reset_index().apply(f, axis=1)
+        out = pd.DataFrame(out.tolist(), index = epoched.index,
+                            columns = ['full', 'full_times'])
+        smoothed_dataset = smoothed_dataset.join(out)
 
-            # Then without motor activity, from 200ms onset to -300ms offset
-            f = lambda x: kernel_smooth( 1000*x['time'], **params,
-                                          edges=(200, 1000*x.duration-300))
-            out = epoched.reset_index().apply(f, axis=1)
-            out = pd.DataFrame(out.tolist(), index = epoched.index,
-                                columns = ['cropped', 'cropped_times'])
-            smoothed_dataset = smoothed_dataset.join(out)
+        # Then without motor activity, from 200ms onset to -300ms offset
+        f = lambda x: kernel_smooth( 1000*x[ cnames[1] ], **params,
+                                      edges =edges_for_each[1](x) )
+        out = epoched.reset_index().apply(f, axis=1)
+        out = pd.DataFrame(out.tolist(), index = epoched.index,
+                            columns = ['cropped', 'cropped_times'])
+        smoothed_dataset = smoothed_dataset.join(out)
 
         # Add behavioral identifiers
         behav = io.load(rat_label, 'behav_stats')
