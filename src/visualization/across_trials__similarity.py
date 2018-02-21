@@ -53,7 +53,7 @@ for label, dset in product(SHORTCUTS['groups']['DRRD'], DSETS):
     # One image for each neuron
     for unit in units:
         fig = plt.figure()
-        sns.heatmap(similarities.loc[unit].values)
+        sns.heatmap(similarities.loc[unit])
         plt.title('Unit {}, {}'.format(unit, label) )
         plt.savefig('{}/sim_evo_unit_{}.png'.format(savedir, unit),
                         dpi=500)
@@ -82,7 +82,6 @@ for label, dset in product(SHORTCUTS['groups']['DRRD'], DSETS):
         print(id_)
         ## Calculate weighted mean similarity
         weight = weights.groupby(id_vars).get_group(id_).set_index('unit')
-        weight
         ponder = lambda df: df*weight.loc[df.unit.values[0], 'w']
         wm = similarities.reset_index().groupby('unit').apply(ponder)
         wm['trial'] = similarities.index.get_level_values('trial')
@@ -95,37 +94,52 @@ for label, dset in product(SHORTCUTS['groups']['DRRD'], DSETS):
 
         ## Similarity
         ax = plt.subplot2grid((4,4),(1,0),rowspan=3,colspan=3)
-        wm = wm.groupby('trial').sum().drop('unit',axis=1)
-        scaler.fit(wm.values.reshape(-1, 1));
+        wm = wm.groupby('trial').sum(min_count=1).drop('unit',axis=1)
+        scaled = wm.dropna(how='all').dropna(1,how='all')
+        scaler.fit(scaled.values.reshape(-1, 1));
         scale = lambda x: scaler.transform(x.values.reshape(-1, 1)).reshape(-1)
-        sns.heatmap( wm.apply(scale), ax=ax,cbar=False,
+        scaled = wm.dropna(how='all').dropna(1,how='all').apply(scale)
+        wm.loc[scaled.index, scaled.columns] = scaled
+        sns.heatmap( wm, ax=ax,cbar=False,
                         vmin=-1, vmax=1, cmap='RdBu_r')
 
         ## Prediction evolution
         ax = plt.subplot2grid((4,4), (0,0), colspan=3)
-        trials = pred.trial.unique()
-        ax.plot(trials, pred.predicted.values, linewidth=.5, alpha=.7)
-        ax.plot(trials, pred.predicted.rolling(20,center=True).mean().values, linewidth=2)
+        predtrials = pred.trial.unique()
+        trials = similarities.reset_index().trial.unique()
+        ax.plot(predtrials, pred.predicted.values, linewidth=.5, alpha=.7)
+        ax.plot(predtrials, pred.predicted.rolling(20,center=True).mean().values, linewidth=2)
         plt.ylim([0, 1]); plt.xticks([]); plt.ylabel('P(init)')
 
-        ax.fill_betweenx((0,1), trials[0], trials[WSIZE], color='g', alpha=.5)
-        ax.fill_betweenx((0,1), trials[-WSIZE], trials[-1], color='g', alpha=.5)
+        ax.fill_betweenx((0,1), predtrials[0], trials[WSIZE], color='g', alpha=.5)
+        ax.fill_betweenx((0,1), predtrials[-WSIZE], predtrials[-1], color='g', alpha=.5)
+        plt.xlim([trials[0],trials[-1]])
 
         ## Behavior (increasing from above)
         behav= behav.sort_values("trial", ascending=False)
         ax = plt.subplot2grid((4,4), (1,3), rowspan=3)
         ax.plot(behav['duration'].values, behav['trial'].values,
-                    'b.', label='Duration', markersize=.5, alpha=.5)
+                    'b.', label='Duration', markersize=.7, alpha=.7)
         ax.plot(behav['duration'].rolling(20,center=True).mean().values, behav['trial'],
                     color='b', linewidth=2)
         plt.xlim([0,7]); plt.xlabel("Trial duration", color='b');
-        ax.yaxis.tick_right(); ax.invert_yaxis()
-        ax = ax.twiny()
+        ax.yaxis.tick_right(); plt.gca().invert_yaxis()
+        ax = ax.twiny(); #plt.gca().invert_yaxis()
         ax.plot(behav['intertrial_interval'], behav['trial'], 'g.', label='Intertrial interval', markersize=.5, alpha=.5)
         ax.plot(behav['intertrial_interval'].rolling(20,center=True).mean(), behav['trial'],
                     color='g', linewidth=2)
         plt.xlabel("Intertrial interval", color='g');
-        plt.xlim([0,100]); plt.ylim([trials[0], trials[-1]])
+        plt.xlim([0,100]); plt.ylim([trials[-1], trials[0]])
+
+        ## Identifiers
+        ax = plt.subplot2grid((4,4), (0,3), rowspan=1); plt.axis('off')
+        ax.text(0.2, 0.7, 'Penalty: {}'.format(id_[1]))
+        ax.text(0.2, 0.5, 'logC: {:.2f}'.format(id_[0]))
+        color = 'c' if id_[1] == 'l1' else 'm'
+        # plt.fill_betweenx((.6,.8 ), 0,1, alpha=.5, color=color)
+        size = (id_[0] - minbar[id_[1]])/(maxbar[id_[1]] - minbar[id_[1]])
+        plt.barh(.65, size, .5, color=color, alpha=size.values[0])
+        plt.ylim([0,1]); plt.xlim([0,1])
 
         ## Identifiers
         ax = plt.subplot2grid((4,4), (0,3), rowspan=1); plt.axis('off')
@@ -139,11 +153,11 @@ for label, dset in product(SHORTCUTS['groups']['DRRD'], DSETS):
 
         # Finalize plot and save
         plt.suptitle('Similarity weighted by Logistic Regression coefs')
-        figname = '{}/sim_evo_mean_weighted_{}.png'.format( savedir,'_'.join(map(str,id_)))
+        figname = '{}/sim_evo_mean_weighted_{}.local.png'.format( savedir,'_'.join(map(str,id_)))
         plt.savefig(figname, dpi=500)
         plt.tight_layout()
         plt.close(fig)
         img_order.append(figname)
-    ordfile = '{}/img_order'.format(savedir)
+    ordfile = '{}/img_order.local.txt'.format(savedir)
     np.savetxt(ordfile, np.array(img_order), fmt='%s')
     to_video(ordfile, '{}/by_regularization'.format(savedir))
