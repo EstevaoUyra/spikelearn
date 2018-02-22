@@ -6,59 +6,6 @@ from sklearn.base import clone
 from numpy.random import permutation
 from scipy.stats import pearsonr
 
-def deprecated(clf, X, y, group=None,
-                         cv='kf', n_splits = 5,
-                         get_weights = True, **kwargs):
-    # TODO documentation
-    """
-
-    """
-    def get_predictions_or_proba(clf, X, mode):
-        """
-        Local helper function to ease the switching between predict_proba and predict
-        """
-        if mode == 'predict':
-            return pd.DataFrame(clf.predict(X), columns=['predictions'])
-        elif mode in ['proba','probability']:
-            try:
-                return pd.DataFrame(clf.predict_proba(X), columns=np.unique(y))
-            except:
-                return pd.DataFrame(clf.decision_function(X), columns=np.unique(y))
-
-    if cv == 'kf':
-        sh = GroupKFold(n_splits=n_splits, **kwargs)
-    elif cv == 'sh':
-        sh = GroupShuffleSplit(n_splits=n_splits, train_size=.8,test_size=.2, **kwargs)
-    elif isinstance(cv, object):
-        sh=cv
-
-    weights = pd.DataFrame()
-    results = pd.DataFrame()
-    n_y = len(np.unique(y))
-    for i, (train_idx, test_idx) in enumerate(sh.split(X, y, group)):
-        clf_local = clone(clf)
-        clf_local.fit(X[train_idx,:],y[train_idx])
-
-        for train_or_test in ['train', 'test']:
-            idx = test_idx  if train_or_test is 'test' else train_idx
-            predictions = get_predictions_or_proba(clf_local, X[idx], 'proba')
-            predictions['cv'] = i
-            predictions['group'] = group[idx]
-            predictions['true'] = y[idx]
-            predictions['predictions'] = predictions.apply(lambda x: x.index[np.argmax(x.values[:n_y])], axis=1)
-            predictions['mean'] = predictions.apply(lambda x: np.sum(predictions.columns[:len(np.unique(y))].values*x.values[:len(np.unique(y))]), axis=1)
-            predictions['set'] = train_or_test
-            results = results.append(predictions)
-
-        if get_weights:
-            w = pd.DataFrame(clf_local.coef_, columns = np.arange(X.shape[1]), index = pd.Index(np.unique(y).astype(int), name='time'))
-            w = w.reset_index().melt(var_name='unit', id_vars=['time'])
-            w['shuffle'] = i
-            weights=weights.append(w)
-    if get_weights:
-        return results, weights
-    return results
-
 pearson_score = lambda true, pred: pearsonr(true, pred)[0]
 def shuffle_val_predict(clf, dfs, names, X, y, group=None,
                          cv='sh', n_splits = 5,
@@ -126,11 +73,11 @@ def shuffle_val_predict(clf, dfs, names, X, y, group=None,
 
     # Make the cross validation on each dataset
     print(len(dfs), names)
-    for df, name in zip(dfs, names):
+    for traindf, name in zip(dfs, names):
         print('training', name)
-        for i, (train_idx, test_idx) in enumerate(sh.split(df[X], df[y], df[group])):
+        for i, (train_idx, test_idx) in enumerate(sh.split(traindf[X], traindf[y], traindf[group])):
             clf_local = clone(clf)
-            clf_local.fit( df[X].values[train_idx], df[y].values[train_idx] )
+            clf_local.fit( traindf[X].values[train_idx], traindf[y].values[train_idx] )
 
             # also test on each dataset
             for testdf, testname in zip(dfs, names):
@@ -140,28 +87,28 @@ def shuffle_val_predict(clf, dfs, names, X, y, group=None,
                     idx = test_idx
                 else:
                     trained_here = False
-                    size = int(n_y*n_test)
-                    idx = permutation(testdf.index)[:size]
-
-                predictions = pd.DataFrame(clf_local.predict_proba( df[X].values[idx]), columns = classes)
+                    size = len(test_idx)
+                    idx = permutation(testdf.shape[0])[:size]
+                    
+                predictions = pd.DataFrame(clf_local.predict_proba( testdf[X].values[idx]), columns = classes)
                 predictions['predictions_max'] = predictions.apply(lambda x: x.index[np.argmax(x.values[:n_y])], axis=1)
 
-                predictions['predictions_mean'] = predictions.apply(lambda x: np.sum(predictions.columns[:len(np.unique(df[y].values))].values*x.values[:len(np.unique(df[y].values))]), axis=1)
+                predictions['predictions_mean'] = predictions.apply(lambda x: np.sum(predictions.columns[:len(np.unique(testdf[y].values))].values*x.values[:len(np.unique(testdf[y].values))]), axis=1)
 
                 # Add identifiers
                 predictions['cv'] = i
-                predictions['group'] = df[group].values[idx]
-                predictions['true_label'] = df[y].values[idx]
+                predictions['group'] = testdf[group].values[idx]
+                predictions['true_label'] = testdf[y].values[idx]
                 predictions['trained_on'] = name
                 predictions['tested_on'] = testname
                 predictions['trained_here'] = trained_here
-                predictions['score_max'] = score(predictions['predictions_max'], df[y].values[idx])
-                predictions['score_mean'] = score(predictions['predictions_mean'], df[y].values[idx])
+                predictions['score_max'] = score(predictions['predictions_max'], testdf[y].values[idx])
+                predictions['score_mean'] = score(predictions['predictions_mean'], testdf[y].values[idx])
                 results = results.append(predictions)
 
             if get_weights:
                 w = pd.DataFrame(clf_local.coef_,
-                                    columns = np.arange(df[X].shape[1]),
+                                    columns = np.arange(traindf[X].shape[1]),
                                     index = pd.Index( classes.astype(int),
                                                       name=y )  )
                 w = w.reset_index().melt(var_name='unit', id_vars=['time'])
@@ -171,18 +118,22 @@ def shuffle_val_predict(clf, dfs, names, X, y, group=None,
 
     # Calculate Z-score
     fields=['score_max', 'score_mean']
-    scores = results.drop_duplicates(['trained_on', 'tested_on'])
-
+    scores = results.drop_duplicates(['trained_on', 'tested_on', 'cv'])
     def SEM(df):
         return df.std()/np.sqrt(df.shape[0])
     def pool_SEM(df):
         pool = df.groupby('trained_here').get_group(True)[fields]
         gtest = df.groupby('tested_on')
         return gtest.apply(lambda df: SEM(pd.concat((df[fields], pool))))
+    def pool_MEAN(df):
+        pool = df.groupby('trained_here').get_group(True)[fields]
+        gtest = df.groupby('tested_on')
+        return gtest.apply(lambda df: (pd.concat((df[fields], pool))).mean())
     def Z_score(df):
         df_sem = pool_SEM(df)
-        df_means = df.groupby('tested_on').mean()
-        return df_means/df_sem
+        df_means = df.groupby('tested_on').mean()[fields]
+        df_pm = pool_MEAN(df)
+        return (df_means-df_pm)/df_sem
     stats = scores.groupby('trained_on').apply(Z_score)
 
 
