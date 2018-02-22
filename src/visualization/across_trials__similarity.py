@@ -1,5 +1,8 @@
 """
-This script generates
+This script generates two sets of plots:
+    1. Unit evolution
+    2. Mean similarity
+        - Weighted by 'mean feature weight'
 
 """
 import os
@@ -136,6 +139,7 @@ for label, dset in product(SHORTCUTS['groups']['DRRD'], DSETS):
         ax.text(0.2, 0.7, 'Penalty: {}'.format(id_[1]))
         ax.text(0.2, 0.5, 'logC: {:.2f}'.format(id_[0]))
         color = 'c' if id_[1] == 'l1' else 'm'
+
         # plt.fill_betweenx((.6,.8 ), 0,1, alpha=.5, color=color)
         size = (id_[0] - minbar[id_[1]])/(maxbar[id_[1]] - minbar[id_[1]])
         plt.barh(.65, size, .5, color=color, alpha=size.values[0])
