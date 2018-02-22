@@ -58,9 +58,7 @@ DSET_PARAMS = {'wide_smoothed' : { 'sigma' : 100,
 
 for rat_label in SHORTCUTS['groups']['DRRD']: #SHORTCUTS:
     epoched = io.load(rat_label, 'epoched_spikes')
-    # epoched = epoched.groupby('is_selected').get_group(True)
-    # SELECTION above DEPRECATED 31/01. TODO Remove after 10/02.
-    # epoched = epoched.reset_index().set_index(['trial','unit'])
+
     for dset_name, params in DSET_PARAMS.items():
         # Create dataset and add identifiers
         smoothed_dataset = pd.DataFrame(index=epoched.index)
@@ -72,13 +70,6 @@ for rat_label in SHORTCUTS['groups']['DRRD']: #SHORTCUTS:
             cnames = ['with_baseline', 'time']
             edges_for_each = [lambda x: (BASELINE, 1000*x.duration),
                               lambda x: (MA_CUT[0], 1000*x.duration-MA_CUT[1])]
-
-            f = lambda x: kernel_smooth( 1000*x['normalized_time'], **params,
-                                          edges=(0, 1000))
-            out = epoched.reset_index().apply(f, axis=1)
-            out = pd.DataFrame(out.tolist(), index = epoched.index,
-                                columns = ['full', 'full_times'])
-            smoothed_dataset = smoothed_dataset.join(out)
 
         # Full activity, from baseline to trial ending
         f = lambda x: kernel_smooth( 1000*x[ cnames[0] ], **params,

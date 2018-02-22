@@ -11,7 +11,7 @@ import sys
 sys.path.append('.')
 from spikelearn.data import io, SHORTCUTS
 
-MA_CUT = [200, 300] # What to cut from beginning and end because of motor activity. This has been defined by inspection
+MA_CUT = [.2, .3] # How much to remove from beginning and end because of motor activity. This has been defined by inspection
 
 
 
@@ -40,10 +40,11 @@ for rat in SHORTCUTS['groups']['ALL']:
 
     def norm_without_edges(x):
         if len(x.time) == 0: return [[]]
-        end = x.duration - MA_CUT[1])
-        spikes_of_interest = [x.time>MA_CUT[0], x.time < end]
-         new_duration = end - MA_CUT[0]
-        return x.time[spikes_of_interest]/new_duration
+        end = x.duration - MA_CUT[1]
+        spikes_of_interest = np.logical_and(x.time>MA_CUT[0], x.time < end)
+        new_duration = end - MA_CUT[0]
+        if len(x.time[spikes_of_interest]) == 0: return [[]]
+        return [x.time[spikes_of_interest]/new_duration]
 
     # Make redundant yet useful data
     epoched['with_baseline'] = epoched['time']
