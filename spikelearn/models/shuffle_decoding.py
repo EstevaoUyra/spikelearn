@@ -72,9 +72,7 @@ def shuffle_val_predict(clf, dfs, names, X, y, group=None,
     n_y = len(classes)
 
     # Make the cross validation on each dataset
-    print(len(dfs), names)
     for traindf, name in zip(dfs, names):
-        print('training', name)
         for i, (train_idx, test_idx) in enumerate(sh.split(traindf[X], traindf[y], traindf[group])):
             clf_local = clone(clf)
             clf_local.fit( traindf[X].values[train_idx], traindf[y].values[train_idx] )
@@ -89,7 +87,7 @@ def shuffle_val_predict(clf, dfs, names, X, y, group=None,
                     trained_here = False
                     size = len(test_idx)
                     idx = permutation(testdf.shape[0])[:size]
-                    
+
                 predictions = pd.DataFrame(clf_local.predict_proba( testdf[X].values[idx]), columns = classes)
                 predictions['predictions_max'] = predictions.apply(lambda x: x.index[np.argmax(x.values[:n_y])], axis=1)
 
