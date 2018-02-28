@@ -20,15 +20,15 @@ n_trial_per_splits = 60
 folder = 'data/results/across_trials/cross_decoding/'
 DSETS = ['medium_smoothed', 'medium_smoothed_norm',
          'narrow_smoothed', 'narrow_smoothed_norm',
-         'wide_smoothed'][:2]
-NSPLITS = 2
+         'wide_smoothed']
+NSPLITS = 50
 subset = 'cropped'
-C1, C2 = np.linspace(-1.5, 5, 2), np.linspace(-5, 5, 2)
+C1, C2 = np.linspace(-1.5, 5, 3), np.linspace(-5, 5, 3)
 
 # Prepare output folders
-[os.makedirs(folder+dset) for dset in DSETS]
+#[os.makedirs(folder+dset) for dset in DSETS]
 
-for label, dset in product(SHORTCUTS['groups']['DRRD'], DSETS):
+for label, dset in product(['DRRD 9', 'DRRD 10'], DSETS):
 
     data_ = select( io.load(label, dset),
                     _min_duration=TMIN, is_selected=True ).reset_index()
@@ -58,11 +58,11 @@ for label, dset in product(SHORTCUTS['groups']['DRRD'], DSETS):
                                  cv='sh', n_splits = NSPLITS)
 
         one_w['logC'] = logC
-        one_w['regl'] = regl
+        one_w['penalty'] = regl
         one_p['logC'] = logC
-        one_p['regl'] = regl
+        one_p['penalty'] = regl
         one_s['logC'] = logC
-        one_s['regl'] = regl
+        one_s['penalty'] = regl
 
         res_pred = res_pred.append(one_p)
         res_weight = res_weight.append(one_w)
