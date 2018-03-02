@@ -20,10 +20,10 @@ n_trial_per_splits = 60
 folder = 'data/results/across_trials/cross_decoding/'
 DSETS = ['medium_smoothed', 'medium_smoothed_norm',
          'narrow_smoothed', 'narrow_smoothed_norm',
-         'wide_smoothed'][:2]
-NSPLITS = 2
+         'wide_smoothed']
+NSPLITS = 4
 subset = 'cropped'
-C1, C2 = np.linspace(-1.5, 5, 2), np.linspace(-5, 5, 2)
+C1, C2 = np.linspace(-1.5, 5, 4), np.linspace(-5, 5, 4)
 
 # Prepare output folders
 [os.makedirs(folder+dset) for dset in DSETS]
