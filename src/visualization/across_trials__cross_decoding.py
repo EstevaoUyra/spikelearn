@@ -58,7 +58,7 @@ stats_filename = lambda label, dset: '{}/{}_cross_stats.csv'.format(loaddir+dset
 fsavedir = lambda label, dset : 'reports/figures/across_trials/cross_decoding/{}/{}'.format(dset, label)
 
 # Identifier variables
-id_vars = ['logC', 'regl']
+id_vars = ['logC', 'penalty']
 id_combs = lambda df: product(weights.unique(df[id_]) for id_ in id_vars)
 
 for label, dset in product(SHORTCUTS['groups']['DRRD'], DSETS):
@@ -98,6 +98,18 @@ for label, dset in product(SHORTCUTS['groups']['DRRD'], DSETS):
         plt.title('Difference in mean weights')
         figname = '{}/weight_change_{}.local.png'.format( savedir,'_'.join(map(str,id_)))
         plt.savefig(figname, dpi=400)
+        plt.close(fig)
+
+        # Absolute performance
+        fig = plt.figure(figsize=(10,5))
+        ax=plt.subplot(1,2,1)
+        sns.heatmap(preds.groupby(id_vars).get_group(id_).drop_duplicates(['trained_on','tested_on','cv']).groupby(['trained_on','tested_on']).mean().score_max.unstack(-1))
+        plt.title('Score via max prob')
+        ax=plt.subplot(1,2,2)
+        sns.heatmap(preds.groupby(id_vars).get_group(id_).drop_duplicates(['trained_on','tested_on','cv']).groupby(['trained_on','tested_on']).mean().score_mean.unstack(-1))
+        plt.title('Score via expectation')
+        figname = '{}/pearson_score_{}.local.png'.format( savedir,'_'.join(map(str,id_)))
+        plt.savefig(figname, dpi=200)
         plt.close(fig)
 
     # 3. CDP vs WCp

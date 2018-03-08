@@ -6,7 +6,7 @@ sys.path.append('.')
 
 from spikelearn.measures.similarity import unit_similarity_evolution
 from spikelearn.models.shuffle_decoding import shuffle_val_predict
-from spikelearn.data import io, to_feature_array, select, SHORTCUTS
+from spikelearn.data import io, to_feature_array, select, SHORTCUTS, remove_baseline
 
 from sklearn.linear_model import LogisticRegression
 from sklearn.preprocessing import StandardScaler
@@ -21,14 +21,17 @@ folder = 'data/results/across_trials/cross_decoding/'
 DSETS = ['medium_smoothed', 'medium_smoothed_norm',
          'narrow_smoothed', 'narrow_smoothed_norm',
          'wide_smoothed']
-NSPLITS = 4
+
+NSPLITS = 50
 subset = 'cropped'
-C1, C2 = np.linspace(-1.5, 5, 4), np.linspace(-5, 5, 4)
+C1, C2 = np.linspace(-1.5, 5, 3), np.linspace(-5, 5, 3)
+BASELINE_SIZE = .5
+
 
 # Prepare output folders
-[os.makedirs(folder+dset) for dset in DSETS]
+#[os.makedirs(folder+dset) for dset in DSETS]
 
-for label, dset in product(SHORTCUTS['groups']['DRRD'], DSETS):
+for label, dset in product(['DRRD 9', 'DRRD 10'], DSETS):
 
     data_ = select( io.load(label, dset),
                     _min_duration=TMIN, is_selected=True ).reset_index()
@@ -45,6 +48,10 @@ for label, dset in product(SHORTCUTS['groups']['DRRD'], DSETS):
                                     _max_trial = slice_bounds[i+1]
                                     ).set_index(['trial','unit']),
                             False, subset) for i in range(n_slices)]
+
+    baseline = io.load(label, 'epoched_spikes')
+    baseline = baseline.baseline.unstack('unit').applymap(len)/BASELINE_SIZE
+    dfs = [remove_baseline(df) for df in dfs]
     names = np.arange(n_slices)
 
 
@@ -58,11 +65,11 @@ for label, dset in product(SHORTCUTS['groups']['DRRD'], DSETS):
                                  cv='sh', n_splits = NSPLITS)
 
         one_w['logC'] = logC
-        one_w['regl'] = regl
+        one_w['penalty'] = regl
         one_p['logC'] = logC
-        one_p['regl'] = regl
+        one_p['penalty'] = regl
         one_s['logC'] = logC
-        one_s['regl'] = regl
+        one_s['penalty'] = regl
 
         res_pred = res_pred.append(one_p)
         res_weight = res_weight.append(one_w)
