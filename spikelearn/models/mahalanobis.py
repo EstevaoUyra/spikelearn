@@ -2,6 +2,16 @@ from sklearn.covariance import EmpiricalCovariance, LedoitWolf, OAS
 from scipy.spatial.distance import mahalanobis
 import numpy as np
 
+
+def temporal_generalization():
+    """
+
+    """
+
+
+
+
+
 class MahalanobisClassifier():
     def __init__(self, shared_cov=False, estimator='oas',
                     assume_centered=False, classes=None, **kwargs):
