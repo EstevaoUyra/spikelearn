@@ -1,7 +1,7 @@
 import scipy.stats as st
 import numpy as np
 
-def kernel_smooth(spike_vector, sigma, edges, bin_size=None, padding='mean'):
+def kernel_smooth(spike_vector, sigma, edges, bin_size=None, padding=None, border_correction = True):
     """
     Receives an array of spike times (point-process like), and smoothes it
     by convolving with a _gaussian_ kernel, of width *sigma*. The time
@@ -28,10 +28,14 @@ def kernel_smooth(spike_vector, sigma, edges, bin_size=None, padding='mean'):
         Must be a multiple of tp (n*tp). The returning bin value is the *sum*
         of each n bins, with no superposition.
 
-    padding : str, default mean
+    padding : str, default None
         The kind of padding on array edges. Possible values are
         'constant', 'edge', 'maximum', 'mean', 'median', 'minimum', 'reflect',
         'symmetric', 'wrap', or a <function>.
+
+    border_correction : bool, default True
+        whether to divide borders by spikevector true contribution
+        Raises a ValueError if used adjoined with padding
 
     Returns
     -------
@@ -50,6 +54,8 @@ def kernel_smooth(spike_vector, sigma, edges, bin_size=None, padding='mean'):
     --------
     numpy.pad for padding options and information.
     """
+
+
     precision_factor = sigma
     tp = int(sigma/precision_factor)
     if bin_size is None:
@@ -70,12 +76,18 @@ def kernel_smooth(spike_vector, sigma, edges, bin_size=None, padding='mean'):
     spike_count, times = np.histogram(spike_vector, bins=n_bins, range=edges)
 
     each_size_len = int(3*tp*precision_factor + 1)
-    padded = np.pad(spike_count, each_size_len, padding)
-
+    if padding is not None:
+        if border_correction:
+            raise ValueError('Padding and correction cannot be used together')
+        spike_count = np.pad(spike_count, each_size_len, padding)
     s=sigma # Just for one-lining below
     kernel = st.norm(0,s).pdf( np.linspace(-3*s, 3*s, 2*each_size_len + 1) )
-    smoothed = np.convolve(padded, kernel, 'valid')
-
+    smoothed = np.convolve(spike_count, kernel,
+                'valid' if padding is not None else 'same')
+    if border_correction:
+        contrib = st.norm(0,s).cdf(np.linspace(0, 3*s, each_size_len))
+        smoothed[:each_size_len] /=  contrib
+        smoothed[-each_size_len:]/= contrib[::-1]
     cs = np.hstack((0, smoothed.cumsum()))
     return np.diff(cs[::nbins_to_agg]), times[:-nbins_to_agg:nbins_to_agg]
 

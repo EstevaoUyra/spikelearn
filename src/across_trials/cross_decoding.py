@@ -16,19 +16,19 @@ import os
 
 # Parameters
 TMIN = 1.5;
-n_trial_per_splits = 60
+n_trial_per_splits = 100
 folder = 'data/results/across_trials/cross_decoding/'
-DSETS = ['medium_smoothed', 'medium_smoothed_norm',
-         'narrow_smoothed', 'narrow_smoothed_norm',
-         'wide_smoothed']
-NSPLITS = 50
+DSETS = ['narrow_smoothed', 'narrow_smoothed_norm']#['medium_smoothed', 'medium_smoothed_norm',
+        # 'narrow_smoothed', 'narrow_smoothed_norm',
+        # 'wide_smoothed']
+NSPLITS = 100
 subset = 'cropped'
 C1, C2 = np.linspace(-1.5, 5, 3), np.linspace(-5, 5, 3)
 
 # Prepare output folders
 #[os.makedirs(folder+dset) for dset in DSETS]
 
-for label, dset in product(['DRRD 9', 'DRRD 10'], DSETS):
+for label, dset in product(SHORTCUTS['groups']['DRRD'], DSETS):
 
     data_ = select( io.load(label, dset),
                     _min_duration=TMIN, is_selected=True ).reset_index()
