@@ -72,6 +72,6 @@ for label in SHORTCUTS['groups']['DRRD']:
         act = act[act.trial.isin(data.trial)]
         act['is_short'] = data.drop_duplicates('trial').set_index('trial').loc[act.trial].is_short.values
         act['is_init'] = act.trial < act.trial.quantile(.5)
-        act.set_index('trial').to_csv('{}/{}_{}_unit{}'.format(savedir, label, name, Dprime[Dp].idxmax()))
+        act.set_index('trial').to_csv('{}/{}_{}'.format(savedir, label, name, Dprime[Dp].idxmax()))
     filename = '{}_Dprime.csv'.format(label)
     Dprime.to_csv('{}/{}'.format(savedir, filename))

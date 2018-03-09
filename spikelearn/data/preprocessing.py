@@ -1,5 +1,7 @@
 import scipy.stats as st
 import numpy as np
+import pandas as pd
+import collections
 
 def kernel_smooth(spike_vector, sigma, edges, bin_size=None, padding=None, border_correction = True):
     """
@@ -47,7 +49,6 @@ def kernel_smooth(spike_vector, sigma, edges, bin_size=None, padding=None, borde
 
     Notes
     -----
-    Convolution borders are edge-padded.
     Total kernel size is 6*sigma, 3 sigma for each size.
 
     See also
@@ -91,7 +92,7 @@ def kernel_smooth(spike_vector, sigma, edges, bin_size=None, padding=None, borde
     cs = np.hstack((0, smoothed.cumsum()))
     return np.diff(cs[::nbins_to_agg]), times[:-nbins_to_agg:nbins_to_agg]
 
-def remove_baseline(activity, baseline, baseline_size=None, by='trial', base_name='baseline'):
+def remove_baseline(activity, baseline, baseline_size=None):
     """
     Removes the mean baseline firing rate from the activity.
 
@@ -102,25 +103,20 @@ def remove_baseline(activity, baseline, baseline_size=None, by='trial', base_nam
         with a single Identifier column *by*, that will be used to select
         the corresponding baseline
 
-    baseline : DataFrame or Series
-        If DataFrame, it must contain a column *by*, and a *base_name* column
-        with spike times from which to compute the firing rate.
-        If Series, must be indexed by *by*,
-        and contain the pre-calculated mean firing rate.
+    baseline : DataFrame
+        Indexed in the same way as the important features of activity
+        may be composed of the mean firing rate or the baseline spike times.
+        BE CAREFUL: Do _NOT_ use smoothed firing rates
 
     baseline_size : number (default None)
         The duration of the baseline, *in seconds*.
-        Ignored if baseline is a Series
-
-    by : index (default 'trial')
-        The columns used to relate activity and baseline
-
-    base_name : index (default 'baseline')
-        The name of the baseline in the DataFrame
-        Ignored if baseline is a Series
+        Ignored if firing rates are given
     """
-    if isinstance(baseline, pd.DataFrame):
+    if isinstance(baseline.iloc[0,0], collections.Sized):
+        assert baseline_size is not None
         firing_rate = lambda x: len(x)/baseline_size # Number of spikes per sec
-        baseline = baseline.groupby(by).apply(firing_rate)[base_name]
+        baseline = baseline.applymap(firing_rate)
+    else:
+        assert isinstance(baseline.iloc[0,0], float)
 
-    return (activity - activity['by'].map(baseline)).drop(by)
+    return (activity - baseline)[activity.columns]

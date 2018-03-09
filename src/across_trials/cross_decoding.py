@@ -6,7 +6,7 @@ sys.path.append('.')
 
 from spikelearn.measures.similarity import unit_similarity_evolution
 from spikelearn.models.shuffle_decoding import shuffle_val_predict
-from spikelearn.data import io, to_feature_array, select, SHORTCUTS
+from spikelearn.data import io, to_feature_array, select, SHORTCUTS, remove_baseline
 
 from sklearn.linear_model import LogisticRegression
 from sklearn.preprocessing import StandardScaler
@@ -24,6 +24,8 @@ DSETS = ['narrow_smoothed', 'narrow_smoothed_norm']#['medium_smoothed', 'medium_
 NSPLITS = 100
 subset = 'cropped'
 C1, C2 = np.linspace(-1.5, 5, 3), np.linspace(-5, 5, 3)
+BASELINE_SIZE = .5
+
 
 # Prepare output folders
 #[os.makedirs(folder+dset) for dset in DSETS]
@@ -45,6 +47,10 @@ for label, dset in product(SHORTCUTS['groups']['DRRD'], DSETS):
                                     _max_trial = slice_bounds[i+1]
                                     ).set_index(['trial','unit']),
                             False, subset) for i in range(n_slices)]
+
+    baseline = io.load(label, 'epoched_spikes')
+    baseline = baseline.baseline.unstack('unit').applymap(len)/BASELINE_SIZE
+    dfs = [remove_baseline(df) for df in dfs]
     names = np.arange(n_slices)
 
 
