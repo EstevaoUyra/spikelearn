@@ -8,10 +8,30 @@ from scipy.stats import pearsonr
 
 pearson_score = lambda true, pred: pearsonr(true, pred)[0]
 
-class shuffle_val_results():
+class Results_shuffle_val():
     """
     Organization dataholder for results from
     shuffle_val_predict
+
+    Attributes
+    ----------
+    n_splits, train_size, test_size : int
+        Parameters used in the analysis.
+
+    scoring_function : list of tuples [(name, callable), ]
+        the scoring function used in the analysis
+
+    classes, groups, features : arrays
+        Characteristics of the dataset
+
+    id_vars, fat_vars : list of string
+        The name of identifier variables
+        Including 'true_label' and 'group' in fat.
+
+    data, proba, weights, predictions, scores: DataFrames
+        The results of the analysis
+
+
     """
     def __init__(self, n_splits, train_size,
                     test_size, scoring_function,
@@ -31,6 +51,7 @@ class shuffle_val_results():
         self.proba = pd.DataFrame(self.id_vars)
         self.weights = pd.DataFrame(self.id_vars)
         self.predictions = pd.DataFrame(self.id_vars)
+        self.scores = pd.DataFrame(self.id_vars)
 
     def _input_id_vars(self, df, **kwargs):
         for key in self.id_vars:
@@ -79,6 +100,10 @@ class shuffle_val_results():
         self.predictions[self.fat_vars] = self.proba[self.fat_vars]
 
     def score(self):
+        for which in ['max', 'mean']:
+            scoring = lambda df: self.scoring_function(df['prediction_'+which],
+                                                        df['true_label'])
+            self.scores = df.groupby(id_vars).agg(scoring)
 
 
 def shuffle_val_predict(clf, dfs, names, X, y, group=None,
@@ -149,7 +174,7 @@ def shuffle_val_predict(clf, dfs, names, X, y, group=None,
                'trained_on',
                'tested_on',
                'trained_here']
-    res = shuffle_val_results(n_splits=n_splits,
+    res = Results_shuffle_val(n_splits=n_splits,
                     train_size = n_train,
                     test_size = n_test,
                     scoring_function = score,

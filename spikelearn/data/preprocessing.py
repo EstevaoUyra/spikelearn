@@ -85,10 +85,12 @@ def kernel_smooth(spike_vector, sigma, edges, bin_size=None, padding=None, borde
     kernel = st.norm(0,s).pdf( np.linspace(-3*s, 3*s, 2*each_size_len + 1) )
     smoothed = np.convolve(spike_count, kernel,
                 'valid' if padding is not None else 'same')
+
     if border_correction:
         contrib = st.norm(0,s).cdf(np.linspace(0, 3*s, each_size_len))
         smoothed[:each_size_len] /=  contrib
         smoothed[-each_size_len:]/= contrib[::-1]
+
     cs = np.hstack((0, smoothed.cumsum()))
     return np.diff(cs[::nbins_to_agg]), times[:-nbins_to_agg:nbins_to_agg]
 
