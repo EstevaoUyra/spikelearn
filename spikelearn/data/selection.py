@@ -247,7 +247,7 @@ def select(dataframe, maxlen=None, takefrom=None, accept_smaller=False,
         elif takefrom is 'shuffle':
             return localdata.sample(maxlen)
 
-def to_feature_array(df, Xyt = True, subset='cropped'):
+def to_feature_array(df, Xyt = False, subset='cropped'):
     """
     Receives an epoched smoothed dataframe, and transforms it to put the each
     unit into a column.
