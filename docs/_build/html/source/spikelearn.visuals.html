@@ -92,8 +92,8 @@ only to vertical separators.</li>
 </dd></dl>
 
 <dl class="function">
-<dt id="spikelearn.visuals.visuals.raster_plot">
-<code class="descclassname">spikelearn.visuals.visuals.</code><code class="descname">raster_plot</code><span class="sig-paren">(</span><em>spike_trains</em>, <em>time='time'</em>, <em>yaxis='trial'</em>, <em>xlim=None</em>, <em>subplots=None</em>, <em>hue=None</em>, <em>n_cols='auto'</em>, <em>n_rows='auto'</em>, <em>title=None</em>, <em>palette='deep'</em>, <em>density=False</em>, <em>n_yticks=5</em>, <em>is_list=False</em>, <em>kde_kwargs=None</em>, <em>fig_kwargs=None</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spikelearn/visuals/visuals.html#raster_plot"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#spikelearn.visuals.visuals.raster_plot" title="Permalink to this definition">¶</a></dt>
+<dt id="spikelearn.visuals.visuals.raster_multiple">
+<code class="descclassname">spikelearn.visuals.visuals.</code><code class="descname">raster_multiple</code><span class="sig-paren">(</span><em>spike_trains</em>, <em>time='time'</em>, <em>yaxis='trial'</em>, <em>xlim=None</em>, <em>col=None</em>, <em>row=None</em>, <em>rows=None</em>, <em>hue=None</em>, <em>hue_order=None</em>, <em>title=None</em>, <em>sharey=False</em>, <em>palette='deep'</em>, <em>density=False</em>, <em>n_yticks=None</em>, <em>is_list=False</em>, <em>kde_kwargs=None</em>, <em>fig_kwargs=None</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spikelearn/visuals/visuals.html#raster_multiple"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#spikelearn.visuals.visuals.raster_multiple" title="Permalink to this definition">¶</a></dt>
 <dd><table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -102,28 +102,85 @@ only to vertical separators.</li>
 <li><strong>spike_trains</strong> (<em>DataFrame</em>) – Each row contains identifier variables, and the time column should
 contain a single time or a list of times for each row.
 Note: if the format is list of times, the function will take longer,
-and this must be flagged at is_list</li>
+and this must be flagged at is_lista</li>
 <li><strong>time</strong> (<em>string</em><em>, </em><em>optional</em><em>, </em><em>default: 'time'</em>) – DataFrame column index containing the times or time lists.
 If not ‘time’, the name of the column is added to the xlabel
 default label is ‘Time (ms)’, and it turns (‘Time ({})’).format(time)</li>
 <li><strong>yaxis</strong> (<em>string</em><em>, </em><em>optional</em><em>, </em><em>default: 'trial'</em>) – Variable that defines the vertical position of the row’s data.</li>
-<li><strong>xlim</strong> (<em>tuple</em><em>, </em><em>optional</em>) – Limits of the horizontal axis of each subplot</li>
-<li><strong>subplots</strong> (<em>string</em><em>, </em><em>optional</em>) – Defines which variable is unique in each subplot</li>
+<li><strong>xlim</strong> (<em>tuple</em><em> or </em><em>list of tuples</em><em>, </em><em>optional</em>) – Limits of the horizontal axis of each subplot.
+If list, applies one for each <em>row</em></li>
+<li><strong>col</strong> (<em>string</em><em>, </em><em>optional</em>) – Defines which variable is unique in each subplot column</li>
+<li><strong>row</strong> (<em>string</em><em>, </em><em>optional</em>) – Defines which variable is unique in each subplot row</li>
+<li><strong>rows</strong> (<em>list</em><em>, </em><em>optional</em>) – The order in which to plot the fields in the rows</li>
 <li><strong>hue</strong> (<em>string</em><em>, </em><em>optional</em>) – Defines which variable is unique in each color</li>
+<li><strong>hue_order</strong> (<em>list</em><em>, </em><em>optional</em>) – The order in which hues will get colored</li>
 <li><strong>palette</strong> (<em>list</em><em> or </em><em>str</em><em>, </em><em>optional</em>) – list of colors or name of seaborn color_palette. Defaults to ‘Set3’</li>
 <li><strong>density</strong> (<em>bool</em><em> or </em><em>str</em><em>, </em><em>optional</em>) – Whether to show the time density of spikes on top of each subplot.
 If str, selects column to groupby and plot multiple densities.
 If ‘hue’, plots a density for each color.</li>
-<li><strong>n_yticks</strong> (<em>int</em><em>, </em><em>optional</em><em>, </em><em>default: 5</em>) – Number of ticks on the vertical axis of each subplot</li>
+<li><strong>n_yticks</strong> (<em>int</em><em>, </em><em>optional</em><em>, </em><em>default: None</em>) – Number of ticks on the vertical axis of each subplot</li>
 <li><strong>is_list</strong> (<em>bool</em><em>, </em><em>optional</em><em>, </em><em>default: False</em>) – Flags the rows as containing list of times, instead of values.
 Making the transformation takes time, and it is preferable to do
-this transformation outside the plotting function.</li>
+this transformation outside the plotting function.
+DEPRECATED, now only accepts list format</li>
 </ul>
 </td>
 </tr>
 </tbody>
 </table>
-<p class="rubric">Notes</p>
+<div class="admonition seealso">
+<p class="first admonition-title">See also</p>
+<p class="last"><a class="reference internal" href="#spikelearn.visuals.visuals.raster_plot" title="spikelearn.visuals.visuals.raster_plot"><code class="xref py py-func docutils literal"><span class="pre">raster_plot()</span></code></a></p>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="spikelearn.visuals.visuals.raster_plot">
+<code class="descclassname">spikelearn.visuals.visuals.</code><code class="descname">raster_plot</code><span class="sig-paren">(</span><em>data</em>, <em>time='time'</em>, <em>yaxis='trial'</em>, <em>hue=None</em>, <em>hue_order=None</em>, <em>density=False</em>, <em>ax=None</em>, <em>palette='deep'</em>, <em>is_list=True</em>, <em>kde_kwargs=None</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spikelearn/visuals/visuals.html#raster_plot"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#spikelearn.visuals.visuals.raster_plot" title="Permalink to this definition">¶</a></dt>
+<dd><p>data :</p>
+<dl class="docutils">
+<dt>time <span class="classifier-delimiter">:</span> <span class="classifier">string, optional, default: ‘time’</span></dt>
+<dd>DataFrame column index containing the times or time lists.
+If not ‘time’, the name of the column is added to the xlabel
+default label is ‘Time (ms)’, and it turns (‘Time ({})’).format(time)</dd>
+<dt>yaxis <span class="classifier-delimiter">:</span> <span class="classifier">string, optional, default: ‘trial’</span></dt>
+<dd>Variable that defines the vertical position of the row’s data.</dd>
+<dt>hue <span class="classifier-delimiter">:</span> <span class="classifier">string, optional</span></dt>
+<dd>Defines which variable is unique in each color</dd>
+<dt>hue_order <span class="classifier-delimiter">:</span> <span class="classifier">list, optional</span></dt>
+<dd>The order in which hues will get colored</dd>
+<dt>density <span class="classifier-delimiter">:</span> <span class="classifier">bool or str, optional</span></dt>
+<dd>Whether to show the time density of spikes on top of each subplot.
+If str, selects column to groupby and plot multiple densities.
+If ‘hue’, plots a density for each color.</dd>
+<dt>palette <span class="classifier-delimiter">:</span> <span class="classifier">list or str, optional</span></dt>
+<dd>list of colors or name of seaborn color_palette. Defaults to ‘Set3’</dd>
+<dt>ax <span class="classifier-delimiter">:</span> <span class="classifier">matplotlib axes, optional</span></dt>
+<dd>The axis on which to plot</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="spikelearn.visuals.visuals.to_video">
+<code class="descclassname">spikelearn.visuals.visuals.</code><code class="descname">to_video</code><span class="sig-paren">(</span><em>listfile</em>, <em>outputfile</em>, <em>fps=3</em>, <em>w=800</em>, <em>h=600</em>, <em>type='png'</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spikelearn/visuals/visuals.html#to_video"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#spikelearn.visuals.visuals.to_video" title="Permalink to this definition">¶</a></dt>
+<dd><p>Simply runs mencoder to merge images into a .avi video.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>listfile</strong> (<em>string</em><em>, </em><em>path-to-file</em>) – Path to a file containing the image names in its rows, in the order
+that they should appear on the video.</li>
+<li><strong>outputfile</strong> (<em>string</em>) – The name of the output video.
+Obs: the name will be completed by .avi</li>
+<li><strong>w</strong><strong>, </strong><strong>h</strong> (<em>fps</em><em>,</em>) – Parameters of the video. defaults 3, 800, 600
+Frame rate, width and height.</li>
+<li><strong>type</strong> (<em>string</em><em>, </em><em>default 'png'</em>) – Type of the images being transformed.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 </div>

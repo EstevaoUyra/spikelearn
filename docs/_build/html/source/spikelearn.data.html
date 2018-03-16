@@ -44,17 +44,408 @@
 <div class="section" id="submodules">
 <h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h2>
 </div>
-<div class="section" id="spikelearn-data-api-module">
-<h2>spikelearn.data.api module<a class="headerlink" href="#spikelearn-data-api-module" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="module-spikelearn.data.io">
+<span id="spikelearn-data-io-module"></span><h2>spikelearn.data.io module<a class="headerlink" href="#module-spikelearn.data.io" title="Permalink to this headline">¶</a></h2>
+<p>Input (loading) and output (saving) functions.
+Lower level functions, usually called from the api</p>
+<dl class="class">
+<dt id="spikelearn.data.io.DataShortcut">
+<em class="property">class </em><code class="descclassname">spikelearn.data.io.</code><code class="descname">DataShortcut</code><span class="sig-paren">(</span><em>base_label</em>, <em>dataset_name=None</em>, <em>dataset_type='auto'</em>, <em>filename=None</em>, <em>basepath=None</em>, <em>overwrite=False</em>, <em>data=None</em>, <em>annotations=''</em>, <em>getpath=False</em>, <em>extension='auto'</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spikelearn/data/io.html#DataShortcut"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#spikelearn.data.io.DataShortcut" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<p>Loads and saves data into DataFrame, getting shortcuts from
+a pre-edited JSON file shortcuts.json</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>base_label</strong> (<em>string</em>) – Base dataset label. If not contained in shortcuts.json, then the filename
+parameter is needed.</li>
+<li><strong>dataset_name</strong> (<em>string</em><em>, </em><em>default None</em>) – Name of the specific dataset to load.
+if None (default), raises TypeError and
+prints a list of all datasets</li>
+<li><strong>dataset_type</strong> (<em>string</em><em>, </em><em>default 'auto'</em>) – Can be “raw”, “interim”, “processed”, “results” or ‘auto’
+If ‘auto’ searches for the dataset in all folders</li>
+<li><strong>filename</strong> (<em>string</em><em>, </em><em>path-to-file</em><em>, </em><em>optional</em>) – Name of the path of datafile. If provided jointly with label, the
+overwrite flag must be explicitly set to True.</li>
+<li><strong>basepath</strong> (<em>string</em><em>, </em><em>optional</em>) – full path of some folder in filename hierarchy
+serves to make shortcuts.json identation less polluted</li>
+<li><strong>overwrite</strong> (<em>bool</em><em>, </em><em>optional</em><em>, </em><em>default False</em>) – Whether to overwrite label with filename</li>
+<li><strong>annotations</strong> (<em>str</em><em> or </em><em>list of str</em><em>, </em><em>optional</em>) – Observations to add to the file description</li>
+<li><strong>getpath</strong> (<em>bool</em><em>, </em><em>optional</em><em>, </em><em>default False</em>) – Whether to get only the path to file,
+Avoiding loading and/or creating</li>
+<li><strong>extension</strong> (<em>string</em><em>, </em><em>optional</em><em>, </em><em>default 'auto'</em>) – Must be specified for creating or overwritting datasets.
+Options are ‘pickle’, ‘csv’</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name" colspan="2">Keyword Arguments:</th></tr>
+<tr class="field-even field"><td>&#160;</td><td class="field-body"><ul class="first last simple">
+<li><strong>any number of identifier variables with keyword arguments</strong><strong>,</strong> (<em>Add</em>) – </li>
+<li><strong>must be numbers</strong><strong> or </strong><strong>strings.</strong> (<em>which</em>) – </li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Notes</p>
+<p>Uses the datafiles.json to search and load data using simple
+name labels.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="spikelearn.data.io.dataset_exist">
+<code class="descclassname">spikelearn.data.io.</code><code class="descname">dataset_exist</code><span class="sig-paren">(</span><em>base_label</em>, <em>dataset_name</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spikelearn/data/io.html#dataset_exist"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#spikelearn.data.io.dataset_exist" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="spikelearn.data.io.load">
+<code class="descclassname">spikelearn.data.io.</code><code class="descname">load</code><span class="sig-paren">(</span><em>base_label</em>, <em>dataset_name</em>, <em>getpath=False</em>, <em>dataset_type='auto'</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spikelearn/data/io.html#load"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#spikelearn.data.io.load" title="Permalink to this definition">¶</a></dt>
+<dd><p>Lightweight loader that used DataShortcut under the hood.</p>
+<div class="admonition seealso">
+<p class="first admonition-title">See also</p>
+<p class="last"><a class="reference internal" href="#spikelearn.data.io.DataShortcut" title="spikelearn.data.io.DataShortcut"><code class="xref py py-func docutils literal"><span class="pre">DataShortcut()</span></code></a></p>
 </div>
-<div class="section" id="spikelearn-data-io-module">
-<h2>spikelearn.data.io module<a class="headerlink" href="#spikelearn-data-io-module" title="Permalink to this headline">¶</a></h2>
+</dd></dl>
+
+<dl class="function">
+<dt id="spikelearn.data.io.save">
+<code class="descclassname">spikelearn.data.io.</code><code class="descname">save</code><span class="sig-paren">(</span><em>data</em>, <em>base_label</em>, <em>dataset_name</em>, <em>dataset_type='processed'</em>, <em>extension='pickle'</em>, <em>annotatons=''</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spikelearn/data/io.html#save"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#spikelearn.data.io.save" title="Permalink to this definition">¶</a></dt>
+<dd><p>Lightweight saver that used DataShortcut under the hood.</p>
+<div class="admonition seealso">
+<p class="first admonition-title">See also</p>
+<p class="last"><a class="reference internal" href="#spikelearn.data.io.DataShortcut" title="spikelearn.data.io.DataShortcut"><code class="xref py py-func docutils literal"><span class="pre">DataShortcut()</span></code></a></p>
 </div>
-<div class="section" id="spikelearn-data-utils-module">
-<h2>spikelearn.data.utils module<a class="headerlink" href="#spikelearn-data-utils-module" title="Permalink to this headline">¶</a></h2>
+</dd></dl>
+
+<dl class="function">
+<dt id="spikelearn.data.io.save_result">
+<code class="descclassname">spikelearn.data.io.</code><code class="descname">save_result</code><span class="sig-paren">(</span><em>data</em>, <em>base_label</em>, <em>dataset_name</em>, <em>dataset_type='processed'</em>, <em>extension='pickle'</em>, <em>annotatons=''</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spikelearn/data/io.html#save_result"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#spikelearn.data.io.save_result" title="Permalink to this definition">¶</a></dt>
+<dd><p>Lightweight saver that used DataShortcut under the hood.</p>
+<div class="admonition seealso">
+<p class="first admonition-title">See also</p>
+<p class="last"><a class="reference internal" href="#spikelearn.data.io.DataShortcut" title="spikelearn.data.io.DataShortcut"><code class="xref py py-func docutils literal"><span class="pre">DataShortcut()</span></code></a></p>
 </div>
-<div class="section" id="module-contents">
-<h2>Module contents<a class="headerlink" href="#module-contents" title="Permalink to this headline">¶</a></h2>
+</dd></dl>
+
+</div>
+<div class="section" id="module-spikelearn.data.preprocessing">
+<span id="spikelearn-data-preprocessing-module"></span><h2>spikelearn.data.preprocessing module<a class="headerlink" href="#module-spikelearn.data.preprocessing" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="spikelearn.data.preprocessing.kernel_smooth">
+<code class="descclassname">spikelearn.data.preprocessing.</code><code class="descname">kernel_smooth</code><span class="sig-paren">(</span><em>spike_vector</em>, <em>sigma</em>, <em>edges</em>, <em>bin_size=None</em>, <em>padding=None</em>, <em>border_correction=True</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spikelearn/data/preprocessing.html#kernel_smooth"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#spikelearn.data.preprocessing.kernel_smooth" title="Permalink to this definition">¶</a></dt>
+<dd><p>Receives an array of spike times (point-process like), and smoothes it
+by convolving with a _gaussian_ kernel, of width <em>sigma</em>. The time
+position will be alocated with a time precision that is a ratio of sigma,
+given by tp = sigma/precision_factor.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>spike_vector</strong> (<em>array</em>) – Point process like spike times, <em>in milisseconds</em></li>
+<li><strong>sigma</strong> (<em>int</em>) – Width of the window, in ms</li>
+<li><strong>edges</strong> (<em>tuple</em>) – Starting and ending time of the window of interest, in ms.</li>
+<li><strong>precision_factor</strong> (<em>int</em><em>, </em><em>default 10</em>) – Factor of the precision ratio sigma/temporal_precision</li>
+<li><strong>bin_size</strong> (<em>int</em><em>, </em><em>default None</em>) – The size (in ms) of each step in the returning smoothed data.
+By default is the minimum, equal to the temporal precision tp.
+Must be a multiple of tp (n*tp). The returning bin value is the <em>sum</em>
+of each n bins, with no superposition.</li>
+<li><strong>padding</strong> (<em>str</em><em>, </em><em>default None</em>) – The kind of padding on array edges. Possible values are
+‘constant’, ‘edge’, ‘maximum’, ‘mean’, ‘median’, ‘minimum’, ‘reflect’,
+‘symmetric’, ‘wrap’, or a &lt;function&gt;.</li>
+<li><strong>border_correction</strong> (<em>bool</em><em>, </em><em>default True</em>) – whether to divide borders by spikevector true contribution
+Raises a ValueError if used adjoined with padding</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last"><ul class="simple">
+<li><strong>smoothed_data</strong> (<em>array</em>) – The estimated firing rate as each interval of bin_size</li>
+<li><strong>times</strong> (<em>array</em>) – The time at the left edge of each interval</li>
+</ul>
+</p>
+</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Notes</p>
+<p>Total kernel size is 6*sigma, 3 sigma for each size.</p>
+<div class="admonition seealso">
+<p class="first admonition-title">See also</p>
+<p class="last"><code class="xref py py-func docutils literal"><span class="pre">numpy.pad()</span></code></p>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="spikelearn.data.preprocessing.remove_baseline">
+<code class="descclassname">spikelearn.data.preprocessing.</code><code class="descname">remove_baseline</code><span class="sig-paren">(</span><em>activity</em>, <em>baseline</em>, <em>baseline_size=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spikelearn/data/preprocessing.html#remove_baseline"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#spikelearn.data.preprocessing.remove_baseline" title="Permalink to this definition">¶</a></dt>
+<dd><p>Removes the mean baseline firing rate from the activity.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>activity</strong> (<em>DataFrame</em>) – DataFrame of firing rates (in spikes/<em>s</em>)
+with a single Identifier column <em>by</em>, that will be used to select
+the corresponding baseline</li>
+<li><strong>baseline</strong> (<em>DataFrame</em>) – Indexed in the same way as the important features of activity
+may be composed of the mean firing rate or the baseline spike times.
+BE CAREFUL: Do _NOT_ use smoothed firing rates</li>
+<li><strong>baseline_size</strong> (<em>number</em><em> (</em><em>default None</em><em>)</em>) – The duration of the baseline, <em>in seconds</em>.
+Ignored if firing rates are given</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="module-spikelearn.data.selection">
+<span id="spikelearn-data-selection-module"></span><h2>spikelearn.data.selection module<a class="headerlink" href="#module-spikelearn.data.selection" title="Permalink to this headline">¶</a></h2>
+<p>Contains the base classes for dealing with data directly.
+The only data-dealing functions that
+are accessible from other modules.</p>
+<dl class="class">
+<dt id="spikelearn.data.selection.Batcher">
+<em class="property">class </em><code class="descclassname">spikelearn.data.selection.</code><code class="descname">Batcher</code><span class="sig-paren">(</span><em>X</em>, <em>y=None</em>, <em>axis='Last'</em>, <em>group=None</em>, <em>mode='sh'</em>, <em>flatten=False</em>, <em>ylabels=None</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spikelearn/data/selection.html#Batcher"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#spikelearn.data.selection.Batcher" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<p>Implements an iterable cross-validator that groups all repeated indexes in the same group.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>X</strong> (<em>numpy ndarray</em><em> or </em><em>pandas DataFrame</em>) – Data container to be sliced.</li>
+<li><strong>y</strong> (<em>ndarray</em><em>(</em><em>n_examples</em><em>, </em><em>1</em><em>) or </em><em>int</em><em>, </em><em>optional</em>) – If ndarray, label of each example.
+If int, the axis that defines the label.</li>
+<li><strong>axis</strong> (<em>int</em><em> or </em><em>str</em>) – If int, dimension to be sliced and served in batches,
+requiring ndarray.
+If string, field used to choose examples, requiring DataFrame.
+n_examples = X.shape[axis]</li>
+<li><strong>group</strong> (<em>np.ndarray</em><em> (</em><em>n_examples</em><em>, </em><em>1</em><em>) or </em><em>string</em><em>, </em><em>optional</em><em>, </em><em>default None</em>) – Use it to make examples always part of the same fold. Defaults to The position in axis (no preferential grouping).
+If string, X must be a DataFrame, and defines the grouping index</li>
+<li><strong>mode</strong> (<em>string</em><em> or </em><em>sklearn generator</em><em>, </em><em>optional</em><em>, </em><em>default</em>) – Which kind of splitting will be used for batching.
+Currently accepts ‘shuffle’ and ‘kfold’.</li>
+<li><strong>flatten</strong> (<em>bool</em>) – Whether to return an Sklearn-style matrix.</li>
+<li><strong>ylabels</strong> (<em>tuple</em><em>, </em><em>optional</em>) – If y is given as an int, its position on the axis is used to access
+the corresponding label in ylabels. defaults to the position itself</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name" colspan="2">Keyword Arguments:</th></tr>
+<tr class="field-even field"><td>&#160;</td><td class="field-body"><ul class="first last simple">
+<li><strong>to be passed to the splitting function.</strong> (<em>Arguments</em>) – </li>
+<li><strong>kwargs are</strong> (<em>Common</em>) – </li>
+<li><strong>train_size</strong> (<em>(</em><em>int</em><em>) or </em><em>(</em><em>float</em><em>)</em><em>, </em><em>optional</em><em>, </em><em>default: 0.5</em>) – If int, total number of groups in the train set. If float, proportion of groups.</li>
+<li><strong>test_size</strong> (<em>(</em><em>int</em><em>) or </em><em>(</em><em>float</em><em>)</em><em>, </em><em>optional</em><em>, </em><em>default: 0.5</em>) – If int, total number of groups in the test set. If float, proportion of groups.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<dl class="method">
+<dt id="spikelearn.data.selection.Batcher.next">
+<code class="descname">next</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spikelearn/data/selection.html#Batcher.next"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#spikelearn.data.selection.Batcher.next" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Yields:</th><td class="field-body"><ul class="first last simple">
+<li><em>(train_size, n_features), (test_size, n_features)</em></li>
+<li><em>(train_size, n_features), (train_size,1), (test_size, n_features),(test_size,1)</em></li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Examples</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="k">for</span> <span class="n">X_train</span><span class="p">,</span> <span class="n">X_test</span> <span class="ow">in</span> <span class="n">Batcher</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">train_size</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">test_size</span><span class="o">=.</span><span class="mi">4</span><span class="p">):</span>
+<span class="gp">&gt;&gt;&gt; </span>    <span class="k">assert</span> <span class="n">X_train</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="mi">3</span>
+<span class="gp">&gt;&gt;&gt; </span>    <span class="k">assert</span> <span class="n">X_test</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="mf">0.4</span> <span class="o">*</span> <span class="n">X</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">for</span> <span class="n">X_train</span><span class="p">,</span> <span class="n">y_train</span><span class="p">,</span> <span class="n">X_test</span><span class="p">,</span> <span class="n">y_test</span> <span class="ow">in</span> <span class="n">Batcher</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">):</span>
+<span class="gp">&gt;&gt;&gt; </span>    <span class="k">assert</span> <span class="n">X_train</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">y_train</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+</pre></div>
+</div>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="function">
+<dt id="spikelearn.data.selection.select">
+<code class="descclassname">spikelearn.data.selection.</code><code class="descname">select</code><span class="sig-paren">(</span><em>dataframe</em>, <em>maxlen=None</em>, <em>takefrom=None</em>, <em>accept_smaller=False</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spikelearn/data/selection.html#select"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#spikelearn.data.selection.select" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>dataframe</strong> (<em>pandas DataFrame</em>) – The data that will be under selection</li>
+<li><strong>maxlen</strong> (<em>int</em>) – Maximum number of rows of resulting dataframe.
+Acts after all selection by kwargs.
+If dataframe is already smaller than maxlen by then,
+resides on accept_smaller parameter.</li>
+<li><strong>takefrom</strong> (<em>str</em>) – Only functional when maxlen is not None.
+Specifies where to get the rows.
+May be one of ‘shuffle’, ‘init’, ‘end’</li>
+<li><strong>accept_smaller</strong> (<em>bool</em>) – Whether to silently accept dataframes smaller than maxlen.
+If False and it is smaller, raises an exception
+Defaults to False</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name" colspan="2">Keyword Arguments:</th></tr>
+<tr class="field-even field"><td>&#160;</td><td class="field-body"><p class="first last"><strong>Key</strong> (<em>string</em>) – The index of any field in the DataFrame
+If type is numerical, may be preceded or succeded by _in_, _max_, _min_,
+_maxeq_ or _mineq_, inside underlines.</p>
+</td>
+</tr>
+</tbody>
+</table>
+<dl class="docutils">
+<dt>Value <span class="classifier-delimiter">:</span> <span class="classifier">string or numerical</span></dt>
+<dd>The value used for selecting.</dd>
+</dl>
+<p class="rubric">Examples</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">selected_by_duration</span> <span class="o">=</span> <span class="n">select</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">_min_duration</span><span class="o">=</span><span class="mi">1000</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">selected_neurons</span> <span class="o">=</span> <span class="n">select</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">_in_unit</span><span class="o">=</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">8</span><span class="p">])</span>
+</pre></div>
+</div>
+<p class="rubric">Notes</p>
+<p>The wordparts _in_, _min_, _mineq_, _maxeq_, _max_ should not be
+part of identifier variables,
+and have to be reserved for using the comparisons.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="spikelearn.data.selection.to_feature_array">
+<code class="descclassname">spikelearn.data.selection.</code><code class="descname">to_feature_array</code><span class="sig-paren">(</span><em>df</em>, <em>Xyt=True</em>, <em>subset='cropped'</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spikelearn/data/selection.html#to_feature_array"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#spikelearn.data.selection.to_feature_array" title="Permalink to this definition">¶</a></dt>
+<dd><p>Receives an epoched smoothed dataframe, and transforms it to put the each
+unit into a column.</p>
+</dd></dl>
+
+</div>
+<div class="section" id="module-spikelearn.data.utils">
+<span id="spikelearn-data-utils-module"></span><h2>spikelearn.data.utils module<a class="headerlink" href="#module-spikelearn.data.utils" title="Permalink to this headline">¶</a></h2>
+<p>Utilitary functions.</p>
+<dl class="function">
+<dt id="spikelearn.data.utils.df_to_array">
+<code class="descclassname">spikelearn.data.utils.</code><code class="descname">df_to_array</code><span class="sig-paren">(</span><em>df</em>, <em>axis_fields</em>, <em>field_values=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spikelearn/data/utils.html#df_to_array"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#spikelearn.data.utils.df_to_array" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="spikelearn.data.utils.get_filepaths_from_shortcut">
+<code class="descclassname">spikelearn.data.utils.</code><code class="descname">get_filepaths_from_shortcut</code><span class="sig-paren">(</span><em>one_shortcuts</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spikelearn/data/utils.html#get_filepaths_from_shortcut"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#spikelearn.data.utils.get_filepaths_from_shortcut" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="spikelearn.data.utils.half_ttest_half">
+<code class="descclassname">spikelearn.data.utils.</code><code class="descname">half_ttest_half</code><span class="sig-paren">(</span><em>series</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spikelearn/data/utils.html#half_ttest_half"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#spikelearn.data.utils.half_ttest_half" title="Permalink to this definition">¶</a></dt>
+<dd><p>Divides series in half and returns the t_test odds between each</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="spikelearn.data.utils.ndarray_to_df">
+<code class="descclassname">spikelearn.data.utils.</code><code class="descname">ndarray_to_df</code><span class="sig-paren">(</span><em>arr</em>, <em>field_names</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spikelearn/data/utils.html#ndarray_to_df"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#spikelearn.data.utils.ndarray_to_df" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="spikelearn.data.utils.odds">
+<code class="descclassname">spikelearn.data.utils.</code><code class="descname">odds</code><span class="sig-paren">(</span><em>p</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spikelearn/data/utils.html#odds"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#spikelearn.data.utils.odds" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="spikelearn.data.utils.recursive_full_name_recovery">
+<code class="descclassname">spikelearn.data.utils.</code><code class="descname">recursive_full_name_recovery</code><span class="sig-paren">(</span><em>inside_folder_shortcuts</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spikelearn/data/utils.html#recursive_full_name_recovery"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#spikelearn.data.utils.recursive_full_name_recovery" title="Permalink to this definition">¶</a></dt>
+<dd><p>Receives a nested dictionary in which keys are folder names,
+and values are filenames, and returns the fullpaths of each.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="spikelearn.data.utils.reyes_cp">
+<code class="descclassname">spikelearn.data.utils.</code><code class="descname">reyes_cp</code><span class="sig-paren">(</span><em>timeseries</em>, <em>full_window_size=60</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spikelearn/data/utils.html#reyes_cp"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#spikelearn.data.utils.reyes_cp" title="Permalink to this definition">¶</a></dt>
+<dd><p>Change-point analysis algorithm. Window-walks a timeseries calculating
+the odds of a simple t_test between the window’s first and second half.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>timeseries</strong> (<em>array-like</em>) – Series of values upon which to calculate the Change-point</li>
+<li><strong>full_window_size</strong> (<em>int</em><em>, </em><em>optional</em><em>, </em><em>default: 60</em>) – Size of the total walking window (sum of two halfs)</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>odds</strong> – Change-point odds for each timepoint</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">Series</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="spikelearn.data.utils.slashed">
+<code class="descclassname">spikelearn.data.utils.</code><code class="descname">slashed</code><span class="sig-paren">(</span><em>path</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spikelearn/data/utils.html#slashed"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#spikelearn.data.utils.slashed" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="spikelearn.data.utils.verticalize_df">
+<code class="descclassname">spikelearn.data.utils.</code><code class="descname">verticalize_df</code><span class="sig-paren">(</span><em>df</em>, <em>idx</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spikelearn/data/utils.html#verticalize_df"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#spikelearn.data.utils.verticalize_df" title="Permalink to this definition">¶</a></dt>
+<dd><p>Melts a DataFrame in which the to-melt values are not distributed in the
+row, but are in a single field in each row.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>df</strong> (<em>DataFrame</em>) – A DataFrame of id variables, with one single field containing
+an array-like variable.</li>
+<li><strong>idx</strong> (<em>string</em>) – The index of the array-like variable.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>df</strong> – Tidy (melted), with one value of idx variable per row</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">DataFrame</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="spikelearn.data.utils.verticalize_series">
+<code class="descclassname">spikelearn.data.utils.</code><code class="descname">verticalize_series</code><span class="sig-paren">(</span><em>series</em>, <em>idx</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/spikelearn/data/utils.html#verticalize_series"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#spikelearn.data.utils.verticalize_series" title="Permalink to this definition">¶</a></dt>
+<dd><p>Melts a series in which the values are not only in one row,
+but are in a single field in this row.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>series</strong> (<em>pandas Series</em>) – A series of id variables, with one single field containing
+an array-like variable.</li>
+<li><strong>idx</strong> (<em>string</em>) – The index of the array-like variable.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>df</strong> – Tidy (melted), with one value of idx variable per row</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">DataFrame</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="module-spikelearn.data">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-spikelearn.data" title="Permalink to this headline">¶</a></h2>
+<p>A module for data loading, processing and saving.</p>
 </div>
 </div>
 

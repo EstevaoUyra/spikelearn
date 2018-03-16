@@ -1,5 +1,5 @@
-SingleUnit Spike Learning
-=========================
+spikelearn
+==========
 
 .. toctree::
    :maxdepth: 4

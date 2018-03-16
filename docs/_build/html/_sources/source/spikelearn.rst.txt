@@ -6,7 +6,8 @@ Subpackages
 
 .. toctree::
 
-    spikelearn.dataprocessing
+    spikelearn.data
+    spikelearn.models
     spikelearn.visuals
 
 Submodules
