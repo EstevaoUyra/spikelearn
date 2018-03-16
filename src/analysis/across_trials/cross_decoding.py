@@ -48,10 +48,10 @@ for label, dset in product(SHORTCUTS['groups']['DRRD'], DSETS):
                                     ).set_index(['trial','unit']),
                             False, subset) for i in range(n_slices)]
 
-    baseline = io.load(label, 'epoched_spikes')
-    baseline = baseline.baseline.unstack('unit').applymap(len)/BASELINE_SIZE
-    dfs = [remove_baseline(df) for df in dfs]
-    names = np.arange(n_slices)
+    #baseline = io.load(label, 'epoched_spikes')
+    #baseline = baseline.baseline.unstack('unit').applymap(len)/BASELINE_SIZE
+    #dfs = [remove_baseline(df) for df in dfs]
+
 
 
     res_pred = pd.DataFrame()
@@ -59,9 +59,7 @@ for label, dset in product(SHORTCUTS['groups']['DRRD'], DSETS):
     res_stats = pd.DataFrame()
     for logC, regl in chain( zip(C1, cycle(['l1'])), zip(C2, cycle(['l2']))):
         clf = LogisticRegression( C=10**logC )
-        one_p, one_w, one_s = shuffle_val_predict( clf, [df.reset_index() for df in dfs], names,
-                                 X=dfs[0].columns, y='time', group='trial',
-                                 cv='sh', n_splits = NSPLITS)
+        res = shuffle_val_predict( clf, dfs, n_splits = NSPLITS)
 
         one_w['logC'] = logC
         one_w['penalty'] = regl

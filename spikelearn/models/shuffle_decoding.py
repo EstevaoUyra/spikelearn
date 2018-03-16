@@ -105,12 +105,21 @@ class Results_shuffle_val():
                                                         df['true_label'])
             self.scores = df.groupby(id_vars).agg(scoring)
 
+    def add_identifier(self, **kwargs):
+        for key, val in kwargs.items():
+            self.id_vars.append(key)
+            self.fat_vars.append(key)
+            self.data[key] = val
+            self.proba[key] = val
+            self.weights[key] = val
+
+
 
 def shuffle_val_predict(clf, dfs, names, X, y, group=None,
                          cv='sh', n_splits = 5,
                          train_size=.8,test_size=.2,
                          get_weights = True, score=pearson_score,
-                         **kwargs):
+                         id_kwargs, **kwargs):
     """
     Trains in each dataset, always testing on both, to calculate statistics
         about generalization between datasets.
