@@ -49,6 +49,7 @@
 <span class="kn">from</span> <span class="nn">scipy.stats</span> <span class="k">import</span> <span class="n">ttest_ind</span>
 
 
+
 <div class="viewcode-block" id="reyes_cp"><a class="viewcode-back" href="../../../source/spikelearn.data.html#spikelearn.data.utils.reyes_cp">[docs]</a><span class="k">def</span> <span class="nf">reyes_cp</span><span class="p">(</span><span class="n">timeseries</span><span class="p">,</span><span class="n">full_window_size</span><span class="o">=</span><span class="mi">60</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Change-point analysis algorithm. Window-walks a timeseries calculating</span>
@@ -102,7 +103,7 @@
     <span class="k">for</span> <span class="n">id_var</span> <span class="ow">in</span> <span class="n">row</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="n">idx</span><span class="p">):</span>
         <span class="n">df</span><span class="p">[</span><span class="n">id_var</span><span class="p">]</span><span class="o">=</span><span class="n">row</span><span class="p">[</span><span class="n">id_var</span><span class="p">]</span>
     <span class="k">return</span> <span class="n">df</span></div>
-    
+
 <div class="viewcode-block" id="verticalize_df"><a class="viewcode-back" href="../../../source/spikelearn.data.html#spikelearn.data.utils.verticalize_df">[docs]</a><span class="k">def</span> <span class="nf">verticalize_df</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">idx</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Melts a DataFrame in which the to-melt values are not distributed in the</span>
@@ -122,6 +123,47 @@
 <span class="sd">        Tidy (melted), with one value of idx variable per row</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">([</span><span class="n">verticalize_series</span><span class="p">(</span><span class="n">row</span><span class="p">,</span><span class="n">idx</span><span class="p">)</span> <span class="k">for</span> <span class="n">_</span><span class="p">,</span><span class="n">row</span> <span class="ow">in</span> <span class="n">df</span><span class="o">.</span><span class="n">iterrows</span><span class="p">()])</span></div>
+
+<div class="viewcode-block" id="slashed"><a class="viewcode-back" href="../../../source/spikelearn.data.html#spikelearn.data.utils.slashed">[docs]</a><span class="k">def</span> <span class="nf">slashed</span><span class="p">(</span><span class="n">path</span><span class="p">):</span>
+    <span class="k">assert</span> <span class="nb">type</span><span class="p">(</span><span class="n">path</span><span class="p">)</span> <span class="ow">is</span> <span class="nb">str</span>
+    <span class="k">if</span> <span class="n">path</span><span class="o">==</span><span class="s1">&#39;&#39;</span><span class="p">:</span>
+        <span class="k">return</span> <span class="s1">&#39;/&#39;</span>
+    <span class="k">elif</span> <span class="n">path</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;/&#39;</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">path</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="s1">&#39;/&#39;</span><span class="o">+</span><span class="n">path</span></div>
+
+<div class="viewcode-block" id="recursive_full_name_recovery"><a class="viewcode-back" href="../../../source/spikelearn.data.html#spikelearn.data.utils.recursive_full_name_recovery">[docs]</a><span class="k">def</span> <span class="nf">recursive_full_name_recovery</span><span class="p">(</span><span class="n">inside_folder_shortcuts</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Receives a nested dictionary in which keys are folder names,</span>
+<span class="sd">    and values are filenames, and returns the fullpaths of each.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">inside_folder_shortcuts</span><span class="p">)</span> <span class="ow">is</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="k">return</span> <span class="p">[</span><span class="n">slashed</span><span class="p">(</span><span class="n">inside_folder_shortcuts</span><span class="p">)]</span>
+    <span class="k">elif</span> <span class="nb">type</span><span class="p">(</span><span class="n">inside_folder_shortcuts</span><span class="p">)</span> <span class="ow">is</span> <span class="nb">dict</span><span class="p">:</span>
+        <span class="n">paths</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">folder</span> <span class="ow">in</span> <span class="n">inside_folder_shortcuts</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">path</span> <span class="ow">in</span> <span class="n">recursive_full_name_recovery</span><span class="p">(</span><span class="n">inside_folder_shortcuts</span><span class="p">[</span><span class="n">folder</span><span class="p">]):</span>
+                <span class="n">paths</span><span class="o">+=</span> <span class="p">[</span><span class="n">slashed</span><span class="p">(</span><span class="n">folder</span><span class="p">)</span><span class="o">+</span><span class="n">path</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">paths</span></div>
+
+<div class="viewcode-block" id="get_filepaths_from_shortcut"><a class="viewcode-back" href="../../../source/spikelearn.data.html#spikelearn.data.utils.get_filepaths_from_shortcut">[docs]</a><span class="k">def</span> <span class="nf">get_filepaths_from_shortcut</span><span class="p">(</span><span class="n">one_shortcuts</span><span class="p">):</span>
+    <span class="n">all_paths</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">folder</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;data&#39;</span><span class="p">]:</span>
+        <span class="n">all_paths</span><span class="o">+=</span> <span class="p">[</span><span class="s1">&#39;</span><span class="si">{}</span><span class="s1">/</span><span class="si">{}{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">one_shortcuts</span><span class="p">[</span><span class="s1">&#39;basepath&#39;</span><span class="p">],</span><span class="n">folder</span><span class="p">,</span><span class="n">path</span><span class="p">)</span> <span class="k">for</span> <span class="n">path</span> <span class="ow">in</span> <span class="n">recursive_full_name_recovery</span><span class="p">(</span><span class="n">one_shortcuts</span><span class="p">[</span><span class="n">folder</span><span class="p">])]</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">all_paths</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="df_to_array"><a class="viewcode-back" href="../../../source/spikelearn.data.html#spikelearn.data.utils.df_to_array">[docs]</a><span class="k">def</span> <span class="nf">df_to_array</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">axis_fields</span><span class="p">,</span> <span class="n">field_values</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="c1"># Assert there is exactly one value for each combination of fields</span>
+    <span class="k">assert</span> <span class="nb">all</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="n">axis_fields</span><span class="p">)</span><span class="o">.</span><span class="n">agg</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span><span class="o">==</span><span class="mi">1</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">field_values</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">field_values</span> <span class="o">=</span> <span class="p">{</span><span class="n">field</span><span class="p">:</span><span class="n">df</span><span class="p">[</span><span class="n">field</span><span class="p">]</span><span class="o">.</span><span class="n">unique</span><span class="p">()</span> <span class="k">for</span> <span class="n">field</span> <span class="ow">in</span> <span class="n">axis_fields</span><span class="p">}</span>
+    <span class="n">out_shape</span> <span class="o">=</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">field_values</span><span class="p">[</span><span class="n">field</span><span class="p">])</span> <span class="k">for</span> <span class="n">field</span> <span class="ow">in</span> <span class="n">axis_fields</span><span class="p">)</span>
+    <span class="n">arr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">full</span><span class="p">(</span><span class="n">out_shape</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">)</span>
+    <span class="k">raise</span> <span class="ne">NotImplementedError</span></div>
+
+<div class="viewcode-block" id="ndarray_to_df"><a class="viewcode-back" href="../../../source/spikelearn.data.html#spikelearn.data.utils.ndarray_to_df">[docs]</a><span class="k">def</span> <span class="nf">ndarray_to_df</span><span class="p">(</span><span class="n">arr</span><span class="p">,</span> <span class="n">field_names</span><span class="p">):</span>
+    <span class="k">raise</span> <span class="ne">NotImplementedError</span></div>
 </pre></div>
 
           </div>

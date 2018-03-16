@@ -46,68 +46,309 @@
 <span class="sd">&quot;&quot;&quot;</span>
 
 <span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
-<span class="kn">from</span> <span class="nn">scipy.io</span> <span class="k">import</span> <span class="n">loadmat</span>
+<span class="kn">import</span> <span class="nn">json</span>
 
+<span class="kn">from</span> <span class="nn">datetime</span> <span class="k">import</span> <span class="n">datetime</span>
+<span class="kn">from</span> <span class="nn">.utils</span> <span class="k">import</span> <span class="n">get_filepaths_from_shortcut</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">pickle</span>
 
-<div class="viewcode-block" id="spikes_behavior_from_mat"><a class="viewcode-back" href="../../../source/spikelearn.data.html#spikelearn.data.io.spikes_behavior_from_mat">[docs]</a><span class="k">def</span> <span class="nf">spikes_behavior_from_mat</span><span class="p">(</span><span class="n">filename</span><span class="p">):</span>
+<span class="n">DATA_SUBFOLDERS</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;raw&#39;</span><span class="p">,</span> <span class="s1">&#39;interim&#39;</span><span class="p">,</span> <span class="s1">&#39;processed&#39;</span><span class="p">)</span>
+<span class="n">RESULTS_SUBFOLDERS</span> <span class="o">=</span> <span class="p">()</span>
+
+<div class="viewcode-block" id="DataShortcut"><a class="viewcode-back" href="../../../source/spikelearn.data.html#spikelearn.data.io.DataShortcut">[docs]</a><span class="k">class</span> <span class="nc">DataShortcut</span><span class="p">():</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Loads a mat-file into two DataFrames</span>
+<span class="sd">    Loads and saves data into DataFrame, getting shortcuts from</span>
+<span class="sd">    a pre-edited JSON file shortcuts.json</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
+<span class="sd">    base_label : string</span>
+<span class="sd">        Base dataset label. If not contained in shortcuts.json, then the filename</span>
+<span class="sd">        parameter is needed.</span>
 
+<span class="sd">    dataset_name : string, default None</span>
+<span class="sd">        Name of the specific dataset to load.</span>
+<span class="sd">        if None (default), raises TypeError and</span>
+<span class="sd">        prints a list of all datasets</span>
 
-<span class="sd">    Returns</span>
-<span class="sd">    -------</span>
-<span class="sd">    spikes : DataFrame (n_units, 3)</span>
-<span class="sd">        Contains three ndarray fields, indexed by the unit (neuron).</span>
-<span class="sd">        Each ndarray has the form (n_spikes_i,) being different for each row.</span>
-<span class="sd">        &#39;times&#39; holds the absolute times of each spike from the session begin.</span>
-<span class="sd">        &#39;trial&#39; holds the trial number of each corresponding spike from times.</span>
-<span class="sd">        &#39;trial_time&#39; has the relative time of each spike from trial onset.</span>
+<span class="sd">    dataset_type : string, default &#39;auto&#39;</span>
+<span class="sd">        Can be &quot;raw&quot;, &quot;interim&quot;, &quot;processed&quot;, &quot;results&quot; or &#39;auto&#39;</span>
+<span class="sd">        If &#39;auto&#39; searches for the dataset in all folders</span>
 
-<span class="sd">    behavior : DataFrame (n_trials, 3)</span>
-<span class="sd">        Contains five number fields of trial attributes.</span>
-<span class="sd">        &#39;onset&#39; is the time of trial beginning</span>
-<span class="sd">        &#39;offset&#39; is the end of the trial</span>
-<span class="sd">        &#39;duration&#39; is equal to offset - onset</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="c1">#TODO decide if it would make sense to keep sortIdx and sortLabel</span>
-    <span class="n">data</span> <span class="o">=</span> <span class="n">loadmat</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+<span class="sd">    filename : string, path-to-file, optional</span>
+<span class="sd">        Name of the path of datafile. If provided jointly with label, the</span>
+<span class="sd">        overwrite flag must be explicitly set to True.</span>
 
-    <span class="n">spikes</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;dados&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span>
-    <span class="n">behavior</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;dados&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+<span class="sd">    basepath : string, optional</span>
+<span class="sd">        full path of some folder in filename hierarchy</span>
+<span class="sd">        serves to make shortcuts.json identation less polluted</span>
 
-    <span class="n">spikes</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">([[</span> <span class="n">spikes</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="n">i</span><span class="p">][</span><span class="mi">0</span><span class="p">][:,</span><span class="mi">0</span><span class="p">],</span> <span class="n">spikes</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="n">i</span><span class="p">][</span><span class="mi">0</span><span class="p">][:,</span><span class="mi">1</span><span class="p">]]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">spikes</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="k">if</span> <span class="n">spikes</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="n">i</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">==</span><span class="mi">2</span><span class="p">],</span> <span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;times&#39;</span><span class="p">,</span><span class="s1">&#39;trial&#39;</span><span class="p">])</span>
+<span class="sd">    overwrite : bool, optional, default False</span>
+<span class="sd">        Whether to overwrite label with filename</span>
 
-    <span class="n">behavior</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="n">behavior</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]),</span>   <span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;one&#39;</span><span class="p">,</span><span class="s1">&#39;onset&#39;</span><span class="p">,</span><span class="s1">&#39;offset&#39;</span><span class="p">,</span><span class="s1">&#39;zero&#39;</span><span class="p">,</span> <span class="s1">&#39;duration&#39;</span><span class="p">,</span> <span class="s1">&#39;sortIdx&#39;</span><span class="p">,</span> <span class="s1">&#39;sortLabel&#39;</span><span class="p">])</span><span class="o">.</span><span class="n">drop</span><span class="p">([</span><span class="s1">&#39;one&#39;</span><span class="p">,</span> <span class="s1">&#39;zero&#39;</span><span class="p">,</span> <span class="s1">&#39;sortIdx&#39;</span><span class="p">,</span> <span class="s1">&#39;sortLabel&#39;</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+<span class="sd">    annotations : str or list of str, optional</span>
+<span class="sd">        Observations to add to the file description</span>
 
-    <span class="c1"># Calculate relative spike time</span>
-    <span class="n">spikes</span><span class="p">[</span><span class="s1">&#39;trial_time&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">transpose</span><span class="p">([</span><span class="n">spikes</span><span class="o">.</span><span class="n">times</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">-</span> <span class="n">behavior</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="n">spikes</span><span class="o">.</span><span class="n">trial</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">onset</span><span class="o">.</span><span class="n">as_matrix</span><span class="p">()</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">spikes</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])]))</span>
+<span class="sd">    getpath : bool, optional, default False</span>
+<span class="sd">        Whether to get only the path to file,</span>
+<span class="sd">        Avoiding loading and/or creating</span>
 
-    <span class="k">return</span> <span class="n">spikes</span><span class="p">,</span> <span class="n">behavior</span></div>
+<span class="sd">    extension : string, optional, default &#39;auto&#39;</span>
+<span class="sd">        Must be specified for creating or overwritting datasets.</span>
+<span class="sd">        Options are &#39;pickle&#39;, &#39;csv&#39;</span>
 
-<span class="k">class</span> <span class="nc">DataHolder</span><span class="p">(</span><span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Loads and saves data into DataFrame, getting shortcuts from</span>
-<span class="sd">    a pre-edited JSON file.</span>
-
+<span class="sd">    Keyword Arguments</span>
+<span class="sd">    -----------------</span>
+<span class="sd">    Add any number of identifier variables with keyword arguments,</span>
+<span class="sd">    which must be numbers or strings.</span>
 
 <span class="sd">    Notes</span>
 <span class="sd">    -----</span>
 <span class="sd">    Uses the datafiles.json to search and load data using simple</span>
 <span class="sd">    name labels.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">filename</span><span class="p">):</span>
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">filename</span><span class="p">))</span>
-    <span class="k">def</span> <span class="nf">load</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="n">attrs</span>
-    <span class="k">def</span> <span class="nf">new_attribute</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">base_label</span><span class="p">,</span> <span class="n">dataset_name</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">dataset_type</span><span class="o">=</span><span class="s1">&#39;auto&#39;</span><span class="p">,</span> <span class="n">filename</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">basepath</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">overwrite</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">data</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">annotations</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">getpath</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">extension</span><span class="o">=</span><span class="s1">&#39;auto&#39;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">base_label</span> <span class="o">=</span> <span class="n">base_label</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dataset_name</span> <span class="o">=</span> <span class="n">dataset_name</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">overwrite</span> <span class="o">=</span> <span class="n">overwrite</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">getpath</span> <span class="o">=</span> <span class="n">getpath</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">annotations</span> <span class="o">=</span> <span class="n">annotations</span>
+
+        <span class="k">if</span> <span class="n">dataset_type</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;raw&#39;</span><span class="p">,</span> <span class="s1">&#39;interim&#39;</span><span class="p">,</span> <span class="s1">&#39;processed&#39;</span><span class="p">,</span> <span class="s1">&#39;results&#39;</span><span class="p">]:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">dataset_type</span> <span class="o">=</span> <span class="s1">&#39;data/&#39;</span><span class="o">+</span><span class="n">dataset_type</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">dataset_type</span> <span class="o">=</span> <span class="n">dataset_type</span>
+        <span class="c1"># Make sure inputs are consistent</span>
+        <span class="c1">#TODO self._assertions()</span>
+
+        <span class="c1"># Load the shortcuts</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">shortcuts</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="nb">open</span><span class="p">(</span><span class="s1">&#39;shortcuts.json&#39;</span><span class="p">,</span><span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="p">)</span>
+        <span class="k">if</span> <span class="n">base_label</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">shortcuts</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_soi_fullpath</span> <span class="o">=</span> <span class="n">get_filepaths_from_shortcut</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">shortcuts</span><span class="p">[</span><span class="n">base_label</span><span class="p">])</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_dataset_exists</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">basepath</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">shortcuts</span><span class="p">[</span><span class="n">base_label</span><span class="p">][</span><span class="s1">&#39;basepath&#39;</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_dataset_exists</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="k">assert</span> <span class="n">basepath</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">basepath</span> <span class="o">=</span> <span class="n">basepath</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_new_label</span><span class="p">()</span>
+
+        <span class="c1"># Specific case of no dataset listed</span>
+        <span class="k">if</span> <span class="n">dataset_name</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">dataset_names</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">name</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;/&#39;</span><span class="p">)[</span><span class="o">-</span><span class="mi">2</span><span class="p">]</span> <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_soi_fullpath</span><span class="p">])</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s1">&#39;You must input the dataset name. For </span><span class="si">{}</span><span class="s1">, possible datasets are </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">base_label</span><span class="p">,</span> <span class="n">dataset_names</span><span class="p">))</span>
+
+        <span class="c1"># Get data at last</span>
+        <span class="k">if</span> <span class="n">data</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">filename</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_filename</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_get_extension</span><span class="p">(</span><span class="n">extension</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_functioning</span> <span class="o">=</span> <span class="s2">&quot;loader&quot;</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_load</span><span class="p">()</span>
+
+        <span class="k">elif</span> <span class="ow">not</span> <span class="n">overwrite</span><span class="p">:</span> <span class="c1"># Dataset is new</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="n">data</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_functioning</span> <span class="o">=</span> <span class="s2">&quot;creator&quot;</span>
+            <span class="k">if</span> <span class="n">filename</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">filename</span> <span class="o">=</span> <span class="s1">&#39;_&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="n">dataset_name</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;/&#39;</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span><span class="n">base_label</span><span class="p">])</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">filename</span> <span class="o">=</span> <span class="n">filename</span>
+            <span class="nb">print</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">filename</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_get_extension</span><span class="p">(</span><span class="n">extension</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_create</span><span class="p">()</span>
+
+        <span class="c1"># Add identifiers</span>
+        <span class="c1"># TODO identifiers in numpy arrays</span>
+        <span class="c1"># TODO identifiers before saving</span>
+        <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Identifier </span><span class="si">{}</span><span class="s2"> already exists&quot;</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">kwargs</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
+
+        <span class="c1"># Overwritting</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">overwrite</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_overwrite</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">_new_label</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">basepath</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">shortcuts</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">base_label</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">labeldict</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">shortcuts</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">base_label</span><span class="p">]</span>
+        <span class="n">labeldict</span><span class="p">[</span><span class="s1">&#39;basepath&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">basepath</span>
+        <span class="n">labeldict</span><span class="p">[</span><span class="s1">&#39;data&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="n">subfolder</span> <span class="p">:</span> <span class="p">{}</span> <span class="k">for</span> <span class="n">subfolder</span>
+                                    <span class="ow">in</span> <span class="n">DATA_SUBFOLDERS</span><span class="p">}</span>
+        <span class="n">labeldict</span><span class="p">[</span><span class="s1">&#39;results&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="n">subfolder</span> <span class="p">:</span> <span class="p">{}</span> <span class="k">for</span> <span class="n">subfolder</span>
+                                    <span class="ow">in</span> <span class="n">RESULTS_SUBFOLDERS</span><span class="p">}</span>
+
+    <span class="k">def</span> <span class="nf">_get_extension</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">extension</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">extension</span> <span class="o">==</span> <span class="s1">&#39;auto&#39;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">extension</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">filename</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">extension</span> <span class="o">=</span> <span class="n">extension</span>
+
+    <span class="k">def</span> <span class="nf">_assertions</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Assert class inputs are consistent.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># TODO correct whole function</span>
+
+        <span class="k">assert</span> <span class="nb">type</span><span class="p">(</span><span class="n">label</span><span class="p">)</span> <span class="ow">is</span> <span class="nb">str</span>
+        <span class="k">if</span> <span class="n">filename</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">overwrite</span> <span class="ow">or</span> <span class="n">dataset</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">_soi_fullpath</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Overwritting dataset </span><span class="si">{}</span><span class="se">\n</span><span class="s1"> Previous dataset still stored in folder&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">dataset</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">base_label</span><span class="p">))</span>
+            <span class="k">elif</span> <span class="n">label</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">_soi_fullpath</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Adding </span><span class="si">{}</span><span class="s1"> to dataset&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">label</span><span class="p">))</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">IOError</span><span class="p">(</span><span class="s1">&#39;When not overwritting, do not input filename&#39;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">assert</span> <span class="n">overwrite</span> <span class="ow">is</span> <span class="kc">False</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="k">assert</span> <span class="n">label</span> <span class="ow">in</span> <span class="n">_soi_fullpath</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">IOError</span><span class="p">(</span><span class="s1">&#39;If label is not pre-saved, must provide filename&#39;</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="k">assert</span> <span class="nb">type</span><span class="p">(</span><span class="n">kwargs</span><span class="p">[</span><span class="n">key</span><span class="p">])</span> <span class="ow">is</span> <span class="nb">float</span> <span class="ow">or</span> <span class="nb">type</span><span class="p">(</span><span class="n">kwargs</span><span class="p">[</span><span class="n">key</span><span class="p">])</span> <span class="ow">is</span> <span class="nb">str</span> <span class="ow">or</span> <span class="nb">type</span><span class="p">(</span><span class="n">kwargs</span><span class="p">[</span><span class="n">key</span><span class="p">])</span> <span class="ow">is</span> <span class="nb">int</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s1">&#39;keyword argument </span><span class="si">{}</span><span class="s1"> was not accepted, because it was not integer/float/string&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">key</span><span class="p">))</span>
+
+
+    <span class="k">def</span> <span class="nf">_get_filename</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">dataset_names</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">name</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;/&#39;</span><span class="p">)[</span><span class="o">-</span><span class="mi">2</span><span class="p">]</span> <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_soi_fullpath</span><span class="p">])</span>
+
+        <span class="c1"># Last ([-1]) is filename, next to last ([-2]) is dataset_name</span>
+        <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dataset_name</span><span class="p">)</span> <span class="ow">is</span> <span class="nb">str</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">dataset_type</span> <span class="o">==</span> <span class="s1">&#39;auto&#39;</span><span class="p">:</span>
+                <span class="n">index</span> <span class="o">=</span> <span class="n">dataset_names</span><span class="o">==</span><span class="bp">self</span><span class="o">.</span><span class="n">dataset_name</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">index</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">logical_and</span><span class="p">((</span><span class="n">dataset_names</span><span class="o">==</span><span class="bp">self</span><span class="o">.</span><span class="n">dataset_name</span><span class="p">,</span>
+                          <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">dataset_type</span> <span class="ow">in</span> <span class="n">name</span> <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_soi_fullpath</span><span class="p">]))</span>
+            <span class="k">if</span> <span class="nb">sum</span><span class="p">(</span><span class="n">index</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_soi_fullpath</span><span class="p">[</span><span class="n">index</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+            <span class="k">elif</span> <span class="nb">sum</span><span class="p">(</span><span class="n">index</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">IOError</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">dataset_name</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="nb">sum</span><span class="p">(</span><span class="n">index</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">IOError</span><span class="p">(</span><span class="mi">999</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">dataset_name</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dataset_name</span><span class="p">)</span> <span class="ow">is</span> <span class="nb">list</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">NotImplementedError</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s1">&#39;The dataset_name shoud be str or list, not </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">dataset_name</span><span class="p">)))</span>
+
+    <span class="k">def</span> <span class="nf">_enforce_extension</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">extension</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;pickle&#39;</span><span class="p">,</span> <span class="s1">&#39;pkl&#39;</span><span class="p">]:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_functioning</span> <span class="ow">is</span> <span class="s2">&quot;loader&quot;</span><span class="p">:</span>
+                <span class="k">return</span> <span class="k">lambda</span> <span class="n">f</span><span class="p">:</span> <span class="n">pickle</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="nb">open</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="s1">&#39;rb&#39;</span><span class="p">))</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">return</span> <span class="k">lambda</span> <span class="n">d</span><span class="p">,</span> <span class="n">f</span><span class="p">:</span> <span class="n">pickle</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">d</span><span class="p">,</span> <span class="nb">open</span><span class="p">(</span><span class="n">f</span><span class="p">,</span><span class="s1">&#39;wb&#39;</span><span class="p">))</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">extension</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;csv&#39;</span><span class="p">]:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_functioning</span> <span class="ow">is</span> <span class="s2">&quot;loader&quot;</span><span class="p">:</span>
+                <span class="k">return</span> <span class="k">lambda</span> <span class="n">f</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">return</span> <span class="k">lambda</span> <span class="n">d</span><span class="p">,</span> <span class="n">f</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="n">d</span><span class="p">,</span> <span class="n">f</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">extension</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;h5&#39;</span><span class="p">,</span> <span class="s1">&#39;hdf5&#39;</span><span class="p">,</span> <span class="s1">&#39;h5py&#39;</span><span class="p">]:</span>
+            <span class="k">raise</span> <span class="ne">NotImplementedError</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">extension</span> <span class="o">==</span> <span class="s1">&#39;mat&#39;</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">NotImplementedError</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;The detected extension .</span><span class="si">{}</span><span class="s2"> is not supported. Please input a pickle, csv or hdf5 file&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">extension</span><span class="p">))</span>
+
+    <span class="k">def</span> <span class="nf">_load</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">getpath</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">filename</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_enforce_extension</span><span class="p">()(</span><span class="bp">self</span><span class="o">.</span><span class="n">filename</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_overwrite</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="c1"># TODO overwrite file, saving previous one if filename</span>
+        <span class="c1"># or carrying annotations if just adding identifiers</span>
         <span class="k">pass</span>
-    <span class="k">def</span> <span class="nf">create_attribute</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">attribute</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">func</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-        <span class="k">pass</span>
-    <span class="k">def</span> <span class="nf">select</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">restrictions</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">set_index</span><span class="p">(</span><span class="s1">&#39;selected&#39;</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_create_path</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">basepath</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">filename</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">filename</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">{}</span><span class="s1">/</span><span class="si">{}</span><span class="s1">/</span><span class="si">{}</span><span class="s1">/</span><span class="si">{}</span><span class="s1">.</span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">basepath</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">dataset_type</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">dataset_name</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">filename</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">extension</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_create_annotations</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">filename</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">)[:</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span><span class="o">+</span><span class="s1">&#39;_annotations.txt&#39;</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+            <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;Created in </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">datetime</span><span class="o">.</span><span class="n">today</span><span class="p">())))</span>
+            <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">annotations</span><span class="p">)</span> <span class="ow">is</span> <span class="nb">str</span><span class="p">:</span>
+                <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">annotations</span><span class="p">))</span>
+            <span class="k">elif</span> <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">annotations</span><span class="p">)</span> <span class="ow">is</span> <span class="nb">list</span><span class="p">:</span>
+                <span class="p">[</span><span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">annot</span><span class="p">))</span> <span class="k">for</span> <span class="n">annot</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">annotations</span><span class="p">]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s1">&#39;Annotations must be strings or lists of strings&#39;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_create</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">basepath</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">shortcuts</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">base_label</span><span class="p">][</span><span class="s1">&#39;basepath&#39;</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_create_path</span><span class="p">()</span>
+
+
+        <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">basepath</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+        <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">filename</span><span class="p">[:</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">basepath</span><span class="p">)]</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">basepath</span>
+
+        <span class="c1"># Updating shortcuts</span>
+        <span class="n">path</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">filename</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">basepath</span><span class="p">,</span><span class="s1">&#39;&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;/&#39;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="nb">type</span><span class="p">(</span><span class="n">path</span><span class="p">)</span> <span class="ow">is</span> <span class="nb">list</span>
+        <span class="n">insidecut</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">shortcuts</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">base_label</span><span class="p">]</span>
+        <span class="k">for</span> <span class="n">folder</span> <span class="ow">in</span> <span class="n">path</span><span class="p">[</span><span class="mi">1</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">]:</span>
+            <span class="n">folderpath</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">filename</span><span class="p">[:</span><span class="bp">self</span><span class="o">.</span><span class="n">filename</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">folder</span><span class="p">)]</span><span class="o">+</span><span class="n">folder</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">folderpath</span><span class="p">):</span>
+                <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">folderpath</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">folder</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">insidecut</span><span class="p">:</span>
+                <span class="n">insidecut</span><span class="p">[</span><span class="n">folder</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+            <span class="k">if</span> <span class="n">folder</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">path</span><span class="p">[</span><span class="o">-</span><span class="mi">2</span><span class="p">]:</span>
+                <span class="n">insidecut</span> <span class="o">=</span> <span class="n">insidecut</span><span class="p">[</span><span class="n">folder</span><span class="p">]</span>
+
+        <span class="n">insidecut</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">dataset_name</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;/&#39;</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]]</span> <span class="o">=</span> <span class="n">path</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">json</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">shortcuts</span><span class="p">,</span> <span class="nb">open</span><span class="p">(</span><span class="s1">&#39;shortcuts.json&#39;</span><span class="p">,</span><span class="s1">&#39;w&#39;</span><span class="p">),</span> <span class="n">indent</span><span class="o">=</span><span class="s1">&#39;</span><span class="se">\t</span><span class="s1">&#39;</span><span class="p">)</span>
+
+        <span class="c1"># Creating datafile</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_enforce_extension</span><span class="p">()(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">filename</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_create_annotations</span><span class="p">()</span></div>
+
+
+
+<div class="viewcode-block" id="load"><a class="viewcode-back" href="../../../source/spikelearn.data.html#spikelearn.data.io.load">[docs]</a><span class="k">def</span> <span class="nf">load</span><span class="p">(</span><span class="n">base_label</span><span class="p">,</span> <span class="n">dataset_name</span><span class="p">,</span> <span class="n">getpath</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">dataset_type</span><span class="o">=</span><span class="s1">&#39;auto&#39;</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Lightweight loader that used DataShortcut under the hood.</span>
+
+<span class="sd">    See also</span>
+<span class="sd">    --------</span>
+<span class="sd">    DataShortcut</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">DataShortcut</span><span class="p">(</span><span class="n">base_label</span><span class="p">,</span> <span class="n">dataset_name</span><span class="p">,</span> <span class="n">getpath</span><span class="o">=</span><span class="n">getpath</span><span class="p">,</span> <span class="n">dataset_type</span><span class="o">=</span><span class="n">dataset_type</span><span class="p">)</span><span class="o">.</span><span class="n">data</span></div>
+
+
+<div class="viewcode-block" id="save"><a class="viewcode-back" href="../../../source/spikelearn.data.html#spikelearn.data.io.save">[docs]</a><span class="k">def</span> <span class="nf">save</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">base_label</span><span class="p">,</span> <span class="n">dataset_name</span><span class="p">,</span> <span class="n">dataset_type</span><span class="o">=</span> <span class="s1">&#39;processed&#39;</span><span class="p">,</span> <span class="n">extension</span><span class="o">=</span><span class="s1">&#39;pickle&#39;</span><span class="p">,</span> <span class="n">annotatons</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Lightweight saver that used DataShortcut under the hood.</span>
+
+<span class="sd">    See also</span>
+<span class="sd">    --------</span>
+<span class="sd">    DataShortcut</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">DataShortcut</span><span class="p">(</span><span class="n">base_label</span><span class="p">,</span> <span class="n">dataset_name</span><span class="p">,</span> <span class="n">dataset_type</span><span class="o">=</span><span class="n">dataset_type</span><span class="p">,</span>  <span class="n">annotatons</span><span class="o">=</span><span class="n">annotatons</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">,</span> <span class="n">extension</span><span class="o">=</span><span class="n">extension</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="save_result"><a class="viewcode-back" href="../../../source/spikelearn.data.html#spikelearn.data.io.save_result">[docs]</a><span class="k">def</span> <span class="nf">save_result</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">base_label</span><span class="p">,</span> <span class="n">dataset_name</span><span class="p">,</span> <span class="n">dataset_type</span><span class="o">=</span> <span class="s1">&#39;processed&#39;</span><span class="p">,</span> <span class="n">extension</span><span class="o">=</span><span class="s1">&#39;pickle&#39;</span><span class="p">,</span> <span class="n">annotatons</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Lightweight saver that used DataShortcut under the hood.</span>
+
+<span class="sd">    See also</span>
+<span class="sd">    --------</span>
+<span class="sd">    DataShortcut</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">DataShortcut</span><span class="p">(</span><span class="n">base_label</span><span class="p">,</span> <span class="n">dataset_name</span><span class="p">,</span> <span class="n">dataset_type</span><span class="o">=</span><span class="n">dataset_type</span><span class="p">,</span>  <span class="n">annotatons</span><span class="o">=</span><span class="n">annotatons</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">,</span> <span class="n">extension</span><span class="o">=</span><span class="n">extension</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="dataset_exist"><a class="viewcode-back" href="../../../source/spikelearn.data.html#spikelearn.data.io.dataset_exist">[docs]</a><span class="k">def</span> <span class="nf">dataset_exist</span><span class="p">(</span><span class="n">base_label</span><span class="p">,</span> <span class="n">dataset_name</span><span class="p">):</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">load</span><span class="p">(</span><span class="n">base_label</span><span class="p">,</span> <span class="n">dataset_name</span><span class="p">,</span> <span class="n">getpath</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="k">return</span> <span class="kc">True</span>
+    <span class="k">except</span> <span class="ne">IOError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">e</span><span class="o">.</span><span class="n">errno</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">False</span>
+        <span class="k">elif</span> <span class="n">e</span><span class="o">.</span><span class="n">errno</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">NotImplementedError</span></div>
 </pre></div>
 
           </div>
