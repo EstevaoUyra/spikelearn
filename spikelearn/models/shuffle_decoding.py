@@ -28,7 +28,7 @@ class Results_shuffle_val():
         The name of identifier variables
         Including 'true_label' and 'group' in fat.
 
-    data, proba, weights, predictions, scores: DataFrames
+    data, proba, weights, predictions, scores, stats: DataFrames
         The results of the analysis
 
 
@@ -47,11 +47,11 @@ class Results_shuffle_val():
         self.id_vars =  id_vars
         self.fat_vars = id_vars + ['true_label', 'group']
 
-        self.data = pd.DataFrame(self.id_vars)
-        self.proba = pd.DataFrame(self.id_vars)
-        self.weights = pd.DataFrame(self.id_vars)
-        self.predictions = pd.DataFrame(self.id_vars)
-        self.scores = pd.DataFrame(self.id_vars)
+        self.proba = pd.DataFrame(columns = self.id_vars)
+        self.weights = pd.DataFrame(columns = self.id_vars)
+        self.predictions = pd.DataFrame(columns = self.id_vars)
+        self.score = pd.DataFrame()
+        self.stats = pd.DataFrame()
 
     def _input_id_vars(self, df, **kwargs):
         for key in self.id_vars:
@@ -59,12 +59,11 @@ class Results_shuffle_val():
         return df
 
     def _thin(self, df, let_labels=False):
-        if let_label:
-            to_drop = self.fat_vars
-        else:
+        if let_labels:
             to_drop = self.id_vars
-
-    return df.drop(to_drop, axis=1)
+        else:
+            to_drop = self.fat_vars
+        return df.drop(to_drop, axis=1)
 
     def proba_matrix(self):
         raise NotImplementedError
@@ -77,6 +76,7 @@ class Results_shuffle_val():
 
         local = pd.DataFrame(probas, columns = self.classes)
         local['true_label'] = true_labels
+        local['group'] = groups
         local = self._input_id_vars(local, **kwargs)
         self.proba = self.proba.append(local)
 
@@ -86,45 +86,78 @@ class Results_shuffle_val():
                                 index = self.classes,
                                 columns = self.features)
         local = local.reset_index().melt(var_name='feature',
-                                      id_vars=[classes.name])
+                                      id_vars=[self.classes.name])
         local = self._input_id_vars(local, **kwargs)
         self.weights = self.weights.append(local)
 
     def calculate_predictions(self):
-        pred_max = lambda x: self.classes[np.argmax(x)]
+
+        pred_max = lambda x: np.argmax(x)
         self.predictions['predictions_max'] = self._thin(self.proba).apply(pred_max, axis = 1)
 
-        pred_mean = lambda x: np.sum(predictions.drop('true_label',axis=1).columns.values*x.values)
+        pred_mean = lambda x: np.sum(self._thin(self.proba).columns.values*x.values)
         self.predictions['predictions_mean'] = self._thin(self.proba).apply(pred_mean, axis = 1)
 
         self.predictions[self.fat_vars] = self.proba[self.fat_vars]
 
-    def score(self):
+    def compute_score(self):
         for which in ['max', 'mean']:
-            scoring = lambda df: self.scoring_function(df['prediction_'+which],
+            # def scoring(df):
+            #     print(df.columns)
+            scoring = lambda df: self.scoring_function(df['predictions_'+which],
                                                         df['true_label'])
-            self.scores = df.groupby(id_vars).agg(scoring)
+            self.score['score_'+which] = self.predictions.groupby(self.id_vars).apply(scoring)
 
 
-def shuffle_val_predict(clf, dfs, names, X, y, group=None,
+
+    def compute_stats(self):
+        fields=['score_max', 'score_mean']
+        def SEM(df):
+            return df.std()/np.sqrt(df.shape[0])
+        def pool_SEM(df):
+            pool = df.groupby('trained_here').get_group(True)[fields]
+            gtest = df.groupby('tested_on')
+            return gtest.apply(lambda df: SEM(pd.concat((df[fields], pool))))
+        def pool_MEAN(df):
+            pool = df.groupby('trained_here').get_group(True)[fields]
+            gtest = df.groupby('tested_on')
+            return gtest.apply(lambda df: (pd.concat((df[fields], pool))).mean())
+        def Z_score(df):
+            df_sem = pool_SEM(df)
+            df_means = df.groupby('tested_on').mean()[fields]
+            df_pm = pool_MEAN(df)
+            return (df_means-df_pm)/df_sem
+        self.stats = self.score.groupby('trained_on').apply(Z_score)
+
+
+def shuffle_val_predict(clf, dfs, names=None, X=None, y=None, group=None,
                          cv='sh', n_splits = 5,
                          train_size=.8,test_size=.2,
                          get_weights = True, score=pearson_score,
                          **kwargs):
+
     """
     Trains in each dataset, always testing on both, to calculate statistics
         about generalization between datasets.
 
     Parameters
     ----------
-    X, y, group : indices [str[, str] ]
-        The indices of each variable in the dataframes
+    clf : sklearn classifier instance
+        The model which will be fitted and used to predict labels
 
-    dfs : list of pandas DataFrames
+    dfs : DataFrame, or list of DataFrames
         The data holders
 
-    names : list of strings
+    names : list of strings, optional, default range
         The ID variables of each DataFrame
+        If not given, will default to 0, 1, ..., len(dfs)-1
+
+    X, y, group : indices [str[, str] ], optional
+        The indices of each variable in the dataframes
+        If not given, will default to
+        X -> df columns
+        y -> second index name
+        group -> first index name
 
     cv : str or callable, default 'sh'
         The splitting method to use.
@@ -145,18 +178,33 @@ def shuffle_val_predict(clf, dfs, names, X, y, group=None,
 
     Returns
     -------
-    results : DataFrame
-        Columns are [*y, predictions_max, predictions_mean, true_label,
-                        cv, group, trained_on, tested_on, trained_here]
+    results : Results_shuffle_val
+        dataholder for this results.
+        consists in many dataframes for ease of access
+        proba, weights, predictions, scores, stats
 
-    weights : DataFrame
-        Columns are [*y, trained_on, cv]
+    See also
+    --------
+        Results_shuffle_val
+
 
     """
+    # Dealing with other optional variables
+    if type(dfs) == pd.DataFrame:
+        dfs = [dfs]
+    if X == None:
+        assert group == None and y == None
+        X = dfs[0].columns
+        y = dfs[0].index.names[1]
+        group = dfs[0].index.names[0]
+        dfs = [df.reset_index() for df in dfs]
+    if names == None:
+        names = np.arange(len(dfs))
+
     # Number of training and testing is defined by the smallest dataframe
     size_smallest = min([df[group].unique().shape[0] for df in dfs])
-    n_train = size_smallest * train_size
-    n_test = size_smallest * test_size
+    n_train = int(size_smallest * train_size)
+    n_test = int(size_smallest * test_size)
 
     # Method of cross-validation
     if cv == 'kf':
@@ -179,8 +227,8 @@ def shuffle_val_predict(clf, dfs, names, X, y, group=None,
                     test_size = n_test,
                     scoring_function = score,
                     classes = classes,
-                    groups = df[group].unique(),
-                    features = X,
+                    groups = dfs[0][group].unique(),
+                    features = pd.Index(X, name='unit'),
                     id_vars = id_vars)
 
     # Make the cross validation on each dataset
@@ -202,46 +250,23 @@ def shuffle_val_predict(clf, dfs, names, X, y, group=None,
 
                 probas = clf_local.predict_proba(testdf[X].values[idx])
                 true_labels = testdf[y].values[idx]
-
+                pred_groups = testdf[group].values[idx]
                 res.append_probas(probas, true_labels,
                                   cv=i, trained_on=name,
                                   tested_on=testname,
-                                  trained_here=trained_here)
+                                  trained_here=trained_here,
+                                  groups = pred_groups)
 
 
 
             if get_weights:
                 res.append_weights(clf_local.coef_,
                                     cv=i, trained_on=name,
-                                    tested_on= np.nan
+                                    tested_on= np.nan,
                                     trained_here= np.nan)
 
-                w = w.reset_index().melt(var_name='unit', id_vars=['time'])
+    res.calculate_predictions()
+    res.compute_score()
+    res.compute_stats()
 
-                weights = weights.append(w)
-
-    # TODO update statistics to results new format
-    # Calculate Z-score
-    fields=['score_max', 'score_mean']
-    scores = results.drop_duplicates(['trained_on', 'tested_on', 'cv'])
-    def SEM(df):
-        return df.std()/np.sqrt(df.shape[0])
-    def pool_SEM(df):
-        pool = df.groupby('trained_here').get_group(True)[fields]
-        gtest = df.groupby('tested_on')
-        return gtest.apply(lambda df: SEM(pd.concat((df[fields], pool))))
-    def pool_MEAN(df):
-        pool = df.groupby('trained_here').get_group(True)[fields]
-        gtest = df.groupby('tested_on')
-        return gtest.apply(lambda df: (pd.concat((df[fields], pool))).mean())
-    def Z_score(df):
-        df_sem = pool_SEM(df)
-        df_means = df.groupby('tested_on').mean()[fields]
-        df_pm = pool_MEAN(df)
-        return (df_means-df_pm)/df_sem
-    stats = scores.groupby('trained_on').apply(Z_score)
-
-
-    if get_weights:
-        return results, weights, stats
-    return results, stats
+    return res
