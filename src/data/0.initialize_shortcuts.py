@@ -32,6 +32,7 @@ for rat in ALL_RATS:
 for rat in DRRD_RATS:
     shortcuts[rat]['data']['external']['selected_neurons'] = 'selected_neurons_{}.pickle'.format(rat)
     shortcuts[rat]['data']['external']['tiredness'] = '{}.csv'.format(rat)
+    shortcuts[rat]['data']['external']['changepoint'] = '{}.csv'.format(rat)
 
 # Add group for easy access
 shortcuts['groups'] = {}

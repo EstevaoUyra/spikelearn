@@ -59,14 +59,9 @@ for label, dset in product(SHORTCUTS['groups']['DRRD'], DSETS):
     res_stats = pd.DataFrame()
     for logC, regl in chain( zip(C1, cycle(['l1'])), zip(C2, cycle(['l2']))):
         clf = LogisticRegression( C=10**logC )
-        res = shuffle_val_predict( clf, dfs, n_splits = NSPLITS)
-
-        one_w['logC'] = logC
-        one_w['penalty'] = regl
-        one_p['logC'] = logC
-        one_p['penalty'] = regl
-        one_s['logC'] = logC
-        one_s['penalty'] = regl
+        id_kwargs = {'logC':logC, 'penalty':regl}
+        res = shuffle_val_predict( clf, dfs, n_splits = NSPLITS
+                                    id_kwargs=id_kwargs)
 
         res_pred = res_pred.append(one_p)
         res_weight = res_weight.append(one_w)

@@ -139,9 +139,9 @@ class Results_shuffle_val():
 
 def shuffle_val_predict(clf, dfs, names=None, X=None, y=None, group=None,
                          cv='sh', n_splits = 5,
-                         train_size=.8,test_size=.2,
+                         train_size=.8, test_size=.2,
                          get_weights = True, score=pearson_score,
-                         id_kwargs, **kwargs):
+                         id_kwargs=None, **kwargs):
 
     """
     Trains in each dataset, always testing on both, to calculate statistics
@@ -199,13 +199,13 @@ def shuffle_val_predict(clf, dfs, names=None, X=None, y=None, group=None,
     # Dealing with other optional variables
     if type(dfs) == pd.DataFrame:
         dfs = [dfs]
-    if X == None:
+    if X is None:
         assert group == None and y == None
         X = dfs[0].columns
         y = dfs[0].index.names[1]
         group = dfs[0].index.names[0]
         dfs = [df.reset_index() for df in dfs]
-    if names == None:
+    if names is None:
         names = np.arange(len(dfs))
 
     # Number of training and testing is defined by the smallest dataframe
@@ -271,8 +271,8 @@ def shuffle_val_predict(clf, dfs, names=None, X=None, y=None, group=None,
                                     cv=i, trained_on=name,
                                     tested_on= np.nan,
                                     trained_here= np.nan)
-
-    res.add_identifiers(id_kwargs)
+    if id_kwargs is not None:
+        res.add_identifiers(id_kwargs)
     res.calculate_predictions()
     res.compute_score()
     res.compute_stats()
