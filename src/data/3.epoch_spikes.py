@@ -23,11 +23,16 @@ for rat in SHORTCUTS['groups']['ALL']:
 
 
     epoched = pd.DataFrame(epoched, columns= pd.Index(trials,name='trial'),
-                            index=pd.Index(spikes.index, name='unit')).reset_index().melt('unit', value_name='time').set_index('trial')
+                            index=pd.Index(spikes.index, name='unit')).reset_index().melt('unit', value_name='time')
+
+    if 'area' in spikes.columns:
+        epoched['area'] = epoched.trial.map(spikes.area)
+    if 'waveform' in spikes.columns:
+        epoched['area'] = epoched.trial.map(spikes.waveform)
 
     # Make identifiers
     behav = io.load(rat, 'behav_stats')
-    epoched = epoched.join(behav)
+    epoched = epoched.set_index('trial').join(behav)
 
     # Importing manual selection
     if io.dataset_exist(rat,'selected_neurons'):

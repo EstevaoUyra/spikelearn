@@ -1,7 +1,7 @@
 import pandas as pd
 import numpy as np
 import scipy.stats as st
-from spikelearn.measures.dprime import dprime
+from spikelearn.measures.dprime import cohen_d
 from itertools import product
 
 import sys
@@ -21,10 +21,12 @@ DSETS = ['narrow_smoothed', 'narrow_smoothed_norm', 'medium_smoothed',
         'wide_smoothed']
 
 # Parameters
-T_short_MAX, T_long_MIN = 0.8, 1.2
+T_short_MAX, T_long_MIN = 1, 1
+wsize = 60
 
 for label in SHORTCUTS['groups']['DRRD']:
 
+    print(label)
     # Load necessary data
     data = io.load(label, 'narrow_smoothed')
     data = select(data, is_tired = False) # Remove unwanted trials
@@ -34,32 +36,48 @@ for label in SHORTCUTS['groups']['DRRD']:
 
     # Separate trials long and short
     data['is_short'] = (data.duration < T_short_MAX)
-    data['is_long'] =  (data.duration > T_long_MIN)
+    data['is_long'] =  (data.duration >= T_long_MIN)
     data = data[data.is_short | data.is_long].reset_index()
-
 
     # Get baseline
     baseline_idx = np.where( data.full_times.iloc[0] < 0 )[0]
     data['baseline'] = data.full.apply( lambda x: x[baseline_idx] )
-    for i in baseline_idx:
-        data['b%d'%i] = np.vstack(data['baseline'].values)[:,i]
-    b_idx = ['b%d'%i for i in baseline_idx]
+    b_id = data.full_times.iloc[0][baseline_idx]
+    for i, id_ in zip(baseline_idx, b_id):
+        data[id_] = np.vstack(data['baseline'].values)[:,i]
 
     # Calculate D' for each
     units = data.reset_index().unit.unique()
-    res={True : pd.DataFrame(columns = b_idx,
-                             index= pd.Index(units, name='unit')),
-         False : pd.DataFrame(columns = b_idx,
-                               index= pd.Index(units, name='unit')) }
-    for time, unit, cp in product(b_idx, units, [True, False]):
-        selected = data.reset_index().groupby(['unit','before_cp']).get_group((unit, cp))
-        res[cp].loc[unit, time] = dprime(selected, time, 'is_short')
+    data = data.reset_index()
+    res = data.melt(id_vars = ['trial', 'unit', 'before_cp', 'is_short'],
+                      var_name = 'time', value_vars = b_id, value_name = 'fr')
+    res = res.set_index(['unit','before_cp', 'time'])
 
-    res[True]['before_cp'] = True
-    res[False]['before_cp'] = False
-    res = pd.concat(( res[True], res[False] ))
+    res['cp_d'] = np.nan
+    res = res.sort_index()
+    for time, unit, cp in product(b_id, units, [True, False]):
+        selected = data.groupby(['unit','before_cp']).get_group((unit, cp))
 
-    #act_res = data.reset_index().groupby(['unit','before_cp']).mean()[b_]
+        res.loc[(unit, cp, time), 'cp_d'] = cohen_d(time, 'is_short', selected)
+
+    #wres = res.set_index('trial',append=True)[['is_short','fr']]
+    #wres['both'] = list(zip(wres.is_short.values, wres.fr.values))
+    #wres = wres.both.unstack(['unit','time'])zzz
+    #cohen = lambda arr: cohen_d(np.vstack(arr)[:,1], np.vstack(arr)[:,0])
+#    ww = wres.rolling(30).apply(cohen)
+
+
+    res = res.reset_index('before_cp').set_index('trial',append=True).sort_index()
+    res['window_d'] = np.nan
+    # Rolling D
+    for trialmin in data.trial.unique()[:-wsize-1] :
+        toi = np.arange(trialmin, trialmin+wsize)
+        if trialmin%10==0: print(trialmin)
+        for time, unit in product(b_id, units):
+            selected = data[data.trial.isin(toi)].groupby('unit').get_group(unit)
+            res.loc[(unit, time, trialmin), 'window_d'] = cohen_d(time, 'is_short', selected)
+
+
 
 
     filename = '{}_Dprime_cp_init.csv'.format(label)

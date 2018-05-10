@@ -1,12 +1,12 @@
 import numpy as np
-
+import pandas as pd
 
 def pooled_var(var, sizes):
     assert len(var) == 2
     assert len(sizes) == 2
     return ((sizes[0] - 1)*var[0] + (sizes[1]-1)*var[0])/(sizes.sum()-2)
 
-def cohen_d(df, value_var, id_var):
+def cohen_d(value_var, id_var, df=None):
     """
     Calculates Dprimes between different values for id_var, pairwise.
     Currently only accepts id_var with two values.
@@ -18,13 +18,21 @@ def cohen_d(df, value_var, id_var):
     df : DataFrame
         data holder
 
-    value_var : string
+    value_var : string, or array
         Name of the column in which the values are
+        Or the values themselves
 
-    id_var : string, or list of strings
+    id_var : string, or list of strings, or array of values
         Name of the columns to use to differentiate
+        Or array of ids
 
     """
+    if df is None:
+        df = pd.DataFrame({'values' : value_var,
+                            'ids':id_var} )
+        value_var = 'values'
+        id_var = 'ids'
+        print(df)
 
     val_mean = df.groupby(id_var).mean()[value_var]
     val_var = df.groupby(id_var).var()[value_var]
@@ -32,6 +40,8 @@ def cohen_d(df, value_var, id_var):
 
     if type(id_var) == list and len(id_var) > 1:
         raise NotImplementedError
+    elif df[id_var].unique().shape[0] == 1:
+        return np.nan
     else:
         assert type(id_var) is str
         assert df[id_var].unique().shape[0] == 2
