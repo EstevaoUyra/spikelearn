@@ -14,6 +14,18 @@ For each rat
 176   800   17  0.087844       10  DRRD 10 narrow_smoothed end          70
 """
 
+# TODO: Threshold a partir dos p-valores
+## Permutation test: 1000 bootstraps
+## Non-parametric weight distribution
+## Para fazer medida de performance, NÃO permutar teste.
+
+# Usar gallistel
+# D prime
+
+# Saliency maps
+## Keras - testar se existe p/ regressao log.
+## permutation tests - like weights
+
 import pandas as pd
 import numpy as np
 import sys

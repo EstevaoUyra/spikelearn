@@ -12,6 +12,43 @@ from spikelearn.data import io, SHORTCUTS
 import pandas as pd
 import numpy as np
 
+
+def spikes_behavior_from_ez(filename):
+    def behav_to_df(hdFile):
+        behav = pd.DataFrame({'duration':f['behavior']['DRRD'][:].reshape(-1),
+        'offset':f['behavior']['NPEnd'][:].reshape(-1),
+        'onset':f['behavior']['NPStart'][:].reshape(-1)}, index=pd.Index(np.arange(f['behavior']['DRRD'].shape[1])+1, name='trial'))
+
+        assert not any(behav.duration != (behav.offset - behav.onset)), 'There are inconsistencies in duration'
+        return behav
+
+    def spikes_inside(times, onset, offset, baseline = .5):
+        return times[np.logical_and(times>(onset-baseline), times<offset)]
+
+    def relevant_spikes(times, behavior):
+        spk, trials = [], []
+        for trial, row in behavior.iterrows():
+            aux_spk = list(spikes_inside(times, row.onset, row.offset))
+            spk += aux_spk
+            trials += [trial for i in range(len(aux_spk))]
+
+        return np.array(spk), np.array(trials)
+
+    behavior = behav_to_df(h5py.File('%s/Behavior.mat'%filename, 'r'))
+    mat = loadmat('%s/spikes/openephys.spikes.cellinfo.mat'%filename)['spikes'][0,0]
+
+
+    infos = pd.DataFrame(mat[4].squeeze(), columns=['waveforms'])
+    infos['area'] = np.hstack(mat[6].squeeze())
+
+    spikes = pd.DataFrame(mat[1].squeeze(),
+                            columns=['times']).applymap(np.hstack).join(infos)
+    spikes['trial'] = spikes.times.apply(lambda x: relevant_spikes(x,
+                                                                behavior)[1])
+    spikes['times'] = spikes.times.apply(lambda x: relevant_spikes(x,
+                                                                behavior)[0])
+    return spikes, behavior
+
 def spikes_behavior_from_mat(filename):
     """
     Loads a mat-file into two DataFrames
@@ -34,7 +71,6 @@ def spikes_behavior_from_mat(filename):
         'offset' is the end of the trial
         'duration' is equal to offset - onset
     """
-
     data = loadmat(filename)
 
     spikes = data['dados'][0,0][1]
@@ -54,7 +90,12 @@ def spikes_behavior_from_mat(filename):
 # Load into DataFrames each data
 for rat in SHORTCUTS['groups']['ALL']:
     filepath = io.load(rat, 'spikesorted', getpath=True)
-    spikes, behavior = spikes_behavior_from_mat(filepath)
+    if rat in SHORTCUTS['groups']['GB']:
+        spikes, behavior = spikes_behavior_from_mat(filepath)
+    elif rat in SHORTCUTS['groups']['EZ']:
+        spikes, behavior = spikes_behavior_from_ez(filepath)
+    else:
+        raise NotImplementedError('This dataset is not included as a special case')
 
     identifiers = dict(session=rat.split()[0], rat_number=rat.split()[1] )
     io.save(spikes, rat, 'spikes', 'interim', **identifiers)

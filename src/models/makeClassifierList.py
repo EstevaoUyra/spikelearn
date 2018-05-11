@@ -45,7 +45,8 @@ def makeClassifierList():
                     'hyperparameter_space': [(2, 8),                     # max_depth
                                             [.7,'sqrt','log2']],          # max_features
                     'hyperparameter_names': ['max_depth', 'max_features'],
-                    'n_calls':{'rand':10 ,'opt':30 },
+                    #'n_calls':{'rand':10 ,'opt':30 },
+                    'n_calls':{'rand':1 ,'opt':3 },
                     'func': DecisionTreeClassifier        #class_weight predict_proba
                     },
 

@@ -7,7 +7,8 @@ data : data/raw/spikesorted \
 			python src/data/2.behav_stats.py
 			python src/data/3.epoch_spikes.py
 			python src/data/4.kernel_smoothing.py
-
+			python src/data/5.baseline_files.py
+			
 test-data :
 			echo NotImplemented
 

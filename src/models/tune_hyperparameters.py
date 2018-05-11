@@ -12,6 +12,7 @@ import numpy as np
 import pandas as pd
 from skopt import gp_minimize, dump
 import sys
+import pickle
 sys.path.append('.')
 
 from sklearn.base import clone
@@ -20,9 +21,7 @@ from sklearn.model_selection import GroupShuffleSplit
 from makeClassifierList import makeClassifierList
 
 from spikelearn.data.selection import select, to_feature_array
-from spikelearn.data import io
-
-print('teste', 10)
+from spikelearn.data import io, SHORTCUTS
 
 kappa = make_scorer(cohen_kappa_score, weights = 'quadratic')
 
@@ -47,9 +46,7 @@ def multiclass_pessimistic_score(y_true, y_pred, composite='min',
 
 score = make_scorer(multiclass_pessimistic_score)
 
-RAT_LABELS = ['DRRD %d'%i for i in [7,8,9,10]]
-
-
+RAT_LABELS = SHORTCUTS['groups']['DRRD']
 
 def shufflin_trial_score(clf, X,y, trial, train_size=30, n_splits = 10,scoring=score, verbosity=0):
     sh = GroupShuffleSplit(n_splits=n_splits, train_size=train_size,test_size=.2)
@@ -97,7 +94,7 @@ if __name__ == '__main__':
     parser.add_argument('--overwrite', '-ow', action='store_true')
     parser.add_argument('--verbose', '-v', action='count')
     kw = parser.parse_args()
-    verbosity = kw.verbose
+    verbosity = kw.verbose if kw.verbose is not None else 0
 
     # Select and report classifiers
     required_classifiers = sys.argv
@@ -137,7 +134,7 @@ if __name__ == '__main__':
         data = io.load(rat_label, 'wide_smoothed')
         # Z-score?
         data = select(data, _min_duration=1.5)
-        X, y, trial = to_feature_array(data)
+        X, y, trial = to_feature_array(data, Xyt=True)
 
         number_of_trials_for_each_rat.append(np.unique(trial).shape[0])
 
@@ -167,4 +164,4 @@ if __name__ == '__main__':
                 single_results['clf'] = classifier['name']
                 single_results = single_results.reset_index().set_index(['clf','label'])
                 best_params_of_all = best_params_of_all.append(single_results)
-        best_params_of_all.to_csv(saveDir+'/best_params_of_all.csv')
+        pickle.dump(best_params_of_all, open(saveDir+'/best_params_of_all.csv','wb'))
