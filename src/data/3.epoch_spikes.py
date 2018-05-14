@@ -16,7 +16,7 @@ MA_CUT = [.2, .3] # How much to remove from beginning and end because of motor a
 
 
 # Load into DataFrames each data
-for rat in SHORTCUTS['groups']['ALL']:
+for rat in SHORTCUTS['groups']['eletro']:
     spikes = io.load(rat, 'spikes')
     trials = np.unique(np.hstack(spikes.trial.apply(np.unique))).astype(int)
     epoched = np.array([[spikes.trial_time[iunit][spikes.trial[iunit]==itrial] for itrial in trials] for iunit in spikes.index ] )
@@ -25,10 +25,8 @@ for rat in SHORTCUTS['groups']['ALL']:
     epoched = pd.DataFrame(epoched, columns= pd.Index(trials,name='trial'),
                             index=pd.Index(spikes.index, name='unit')).reset_index().melt('unit', value_name='time')
 
-    if 'area' in spikes.columns:
-        epoched['area'] = epoched.trial.map(spikes.area)
-    if 'waveform' in spikes.columns:
-        epoched['area'] = epoched.trial.map(spikes.waveform)
+    for info in spikes.drop(['trial', 'times'], axis=1).columns:
+        epoched[info] = epoched.unit.map(spikes[info])
 
     # Make identifiers
     behav = io.load(rat, 'behav_stats')
@@ -42,6 +40,9 @@ for rat in SHORTCUTS['groups']['ALL']:
         #selected_neurons = selection_neurons.groupby('selected').get_group(' yes')
         #epoched['is_selected'] = epoched.unit.apply(lambda x: x in selected_neurons.index)
         #epoched['comments'] = epoched.unit.apply(lambda x: (selection_neurons.loc[x,' comments'] if x in selection_neurons.index else ''))
+    else:
+        epoched['is_selected'] = 'Does not apply'
+        epoched['comments'] = ''
 
     def norm_without_edges(x):
         if len(x.time) == 0: return [[]]

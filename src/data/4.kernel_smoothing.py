@@ -56,7 +56,7 @@ DSET_PARAMS = {'wide_smoothed' : { 'sigma' : 100,
                 }
 
 
-for rat_label in SHORTCUTS['groups']['DRRD']: #SHORTCUTS:
+for rat_label in SHORTCUTS['groups']['eletro']: #SHORTCUTS:
     epoched = io.load(rat_label, 'epoched_spikes')
 
     for dset_name, params in DSET_PARAMS.items():
@@ -90,7 +90,10 @@ for rat_label in SHORTCUTS['groups']['DRRD']: #SHORTCUTS:
         # Add behavioral identifiers
         behav = io.load(rat_label, 'behav_stats')
         smoothed_dataset = smoothed_dataset.reset_index().set_index('trial').join(behav)
-        smoothed_dataset = smoothed_dataset.reset_index().set_index(['trial','unit']).join( epoched[['is_selected', 'comments']] )
+        for col in ['waveforms', 'cluster_id', 'quality', 'area',
+                            'is_selected', 'comments']:
+            if col in epoched.columns:
+                smoothed_dataset = smoothed_dataset.reset_index().set_index(['trial','unit']).join( epoched[col] )
 
         # At last save the data
         io.save(data = smoothed_dataset,

@@ -11,10 +11,11 @@ from spikelearn.data import io, SHORTCUTS
 
 import pandas as pd
 import numpy as np
+import h5py
 
 
 def spikes_behavior_from_ez(filename):
-    def behav_to_df(hdFile):
+    def behav_to_df(f):
         behav = pd.DataFrame({'duration':f['behavior']['DRRD'][:].reshape(-1),
         'offset':f['behavior']['NPEnd'][:].reshape(-1),
         'onset':f['behavior']['NPStart'][:].reshape(-1)}, index=pd.Index(np.arange(f['behavior']['DRRD'].shape[1])+1, name='trial'))
@@ -35,10 +36,11 @@ def spikes_behavior_from_ez(filename):
         return np.array(spk), np.array(trials)
 
     behavior = behav_to_df(h5py.File('%s/Behavior.mat'%filename, 'r'))
-    mat = loadmat('%s/spikes/openephys.spikes.cellinfo.mat'%filename)['spikes'][0,0]
+    mat = loadmat('%s/spikes/openephys/openephys.spikes.cellinfo.mat'%filename)['spikes'][0,0]
 
+    quality = pd.read_csv('%s/spikes/openephys/cluster_quality.tsv'%filename, '\t')
 
-    infos = pd.DataFrame(mat[4].squeeze(), columns=['waveforms'])
+    infos = pd.DataFrame(mat[4].squeeze(), columns=['waveforms']).join(quality)
     infos['area'] = np.hstack(mat[6].squeeze())
 
     spikes = pd.DataFrame(mat[1].squeeze(),
@@ -47,6 +49,10 @@ def spikes_behavior_from_ez(filename):
                                                                 behavior)[1])
     spikes['times'] = spikes.times.apply(lambda x: relevant_spikes(x,
                                                                 behavior)[0])
+
+    # Calculate relative spike time
+    spikes['trial_time'] = pd.DataFrame(np.transpose([spikes.times[i] - behavior.iloc[spikes.trial[i]-1].onset.as_matrix() for i in range(spikes.shape[0])]))
+    
     return spikes, behavior
 
 def spikes_behavior_from_mat(filename):
@@ -93,6 +99,7 @@ for rat in SHORTCUTS['groups']['ALL']:
     if rat in SHORTCUTS['groups']['GB']:
         spikes, behavior = spikes_behavior_from_mat(filepath)
     elif rat in SHORTCUTS['groups']['EZ']:
+        print(filepath)
         spikes, behavior = spikes_behavior_from_ez(filepath)
     else:
         raise NotImplementedError('This dataset is not included as a special case')

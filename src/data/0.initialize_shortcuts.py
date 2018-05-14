@@ -32,7 +32,10 @@ for rat in ALL_RATS:
     shortcuts[rat]['data']['raw'] = {}
     shortcuts[rat]['data']['external'] = {}
 
-    shortcuts[rat]['data']['raw']['spikesorted'] = rat+'.mat'
+    if rat in GB_RATS:
+        shortcuts[rat]['data']['raw']['spikesorted'] = rat+'.mat'
+    else:
+        shortcuts[rat]['data']['raw']['spikesorted'] = rat
 
 # Add external data
 for rat in DRRD_RATS:
@@ -43,6 +46,8 @@ for rat in DRRD_RATS:
 # Add group for easy access
 shortcuts['groups'] = {}
 shortcuts['groups']['DRRD'] = {rat :'' for rat in DRRD_RATS}
+shortcuts['groups']['day1'] = {rat :'' for rat in DRRD_RATS+EZ1_RATS}
+shortcuts['groups']['eletro'] = {rat :'' for rat in DRRD_RATS+EZ_RATS}
 shortcuts['groups']['Autoshape'] = {rat :'' for rat in AUTOSHAPE_RATS}
 shortcuts['groups']['GB'] = {rat :'' for rat in GB_RATS}
 shortcuts['groups']['EZ'] = {rat :'' for rat in EZ_RATS}
