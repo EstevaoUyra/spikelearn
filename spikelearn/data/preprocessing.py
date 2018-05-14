@@ -57,26 +57,24 @@ def kernel_smooth(spike_vector, sigma, edges, bin_size=None, padding=None, borde
     """
 
 
-    precision_factor = sigma
-    tp = int(sigma/precision_factor)
+    tp = 1# int(sigma/precision_factor)
     if bin_size is None:
         bin_size = tp
 
-    nbins_to_agg = int(bin_size/tp)
     try:
-        assert float(bin_size)/tp == nbins_to_agg # Is multiple
+        assert float(bin_size)/tp == bin_size # Is multiple
     except AssertionError:
         raise ValueError("Bin size must be a multiple of temporal precision.")
 
     n_bins = int( (bin_size*int(edges[1]/bin_size)-edges[0]) / tp )
-    edges= (edges[0], bin_size*int(n_bins/nbins_to_agg)+edges[0])
+    edges= (edges[0], bin_size*int(n_bins/bin_size)+edges[0])
     if edges[1] <= edges[0]:
         return ([],[])
 
 
     spike_count, times = np.histogram(spike_vector, bins=n_bins, range=edges)
 
-    each_size_len = int(3*tp*precision_factor + 1)
+    each_size_len = int(3*tp*sigma + 1)
     if padding is not None:
         if border_correction:
             raise ValueError('Padding and correction cannot be used together')
@@ -92,7 +90,7 @@ def kernel_smooth(spike_vector, sigma, edges, bin_size=None, padding=None, borde
         smoothed[-each_size_len:]/= contrib[::-1]
 
     cs = np.hstack((0, smoothed.cumsum()))
-    return np.diff(cs[::nbins_to_agg]), times[:-nbins_to_agg:nbins_to_agg]
+    return np.diff(cs[::bin_size]), times[:-bin_size:bin_size]
 
 def remove_baseline(activity, baseline, baseline_size=None):
     """
