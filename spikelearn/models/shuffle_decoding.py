@@ -2,6 +2,9 @@ import pandas as pd
 import numpy as np
 from sklearn.model_selection import GroupShuffleSplit, cross_val_predict, GroupKFold
 from sklearn.base import clone
+from sklearn.preprocessing import MinMaxScaler, StandardScaler
+from sklearn.pipeline import Pipeline
+from sklearn.metrics import confusion_matrix
 
 from numpy.random import permutation
 from scipy.stats import pearsonr
@@ -65,12 +68,28 @@ class Results_shuffle_val():
             to_drop = self.fat_vars
         return df.drop(to_drop, axis=1)
 
-    def proba_matrix(self):
-        raise NotImplementedError
+    def proba_matrix(self, plot=True, grouping=None, **kwargs):
+        if grouping is not None:
+            df = self.proba.groupby(grouping[0]).get_group(grouping[1])
+        else:
+            df = self.proba
+        df = df.groupby('true_label').mean().drop('group', axis=1)
+        if plot:
+            sns.heatmap(df, **kwargs)
+            plt.title('Mean probability associated with labels')
+            plt.xlabel('Possible labels')
+        return df
 
-    def confusion_matrix(self):
-        raise NotImplementedError
-
+    def confusion_matrix(self, plot=True, grouping=None, which='max', **kwargs):
+        if grouping is not None:
+            df = self.predictions.groupby(grouping[0]).get_group(grouping[1])
+        else:
+            df = self.predictions
+        mat = confusion_matrix(df.true_label, df['pred_'+which])
+        if plot:
+            sns.heatmap(mat, **kwargs)
+            plt.title('Confusion matrix');plt.xlabel('Predicted labels')
+        return mat
     def append_probas(self, probas,
                         true_labels, groups, **kwargs):
 
@@ -138,7 +157,7 @@ class Results_shuffle_val():
 
 
 def shuffle_val_predict(clf, dfs, names=None, X=None, y=None, group=None,
-                         cv='sh', n_splits = 5,
+                         cv='sh', n_splits = 5, feature_scaling=None,
                          train_size=.8, test_size=.2,
                          get_weights = True, score=pearson_score,
                          id_kwargs=None, **kwargs):
@@ -171,6 +190,11 @@ def shuffle_val_predict(clf, dfs, names=None, X=None, y=None, group=None,
 
     n_splits : int
         Number of splits to be done.
+
+    feature_scaling : string
+        The kind of scaling to apply to features.
+        Implemented via pipeline (fitted only during training)
+        One of 'standard', 'minmax', 'robust'.
 
     get_weights : bool
         Whether to save and return the weights of each model
@@ -222,6 +246,20 @@ def shuffle_val_predict(clf, dfs, names=None, X=None, y=None, group=None,
     elif isinstance(cv, object):
         sh=cv
 
+    # Scaling
+    if feature_scaling is None:
+        pass
+    elif feature_scaling == 'minmax':
+        clf = Pipeline([('minmaxscaler', MinMaxScaler()),
+                        ('classifier', clf)])
+    elif feature_scaling == 'standard':
+        clf = Pipeline([('standardscaler', StandardScaler()),
+                        ('classifier', clf)])
+    elif feature_scaling == 'robust':
+        clf = Pipeline([('robustscaler', RobustScaler()),
+                        ('classifier', clf)])
+    else:
+        raise ValueError('%s scaling is not accepted.\n Lookup the documentation for accepted scalings'%feature_scaling)
 
     # Define the results format
     classes = pd.Index( np.unique(dfs[0][y]), name=y)

@@ -43,6 +43,7 @@ def kernel_smooth(spike_vector, sigma, edges, bin_size=None, padding=None, borde
     -------
     smoothed_data : array
         The estimated firing rate as each interval of bin_size
+        in *spikes per second*
 
     times : array
         The time at the left edge of each interval
@@ -89,7 +90,7 @@ def kernel_smooth(spike_vector, sigma, edges, bin_size=None, padding=None, borde
         smoothed[:each_size_len] /=  contrib
         smoothed[-each_size_len:]/= contrib[::-1]
 
-    cs = np.hstack((0, smoothed.cumsum()))
+    cs = np.hstack((0, smoothed.cumsum()))*1000/bin_size
     return np.diff(cs[::bin_size]), times[:-bin_size:bin_size]
 
 def remove_baseline(activity, baseline, baseline_size=None):
