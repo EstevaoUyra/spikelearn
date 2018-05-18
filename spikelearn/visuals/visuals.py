@@ -4,6 +4,7 @@ import seaborn as sns
 import numpy as np
 from itertools import product
 import subprocess
+import matplotlib as mpl
 
 def to_video(listfile, outputfile,
                 fps=3, w=800, h=600, type='png'):
@@ -354,49 +355,69 @@ def pretty_neurons(spike_vector=None, show_spikes=True, sigma=0,
     return fig, spike_vector, s
 
 
-def singleRatBehaviorPlot(durations, tVec, threshold='max',
-                            Tc = 1.5, kde='fl', kdeN = 100):
+def singleRatBehaviorPlot(durations, tVec=None, threshold='max',cpax=True, s=20,
+                            Tc = 1.5, kde='fl', kdeN = 100, ticksize=14,
+                            axislabel_size=16, reverse=False, tmax = 5,
+                            figsize = 4):
     #TODO document function
     """
     Plots the responses along the trials, together with the
     """
-    f = plt.figure(figsize=(14,14))
-    sns.set_style("whitegrid")
-    trialNumber = np.arange(len(durations))
+    f = plt.figure(figsize=(figsize,figsize))
+    mpl.rcParams['font.size']=ticksize
 
+    trialNumber = np.arange(len(durations))
+    if tVec is None:
+        tVec = (np.arange(len(durations)) == len(durations)//2).astype(int)
 
     # Behavioral dots
     nonRewarded = (durations < Tc)
-    plt.scatter(durations[nonRewarded],trialNumber[nonRewarded],color=(0.6, 0.036000000000000004, 0.0),s=80)#(0.48, 0.1416, 0.12))
+    plt.scatter(durations[nonRewarded],trialNumber[nonRewarded],s=s, marker='o',facecolors='none',edgecolor='k')#=(0.6, 0.036000000000000004, 0.0))#(0.48, 0.1416, 0.12))
+
+
 
     rewarded = (durations >= Tc)
-    plt.scatter(durations[rewarded],trialNumber[rewarded],color=(0.0, 0.6, 0.18600000000000008),s=80)
+    plt.scatter(durations[rewarded],trialNumber[rewarded],color='k', s=s, marker='o')#(0.0, 0.6, 0.18600000000000008)
 
-    plt.ylim([0,len(durations)]);plt.xlim([0,5]); pcax = plt.gca()
-    plt.ylabel('Trial number',fontsize=18); plt.xlabel('Time from nosepoke onset (s)',fontsize=18)
-
-
+    plt.ylim([0,len(durations)]); plt.xlim([0,tmax]);
+    plt.ylabel('Trial number',fontsize=axislabel_size);
+    if not reverse:
+        plt.xlabel('Time from nosepoke onset (s)',fontsize=axislabel_size)
+    pcax = plt.gca()
     # Changepoint lines
     if threshold == 'max':
-        plt.axhline(np.argmax(tVec),linestyle='-.',linewidth=6,color='k')
+        plt.axhline(np.argmax(tVec), linestyle='-.', linewidth=6, color='k')
     else:
         pass
         plt.hlines(np.nonzero(tVec>threshold)[0],0,max(durations),'k',linestyle='-.',linewidth=6)
 
     # Changepoint lateral
-    cpax = f.add_axes([1,.045,0.1,.945])
-    cpax.plot(tVec,trialNumber,'k'); plt.yticks([]);
-    plt.ylim([0,len(durations)]); plt.xlabel('Odds',fontsize=16)
-
+    if cpax:
+        cpax = f.add_axes([1,.045,1,.945])
+        print(trialNumber)
+        cpax.plot(tVec,trialNumber,'k'); plt.yticks([]);
+        plt.ylim([0,len(durations)]); plt.xlabel('Odds',fontsize=axislabel_size)
+        pos1 = pcax.get_position() # get the original position
+        pos2 = [pos1.x0  + .85, pos1.y0,  pos1.width, pos1.height]
+        cpax.set_position(pos2) # set a new position
     # Kernel density
-    kdax = f.add_axes([.06,1,.925,0.1])
+    if kde is not False:
+        kdax = f.add_axes([.06,1,.925,1])
+        pos1 = pcax.get_position() # get the original position
+        if reverse:
+            pos2 = [pos1.x0 , pos1.y0 - .85,  pos1.width, pos1.height]
+            plt.xlabel('Time from nosepoke onset (s)',fontsize=axislabel_size)
+        else:
+            pos2 = [pos1.x0 , pos1.y0 + .85,  pos1.width, pos1.height]
+        plt.ylabel('Probability density', fontsize=axislabel_size)
+        kdax.set_position(pos2) # set a new position
     if kde in  ['fl','firstlast']:
         first = durations[:kdeN]
         last = durations[-kdeN:]
 
         sns.kdeplot(first,label='First %d trials'%kdeN,color='b',linewidth=2);
         sns.kdeplot(last, label = 'Last %d trials'%kdeN,color = 'magenta',linewidth=4);
-        plt.xticks([]); plt.xlim([0,5]);plt.ylim([0,0.8])
+        plt.xlim([0,tmax]);plt.ylim([0,0.8])
 
         pcax.axhline(kdeN,linestyle='--',color='b',linewidth=4);
         pcax.arrow(1,kdeN,0,-30, head_width=0.05, head_length=10, fc='b', ec='b',linewidth=2)
@@ -412,7 +433,7 @@ def singleRatBehaviorPlot(durations, tVec, threshold='max',
 
         sns.kdeplot(first,label='First %d trials'%kdeN,color='b',linewidth=2);
         sns.kdeplot(last, label = 'Last %d trials'%kdeN,color = 'magenta',linewidth=4);
-        plt.xticks([]); plt.xlim([0,5]);plt.ylim([0,0.8])
+        plt.xlim([0,tmax]);plt.ylim([0,0.8])
 
         pcax.axhline(np.argmax(tVec)-kdeN,linestyle='--',color='b',linewidth=4);
         pcax.arrow(1,np.argmax(tVec)-kdeN,0,30, head_width=0.05, head_length=10, fc='b', ec='b',linewidth=2)
@@ -423,5 +444,5 @@ def singleRatBehaviorPlot(durations, tVec, threshold='max',
         pcax.arrow(4,np.argmax(tVec)+kdeN,0,-30, head_width=0.05, head_length=10, fc='magenta', ec='magenta',linewidth=2)
 
 
-    plt.suptitle('Behavior evolution in one session',y = 1.14, fontsize=22, x=0.55)
-    plt.tight_layout()
+    #plt.suptitle('Behavior evolution\n in one session',y = 1.34, fontsize=axislabel_size*1.1, x=1.35)
+#    plt.tight_layout()
