@@ -10,7 +10,7 @@ Time perception is discussed since Aristotle, yet its underlying neural basis re
 If we had interest only in single variable correlations, like the famous _Time Cells_ or _Ramping Neurons_, we could get along with traditional analysis. To go further into _population coding_, we apply machine learning techniques such as Logistic Regression, Support Vector Machines, XGBoost, and I hope to soon use LSTMs.
 
 ## Open science
-It is impossible to overstate the Python community contributions to my work, from the libraries (sklearn, pandas, numpy), to the foruns (stack overflow). Even without strong principles, one should feel obliged to contribute back in the possible means.
+It is impossible to overstate the Python community contributions to my work, from the libraries ([sklearn](http://scikit-learn.org/stable/), [pandas](https://pandas.pydata.org/), [numpy](http://www.numpy.org/)), to the foruns ([stack overflow](https://stackoverflow.com/)). Even without strong principles, one should feel obliged to contribute back in the possible means.
 
 I strongly believe in the principles of open science, and in the power of collaboration for the greater good, which's the reason why I am learning conventions and best practices for documentation and trying to make it all as organized as possible, even though organization was never my strength.
 
