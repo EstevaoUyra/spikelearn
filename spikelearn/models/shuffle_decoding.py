@@ -99,7 +99,7 @@ class Results_shuffle_val():
 
     def calculate_predictions(self):
 
-        pred_max = lambda x: np.argmax(x)
+        pred_max = lambda x: x.idxmax()
         self.predictions['predictions_max'] = self._thin(self.proba).apply(pred_max, axis = 1)
 
         pred_mean = lambda x: np.sum(self._thin(self.proba).columns.values*x.values)
