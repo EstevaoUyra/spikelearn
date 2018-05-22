@@ -1,4 +1,6 @@
 # spikelearn
+[![python 3.6](https://img.shields.io/badge/python-3.6-blue.svg?style=flat-square)]()
+[![license](https://img.shields.io/github/license/mashape/apistatus.svg?style=flat-square)]()
 
 This project is part of my Master of Sciences graduate studies at Federal University of ABC.
 
