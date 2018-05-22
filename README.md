@@ -11,11 +11,13 @@ If we had interest only in single variable correlations, like the famous _Time C
 
 ## Open science
 It is impossible to overstate the Python community contributions to my work, from the libraries (sklearn, pandas, numpy), to the foruns (stack overflow). Even without strong principles, one should feel obliged to contribute back in the possible means.
-I strongly believe in the principles of open science, and in the power of collaboration for the greater good. That's the reason why I am learning conventions and best practices for documentation and trying to make it all as organized as possible, even though organization was never my strength.
+
+I strongly believe in the principles of open science, and in the power of collaboration for the greater good, which's the reason why I am learning conventions and best practices for documentation and trying to make it all as organized as possible, even though organization was never my strength.
+
 I intend to integrate my functions with *pip* sometime before ending my Master's (scheduled to end September/2019).
 
 # Directory Organization
-We mostly followed the organization proposed by (Cookiecutter Data Science)![https://drivendata.github.io/cookiecutter-data-science/]. The specific usage for each of the main folders in this project follows:
+We mostly followed the organization proposed by [Cookiecutter Data Science](https://drivendata.github.io/cookiecutter-data-science/). The specific usage for each of the main folders in this project follows:
 
 ## Data
 Unfortunately our data is not available yet, and is being ignored by GitHub for the moment. We separate it by the level of preprocessing, aka raw, interim and processed. We also have a folder for external data, and one for results, the latter ignored mainly for storage purposes.
