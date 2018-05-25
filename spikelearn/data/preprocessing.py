@@ -3,7 +3,7 @@ import numpy as np
 import pandas as pd
 import collections
 
-def kernel_smooth(spike_vector, sigma, edges, bin_size=None, padding=None, border_correction = True):
+def kernel_smooth(spike_vector, sigma, edges, bin_size=None, padding='symmetric', border_correction = False):
     """
     Receives an array of spike times (point-process like), and smoothes it
     by convolving with a _gaussian_ kernel, of width *sigma*. The time
@@ -26,9 +26,7 @@ def kernel_smooth(spike_vector, sigma, edges, bin_size=None, padding=None, borde
 
     bin_size : int, default None
         The size (in ms) of each step in the returning smoothed data.
-        By default is the minimum, equal to the temporal precision tp.
-        Must be a multiple of tp (n*tp). The returning bin value is the *sum*
-        of each n bins, with no superposition.
+        By default is the minimum, equal to 1ms.
 
     padding : str, default None
         The kind of padding on array edges. Possible values are
@@ -63,11 +61,11 @@ def kernel_smooth(spike_vector, sigma, edges, bin_size=None, padding=None, borde
         bin_size = tp
 
     try:
-        assert float(bin_size)/tp == bin_size # Is multiple
+        assert float(bin_size) == bin_size # Is multiple
     except AssertionError:
         raise ValueError("Bin size must be a multiple of temporal precision.")
 
-    n_bins = int( (bin_size*int(edges[1]/bin_size)-edges[0]) / tp )
+    n_bins = int( (bin_size*int(edges[1]/bin_size)-edges[0]) )
     edges= (edges[0], bin_size*int(n_bins/bin_size)+edges[0])
     if edges[1] <= edges[0]:
         return ([],[])
@@ -75,7 +73,7 @@ def kernel_smooth(spike_vector, sigma, edges, bin_size=None, padding=None, borde
 
     spike_count, times = np.histogram(spike_vector, bins=n_bins, range=edges)
 
-    each_size_len = int(3*tp*sigma + 1)
+    each_size_len = int(3*sigma + 1)
     if padding is not None:
         if border_correction:
             raise ValueError('Padding and correction cannot be used together')

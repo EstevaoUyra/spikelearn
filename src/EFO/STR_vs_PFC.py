@@ -15,21 +15,22 @@ from spikelearn.data import io, SHORTCUTS, to_feature_array, select, remove_base
 # Parameters
 tmin = 1.5;
 tmax = 10;
-DSETS = ['medium_smoothed', 'medium_smoothed_norm',
-        'narrow_smoothed', 'narrow_smoothed_norm']
+DSETS = ['wide_smoothed']#['medium_smoothed', 'medium_smoothed_norm',
+        #'narrow_smoothed', 'narrow_smoothed_norm']
 CLFs = [(LogisticRegression(), 'LogisticRegression'),
             (GaussianNB(),'NaiveBayes') ]
+BLINE = [True, False]
 
 basedir = 'data/results/double_recording'
 
-ntrials_init_vs_after = 100
+ntrials_init_vs_after = 70
 n_splits = 50
 ntrials_total = 400
 
 
-for label, dset, (clf, clfname) in product(SHORTCUTS['groups']['EZ'],
-                                            DSETS, CLFs):
-    savedir = '{}/{}/{}/{}'.format(basedir, clfname, dset, label)
+for dset, (clf, clfname), bline, label in product(DSETS, CLFs, BLINE,
+                                                  SHORTCUTS['groups']['EZ']):
+    savedir = '{}/{}/{}/{}/{}'.format(basedir, clfname, dset, label, bline)
     print(savedir)
     if not os.path.exists(savedir):
         os.makedirs(savedir)
@@ -40,9 +41,14 @@ for label, dset, (clf, clfname) in product(SHORTCUTS['groups']['EZ'],
     dataSTR = select(data, area='STR')
 
     baseline = io.load(label, 'baseline')
-    data = remove_baseline(to_feature_array(data), baseline, .5)
-    dataPFC = remove_baseline(to_feature_array(dataPFC), baseline, .5)
-    dataSTR = remove_baseline(to_feature_array(dataSTR), baseline, .5)
+    if bline:
+        data = remove_baseline(to_feature_array(data), baseline, .5)
+        dataPFC = remove_baseline(to_feature_array(dataPFC), baseline, .5)
+        dataSTR = remove_baseline(to_feature_array(dataSTR), baseline, .5)
+    else:
+        data = to_feature_array(data)
+        dataPFC = to_feature_array(dataPFC)
+        dataSTR = to_feature_array(dataSTR)
 
     # In each compare first 50 with next 50.
     trials = data.reset_index().trial.unique()
@@ -53,7 +59,9 @@ for label, dset, (clf, clfname) in product(SHORTCUTS['groups']['EZ'],
         ini_df = ini_df.set_index(['trial','time'])
         end_df = select(df.reset_index(), _min_trial=sep1, _maxeq_trial=sep2)
         end_df = end_df.set_index(['trial','time'])
-        res = shuffle_val_predict(clf, [ini_df, end_df], ['first50', 'next50'],
+        res = shuffle_val_predict(clf, [ini_df, end_df],
+                                    ['first%s'%ntrials_init_vs_after,
+                                     'next%s'%ntrials_init_vs_after],
                                     n_splits=n_splits, feature_scaling='standard',
                                     cross_prediction=True, balance_feature_number=False)
         res.save('{}/{}_init_vs_after.pickle'.format(savedir,area))
