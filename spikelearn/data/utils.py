@@ -6,8 +6,6 @@ import numpy as np
 import pandas as pd
 from scipy.stats import ttest_ind
 
-
-
 def reyes_cp(timeseries,full_window_size=60):
     """
     Change-point analysis algorithm. Window-walks a timeseries calculating

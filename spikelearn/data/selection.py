@@ -9,9 +9,6 @@ import numpy as np
 from sklearn.model_selection import ShuffleSplit, KFold
 import operator
 
-
-
-
 class Batcher():
     """
     Implements an iterable cross-validator that groups all repeated indexes in the same group.
