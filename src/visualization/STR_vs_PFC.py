@@ -19,7 +19,7 @@ DSETS = ['medium_smoothed', 'medium_smoothed_norm',
         'narrow_smoothed', 'narrow_smoothed_norm', 'wide_smoothed']
 CLFs = [(LogisticRegression(), 'LogisticRegression'),
             (GaussianNB(),'NaiveBayes') ]
-BLINE = [True]
+BLINE = [True, False]
 import pandas as pd
 AREAS = ['both', 'PFC', 'STR']
 DAYS = [1,2]
@@ -89,5 +89,3 @@ for dset, (clf, clfname), bline in product(DSETS, CLFs, BLINE):
     plt.close(fig)
 
     # Striatum vs PFC
-
-    
