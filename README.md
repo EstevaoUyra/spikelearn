@@ -4,17 +4,36 @@
 
 This project is part of my Master of Sciences graduate studies at Federal University of ABC.
 
-# Installation
-## Bleeding edge installation (from repository)
+# Getting Started
+## Prerequisites
+You must have a working python 3 installation.
+We recommend using [anaconda](https://www.anaconda.com/download/).
+
+### Virtual environment
+We recommend creating a virtual environment to work with the package. If you are using conda, follow the instructions below or learn more at [their docs](https://conda.io/docs/user-guide/tasks/manage-environments.html).
+From within the terminal (for linux) or conda console (for windows), run `conda create --name spike python=3`
+Before installing the package, activate the environment using `source activate spike`.
+
+### Bleeding edge installation (from repository)
 ```bash
 git clone https://github.com/EstevaoUyra/spikelearn
 cd spikelearn
 pip install .
 ```
-## Latest stable
+### Latest stable
 > Not implemented yet
 
 ## Basic usage
+```python
+import spikelearn as spk
+
+from sklearn.linear_model import LogisticRegression
+clf = LogisticRegression()
+
+res = spk.shuffle_val_predict(clf, df)
+res.confusion_matrix();
+res.score()
+```
 
 # Objectives
 ## Timing
