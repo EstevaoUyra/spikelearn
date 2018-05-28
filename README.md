@@ -4,6 +4,18 @@
 
 This project is part of my Master of Sciences graduate studies at Federal University of ABC.
 
+# Installation
+## Bleeding edge installation (from repository)
+```bash
+git clone https://github.com/EstevaoUyra/spikelearn
+cd spikelearn
+pip install .
+```
+## Latest stable
+> Not implemented yet
+
+## Basic usage
+
 # Objectives
 ## Timing
 Time perception is discussed since Aristotle, yet its underlying neural basis remains elusive. By studying neural activity measured not only after but also _during_ learning, we hope to make original contributions to the field.
