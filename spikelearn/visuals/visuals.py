@@ -394,7 +394,6 @@ def singleRatBehaviorPlot(durations, tVec=None, threshold='max',cpax=True, s=20,
     # Changepoint lateral
     if cpax:
         cpax = f.add_axes([1,.045,1,.945])
-        print(trialNumber)
         cpax.plot(tVec,trialNumber,'k'); plt.yticks([]);
         plt.ylim([0,len(durations)]); plt.xlabel('Odds',fontsize=axislabel_size)
         pos1 = pcax.get_position() # get the original position

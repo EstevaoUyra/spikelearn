@@ -5,6 +5,7 @@ from sklearn.base import clone
 from sklearn.preprocessing import MinMaxScaler, StandardScaler, RobustScaler
 from sklearn.pipeline import Pipeline
 from sklearn.metrics import confusion_matrix
+from sklearn.metrics import accuracy_score
 
 from numpy.random import permutation
 from scipy.stats import pearsonr
@@ -59,9 +60,11 @@ class Results_shuffle_val():
         self.stats = pd.DataFrame()
 
     # Internal
-    def scoring_function(self, true, pred):
-        if self.scoring_metric == 'pearson':
+    def scoring_function(self, true, pred, metric):
+        if metric == 'pearson':
             return pearsonr(true, pred)[0]
+        elif metric == 'accuracy':
+            return accuracy_score(true, pred)
         else:
             raise NotImplementedError
 
@@ -108,9 +111,14 @@ class Results_shuffle_val():
         self.predictions[self.fat_vars] = self.proba[self.fat_vars]
 
     def compute_score(self):
-        for which in ['max', 'mean']:
-            scoring = lambda df: self.scoring_function(df['true_label'], df['predictions_'+which])
-            self.score['score_'+which] = self.predictions.groupby(self.id_vars).apply(scoring)
+        for metric in self.scoring_metric:
+            if metric in ['pearson']:
+                for which in ['max', 'mean']:
+                    scoring = lambda df: self.scoring_function(df['true_label'], df['predictions_'+which], metric)
+                    self.score['{}_{}'.format(metric, which)] = self.predictions.groupby(self.id_vars).apply(scoring)
+            else:
+                scoring = lambda df: self.scoring_function(df['true_label'], df['predictions_max'], metric)
+                self.score[metric] = self.predictions.groupby(self.id_vars).apply(scoring)
         self.score = self.score.reset_index()
 
     def add_identifiers(self, **kwargs):
@@ -172,8 +180,8 @@ class Results_shuffle_val():
 def shuffle_val_predict(clf, dfs, names=None, X=None, y=None, group=None,
                          cv='sh', n_splits = 5, feature_scaling=None,
                          train_size=.8, test_size=.2, cross_prediction=False,
-                         balance_feature_number = True,
-                         get_weights = False, score='pearson',
+                         balance_feature_number = False,
+                         get_weights = False, score=['pearson', 'accuracy'],
                          id_kwargs=None, verbose=0, **kwargs):
 
     """
@@ -211,6 +219,8 @@ def shuffle_val_predict(clf, dfs, names=None, X=None, y=None, group=None,
         Implemented via pipeline (fitted only during training)
         One of 'standard', 'minmax', 'robust'.
 
+    balance_feature_number : bool, default False
+
     get_weights : bool
         Whether to save and return the weights of each model
 
@@ -225,7 +235,7 @@ def shuffle_val_predict(clf, dfs, names=None, X=None, y=None, group=None,
     Notes
     -----
     While the number of features can differ in some cases,
-    the variables y and group MUST be the same for all dfs
+    the variables y and group must be the same for all dfs
 
     Returns
     -------
@@ -246,6 +256,7 @@ def shuffle_val_predict(clf, dfs, names=None, X=None, y=None, group=None,
 
     if type(dfs) == pd.DataFrame:
         dfs, names = [dfs], [names]
+        print(names)
     if X is None:
         assert group == None and y == None
         if cross_prediction or get_weights:
@@ -256,7 +267,6 @@ def shuffle_val_predict(clf, dfs, names=None, X=None, y=None, group=None,
             X = {name:df.columns for df, name in zip(dfs,names)}
         y = dfs[0].index.names[1]
         group = dfs[0].index.names[0]
-
         dfs = [df.reset_index() for df in dfs]
 
     # Number of training and testing is defined by the smallest dataframe
