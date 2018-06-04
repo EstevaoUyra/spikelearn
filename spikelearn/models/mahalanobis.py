@@ -4,7 +4,7 @@ import numpy as np
 
 # TODO document classifiers
 
-def similarity(X, y, group=None, n_splits = 100, class_order=None,
+def similarity(X, y, group=None, n_splits = 1000, class_order=None,
                     split_size=None, distance='mahalanobis',
                     cov_estimator='oas', cov_method='class'):
     """
@@ -53,7 +53,7 @@ def similarity(X, y, group=None, n_splits = 100, class_order=None,
         clf = MahalanobisClassifier(classes=classes, estimator=cov_estimator,
                                         shared_cov= (cov_method == 'single'),
                                         assume_centered=False)
-        if cov_method is not 'split':
+        if cov_method != 'split':
             clf.fit_cov(X, y)
     else:
         raise NotImplementedError
