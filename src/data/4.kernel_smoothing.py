@@ -37,6 +37,8 @@ DSET_PARAMS = {'wide_smoothed' : { 'sigma' : 100,
                                     'bin_size' : 100},
               'narrow_smoothed' : { 'sigma' : 20,
                                     'bin_size' : 50},
+              'huge_smoothed' : {'sigma' : 300,
+                                 'bin_size' : 100},
 
 
               'wide_smoothed_viz' : { 'sigma' : 100,
@@ -54,7 +56,6 @@ DSET_PARAMS = {'wide_smoothed' : { 'sigma' : 100,
               'narrow_smoothed_norm_viz' : { 'sigma': 20,
                                              'bin_size': 10},
                 }
-
 
 for rat_label in SHORTCUTS['groups']['eletro']: #SHORTCUTS:
     epoched = io.load(rat_label, 'epoched_spikes')
