@@ -14,7 +14,6 @@ def ramping_trajectory():
     raise  NotImplementedError
 
 def ramping_p(firing_rate, times=None, range=None, return_r=False):
-
     """
     Calculates the pearson coefficient for the specified interval.
 
