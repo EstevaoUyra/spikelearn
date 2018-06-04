@@ -16,7 +16,8 @@ from spikelearn.data import SHORTCUTS
 tmin = 1.5;
 tmax = 10;
 DSETS = ['medium_smoothed', 'medium_smoothed_norm',
-        'narrow_smoothed', 'narrow_smoothed_norm', 'wide_smoothed']
+        'narrow_smoothed', 'narrow_smoothed_norm', 'wide_smoothed', 'huge_smoothed']
+DSETS = ['huge_smoothed']
 CLFs = [(LogisticRegression(), 'LogisticRegression'),
             (GaussianNB(),'NaiveBayes') ]
 BLINE = [True, False]
@@ -24,6 +25,9 @@ import pandas as pd
 AREAS = ['both', 'PFC', 'STR']
 DAYS = [1,2]
 basedir = 'data/results/double_recording'
+
+RATS = SHORTCUTS['groups']['EZ']
+#RATS = [rat for rat in RATS if '6' not in rat]
 
 #fsavedir = lambda dset, clf, bline: 'reports/figures/double_recording/{}/{}/{}'.format(dset, clf, bline)
 fsavedir = lambda dset, clf, bline: 'reports/figures/double_recording/{}/{}/{}'.format(dset, clf, str(bline))
@@ -37,7 +41,7 @@ for dset, (clf, clfname), bline in product(DSETS, CLFs, BLINE):
     # Compare evolution @ first and second day
     all_scores = pd.DataFrame()
     all_probas = pd.DataFrame()
-    for label, area in product(SHORTCUTS['groups']['EZ'], AREAS):
+    for label, area in product(RATS, AREAS):
 
         loaddir = '{}/{}/{}/{}/{}'.format(basedir, clfname, dset, label, bline)
 
