@@ -39,6 +39,8 @@ DSET_PARAMS = {'wide_smoothed' : { 'sigma' : 100,
                                     'bin_size' : 50},
               'huge_smoothed' : {'sigma' : 300,
                                  'bin_size' : 100},
+              'no_smoothing' : {'sigma' : None,
+                                'bin_size' : 100},
 
 
               'wide_smoothed_viz' : { 'sigma' : 100,
@@ -47,7 +49,8 @@ DSET_PARAMS = {'wide_smoothed' : { 'sigma' : 100,
                                         'bin_size' : 20},
               'narrow_smoothed_viz' : { 'sigma' : 20,
                                         'bin_size' : 10},
-
+              'no_smoothing_viz' : {'sigma' : None,
+                                'bin_size' : 10},
 
               'medium_smoothed_norm' : { 'sigma': 50,
                                          'bin_size': 100},
@@ -55,6 +58,8 @@ DSET_PARAMS = {'wide_smoothed' : { 'sigma' : 100,
                                          'bin_size': 50},
               'narrow_smoothed_norm_viz' : { 'sigma': 20,
                                              'bin_size': 10},
+              'no_smoothing_norm' : {'sigma' : None,
+                                    'bin_size' : 100}
                 }
 
 for rat_label in SHORTCUTS['groups']['eletro']: #SHORTCUTS:
