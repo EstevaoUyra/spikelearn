@@ -15,6 +15,7 @@ from spikelearn.data import io, SHORTCUTS, to_feature_array, select, remove_base
 # Parameters
 tmin = 1.5;
 tmax = 10;
+MINQUALITY = 0
 # DSETS = ['wide_smoothed', 'medium_smoothed', 'medium_smoothed_norm', 'huge_smoothed']
 DSETS = ['wide_smoothed', 'huge_smoothed', 'medium_smoothed']
 CLFs = [(LogisticRegression(), 'LogisticRegression'),
@@ -31,13 +32,14 @@ SUBSETS = ['cropped', 'full']
 conditions = product(DSETS, CLFs, BLINE, SHORTCUTS['groups']['EZ'], SUBSETS)
 
 for dset, (clf, clfname), bline, label, subset in conditions:
-    savedir = '{}/{}/{}/{}/{}'.format(basedir, clfname, dset, label, bline)
+    savedir = '{}/{}/{}/{}/{}/{}'.format(basedir, clfname, dset,
+                                            subset, label, bline)
     print(savedir)
     if not os.path.exists(savedir):
         os.makedirs(savedir)
 
     data = io.load(label, dset)
-    data = select(data, _mineq_quality=0,
+    data = select(data, _mineq_quality=MINQUALITY,
                     _min_duration=tmin, _max_duration=tmax)
     dataPFC = select(data, area='PFC')
     dataSTR = select(data, area='STR')
