@@ -1,4 +1,5 @@
 import numpy as np
+import pandas as pd
 from scipy.stats import pearsonr
 
 def ramping_trajectory():
@@ -38,10 +39,14 @@ def ramping_p(firing_rate, times=None, range=None, return_r=False):
     ramping_p : array
         An array of log-odds for each duration.
     """
+    if type(firing_rate) is pd.Series:
+        firing_rate = firing_rate.values
+    if type(times) is pd.Series:
+        times = times.values
     if times is None:
-        times = range(len(firing_rate))
+        times = np.arange(len(firing_rate))
     if range is None:
-        use_times = range(len(firing_rate))
+        use_times = np.arange(len(firing_rate))
     else:
         use_times = np.logical_and(times>range[0], times<range[1])
 
