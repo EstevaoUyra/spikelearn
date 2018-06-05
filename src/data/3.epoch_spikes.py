@@ -48,9 +48,8 @@ for rat in SHORTCUTS['groups']['eletro']:
         if len(x.time) == 0: return [[]]
         end = x.duration - MA_CUT[1]
         spikes_of_interest = np.logical_and(x.time>MA_CUT[0], x.time < end)
-        new_duration = end - MA_CUT[0]
         if len(x.time[spikes_of_interest]) == 0: return [[]]
-        return [x.time[spikes_of_interest]/new_duration]
+        return [x.time[spikes_of_interest]/x.duration]
 
     # Make redundant yet useful data
     epoched['with_baseline'] = epoched['time']
