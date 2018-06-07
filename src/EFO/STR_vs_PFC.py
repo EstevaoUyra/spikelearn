@@ -76,6 +76,7 @@ for dset, (clf, clfname), bline, label, subset in conditions:
     # Compare striatum with pfc
     try:
         res = shuffle_val_predict(clf, [dataPFC, dataSTR], ['PFC', 'STR'],
-                                    n_splits = n_splits, feature_scaling='standard')
+                                    n_splits = n_splits, feature_scaling='standard',
+                                    balance_feature_number=True)
         res.save('{}/performance.pickle'.format(savedir))
     except: pass
