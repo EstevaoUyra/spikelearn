@@ -60,17 +60,21 @@ def kernel_smooth(spike_vector, sigma, edges, bin_size=None, padding='symmetric'
     if bin_size is None:
         bin_size = tp
 
+
+
     try:
         assert float(bin_size) == bin_size # Is multiple
     except AssertionError:
         raise ValueError("Bin size must be a multiple of temporal precision.")
 
-    n_bins = int( (bin_size*int(edges[1]/bin_size)-edges[0]) )
+    n_bins = int(bin_size*int((edges[1]-edges[0])/bin_size))
     edges= (edges[0], bin_size*int(n_bins/bin_size)+edges[0])
     if edges[1] <= edges[0]:
         return ([],[])
 
-
+    if sigma is None:
+        return np.histogram(spike_vector, bins=int((edges[1]-edges[0])/bin_size), range=edges)
+        
     spike_count, times = np.histogram(spike_vector, bins=n_bins, range=edges)
 
     each_size_len = int(3*sigma + 1)
