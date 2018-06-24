@@ -272,3 +272,46 @@ def to_feature_array(df, Xyt = False, subset='cropped'):
         return X, y, trial
     else:
         return rates
+
+def frankenstein(dfs, selection_kwd=None, reset_idx=None, return_valid=True):
+    """
+    Merges the features of multiple dataframes.
+
+    Parameters
+    ----------
+    dfs : iterable of DataFrames
+        Will be merged on the column axis
+        Over the current indexes
+
+    selection : dictionary, optional
+        inputs to select function. If not
+        spikelearn.data.selection.select
+
+    reset_idx : str, optional
+        index to reset before merging
+
+    return_valid : bool, optional, default True
+        Whether to cut the dataframe as the smaller one's size.
+        If false, there will be nan values
+
+    Returns
+    -------
+    merged : DataFrame
+        With shape[1] the sum of dfs shape[1]
+
+    """
+    to_merge = []
+    for df in dfs:
+        df = select(df, **selection_kwd)
+        if reset_index is not None:
+            indexes = df.index.names
+            df = df.reset_index()
+            df[reset_idx] = np.arange(df.shape[0])
+            df.set_index(indexes)
+        to_merge.append(df)
+
+    if return_valid:
+        valid = np.min([df.shape[0] for df in to_merge])
+        to_merge = [df.iloc[:valid] for df in to_merge]
+
+    return pd.concat(to_merge, axis=1)
