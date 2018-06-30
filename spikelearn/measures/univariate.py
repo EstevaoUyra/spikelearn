@@ -3,11 +3,33 @@ import pandas as pd
 from scipy.stats import pearsonr
 from scipy.stats import norm
 
-def bracketing():
+def bracketing(arr, border_size=1, range=None):
     """
-    """
-    raise NotImplementedError
+    A simplified measure of 'U-shapeness'. Negative values imply inverted U.
+    Mean values at center subtracted from mean border values.
 
+    Parameters
+    ----------
+    arr : 1-d array
+        Activity upon which to calculate the bracketing.
+
+    border_size : int, optional
+        How many bins at beginning and end of range to use as border.
+        Defaults to one.
+
+    range : tuple, optional
+        inclusive interval, defaults to full vector
+    """
+    if range is None:
+        range = (0, len(arr)-1)
+    center = np.arange(range[0]+border_size, range[1]-border_size+1)
+    borders = np.hstack( (np.arange(range[0], range[0]+border_size),
+                          np.arange(range[1]-border_size+1, range[1]+1)) )
+
+    if any( np.isin(center, borders) ) or any(np.bincount(borders)>1):
+        raise ValueError("Border size %d is causing overlap"%border_size)
+
+    return arr[borders].mean() - arr[center].mean()
 
 def unit_similarity_evolution(epoched_vector, window=1,
                                 win_type='bartlett', **kwargs):

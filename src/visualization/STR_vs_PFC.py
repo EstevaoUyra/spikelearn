@@ -17,7 +17,7 @@ tmin = 1.5;
 tmax = 10;
 DSETS = ['medium_smoothed', 'medium_smoothed_norm',
         'narrow_smoothed', 'narrow_smoothed_norm', 'wide_smoothed', 'huge_smoothed']
-DSETS = ['huge_smoothed']
+DSETS = ['huge_smoothed', 'wide_smoothed', 'medium_smoothed']
 CLFs = [(LogisticRegression(), 'LogisticRegression'),
             (GaussianNB(),'NaiveBayes') ]
 BLINE = [True, False]
@@ -25,11 +25,9 @@ import pandas as pd
 AREAS = ['both', 'PFC', 'STR']
 DAYS = [1,2]
 basedir = 'data/results/double_recording'
+SUBSETS = ['cropped', 'full']
 
 RATS = SHORTCUTS['groups']['EZ']
-#RATS = [rat for rat in RATS if '6' not in rat]
-
-#fsavedir = lambda dset, clf, bline: 'reports/figures/double_recording/{}/{}/{}'.format(dset, clf, bline)
 fsavedir = lambda dset, clf, bline: 'reports/figures/double_recording/{}/{}/{}'.format(dset, clf, str(bline))
 
 
@@ -37,13 +35,14 @@ ntrials_init_vs_after = 100
 n_splits = 50
 ntrials_total = 400
 
-for dset, (clf, clfname), bline in product(DSETS, CLFs, BLINE):
+for dset, (clf, clfname), bline, subset in product(DSETS, CLFs, BLINE, SUBSETS):
     # Compare evolution @ first and second day
     all_scores = pd.DataFrame()
     all_probas = pd.DataFrame()
     for label, area in product(RATS, AREAS):
 
-        loaddir = '{}/{}/{}/{}/{}'.format(basedir, clfname, dset, label, bline)
+        loaddir = '{}/{}/{}/{}/{}/{}'.format(basedir, clfname, dset,
+                                                subset, label, bline)
 
         res = pickle.load(open('%s/%s_init_vs_after.pickle'%(loaddir, area), 'rb'))
 
@@ -71,7 +70,7 @@ for dset, (clf, clfname), bline in product(DSETS, CLFs, BLINE):
         sns.heatmap(all_probas.loc[area, day])
         plt.xlabel('Possible labels');
         plt.title('%s Electrodes, Day %d, probability matrix'%(area, day))
-    plt.savefig('{}/probability_matrix.png'.format(savedir), dpi=200)
+    plt.savefig('{}/probability_matrix_{}.png'.format(savedir, subset), dpi=200)
     plt.tight_layout()
     plt.close(fig)
 
@@ -80,15 +79,15 @@ for dset, (clf, clfname), bline in product(DSETS, CLFs, BLINE):
     for day, (j, area) in product(DAYS, enumerate(AREAS)):
         local_data = all_scores.groupby(['day','area']).get_group((day, area))
         ax=plt.subplot(len(AREAS),len(DAYS) , 2*j + day)
-        sns.pointplot(x='tested_on', y='score_mean',hue='label',
+        sns.pointplot(x='tested_on', y='pearson_mean',hue='label',
                         linestyles='--', data=local_data, legend=False)
         plt.legend().remove()
-        sns.pointplot(x='tested_on', y='score_mean', color='k', n_boot=5000,
+        sns.pointplot(x='tested_on', y='pearson_mean', color='k', n_boot=5000,
                         data=local_data, legend=False)
         plt.ylim(-.3,.65); plt.xlim(-.1,1.1); #plt.gca().legend_.remove()
         plt.title('%s Electrodes, Day %d, Change in decoding performance'%(area, day))
 
-    plt.savefig('{}/evolution_both.png'.format(savedir), dpi=200)
+    plt.savefig('{}/evolution_both_{}.png'.format(savedir, subset), dpi=200)
     plt.tight_layout()
     plt.close(fig)
 

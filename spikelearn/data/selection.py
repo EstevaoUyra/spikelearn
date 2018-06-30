@@ -273,19 +273,16 @@ def to_feature_array(df, Xyt = False, subset='cropped'):
     else:
         return rates
 
-def frankenstein(dfs, selection_kwd=None, reset_idx=None, return_valid=True):
+def frankenstein(dfs, return_valid=True, subset='cropped',**kwargs):
     """
-    Merges the features of multiple dataframes.
+    Merges the features of multiple dataframes, selecting the subsets, and returns the feature array. Resets the trial index.
 
     Parameters
     ----------
     dfs : iterable of DataFrames
         Will be merged on the column axis
         Over the current indexes
-
-    selection : dictionary, optional
-        inputs to select function. If not
-        spikelearn.data.selection.select
+        must be indexed by [trial unit] in this order
 
     reset_idx : str, optional
         index to reset before merging
@@ -294,24 +291,29 @@ def frankenstein(dfs, selection_kwd=None, reset_idx=None, return_valid=True):
         Whether to cut the dataframe as the smaller one's size.
         If false, there will be nan values
 
+    kwargs :
+        inputs to select function.
+        spikelearn.data.selection.select
+
     Returns
     -------
     merged : DataFrame
         With shape[1] the sum of dfs shape[1]
 
     """
-    to_merge = []
-    for df in dfs:
-        df = select(df, **selection_kwd)
-        if reset_index is not None:
-            indexes = df.index.names
-            df = df.reset_index()
-            df[reset_idx] = np.arange(df.shape[0])
-            df.set_index(indexes)
-        to_merge.append(df)
+    to_select = [select(df, **kwargs) for df in dfs]
+    to_select = [df for df in to_select if df.shape[0]>0]
 
-    if return_valid:
-        valid = np.min([df.shape[0] for df in to_merge])
-        to_merge = [df.iloc[:valid] for df in to_merge]
+    ntrials = np.min([df.reset_index('trial').trial.nunique() for df in to_select])
+    to_merge=[]
+    for df in to_select:
+        df = df.reset_index()
+        df = df[df.trial<=df.trial.unique()[ntrials-1]]
+        nunits = df.unit.nunique()
+        df['trial']=np.vstack([t*np.ones((nunits,1)) for t in range(ntrials)])
 
+        to_merge.append(to_feature_array(df.set_index(['trial','unit']),
+                                            subset='cropped'))
+    for i, df in enumerate(to_merge):
+        df.columns = pd.Index(['%d u%s'%(i, c) for c in df.columns], name='unit')
     return pd.concat(to_merge, axis=1)
