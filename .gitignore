@@ -1,7 +1,10 @@
 
 # Project specific
 
-/data
+/data/processed
+/data/interim
+/data/raw
+/data/results
 *.local.*
 *.mm
 *.json
