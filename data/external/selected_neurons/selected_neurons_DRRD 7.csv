@@ -1,0 +1,24 @@
+selected, comments
+0, yes, good
+2, yes, midsession ++
+4, yes, midsession +
+6, yes, beginning +++
+7, yes, midsession + / beginning -
+9, yes, good
+10, yes, good
+12, yes, good
+15, yes, good
+20, no, gap
+21, no, beginning 0
+22, yes, midsession +
+23, yes, ++
+24, yes, beginning ++
+25, yes, gap
+26, yes, midsession ++
+27, yes, beginning --
+30, yes, midsession ++ / ending ++
+44, no, beginning ++ / rest  --
+48, no, beginning +++
+52, no, beginning 0
+55, yes, --
+87, yes, beginning --

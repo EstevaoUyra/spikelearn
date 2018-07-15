@@ -1,0 +1,15 @@
+selected, comments
+0, yes, +++
+1, yes, +++
+2, no, offset +++
+3, no, offset +++
+4, yes, good
+5, no, offset +++
+6, yes, +++
+9, yes, good
+11, yes, -- / baseline ---
+14, no, offset +++
+15, no, offset +++
+17, yes, offset +
+18, yes, offset ++
+24, yes, ++

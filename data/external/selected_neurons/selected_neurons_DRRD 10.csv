@@ -1,0 +1,66 @@
+selected, comments
+0, no, offset +++
+1, no, offset +++
+4, no, offset +++
+5, yes, good
+6, no, offset +++
+7, yes, gap
+8, no, offset +++
+9, no, offset +++
+10, no, offset +++
+11, no, offset +++
+12, no, offset +++
+13, no, offset +++
+14, yes, offset +
+15, no, offset +++
+16, no, offset +++
+17, yes, offset +
+18, no, offset ++
+19, no, offset +++
+20, no, offset +++
+22, no, offset +++
+23, no, offset +++
+25, no, offset +++
+27, no, offset +++
+28, yes, offset + / baseline --
+29, no, offset +++
+30, no, offset ++
+31, no offset++
+37, yes, midsession ++
+39, yes, good
+40, yes, good
+41, yes, midsession ++
+42, yes, midsession ++
+43, yes, midsession +++
+45, yes, midsession +
+46, yes, midsession +
+49, no, ---
+56, yes, baseline --
+57, yes, offset + / baseline --
+58, yes, offset + / baseline --
+59, yes, baseline --
+60, yes, baseline --
+61, yes, offset +
+62, yes, offset +
+63, yes, offset +
+64, yes, offset +
+65, yes, midsession +
+66, yes, midsession ++
+68, yes, midsession ++
+69, yes, offset +
+70, yes, good
+71, no, midsession +++
+76, no, midsession +++
+78, no, midsession +++
+80, yes, good
+81, yes, good
+82, no, similar
+83, no, similar
+84, no, similar
+85, yes, --
+86, yes, baseline --
+87, no, similar
+88, no, similar
+89, no, similar
+90, no, similar
+91, yes, baseline --
