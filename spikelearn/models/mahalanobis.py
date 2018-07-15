@@ -1,10 +1,12 @@
 from sklearn.covariance import EmpiricalCovariance, LedoitWolf, OAS
+from sklearn.model_selection import GroupShuffleSplit
 from scipy.spatial.distance import mahalanobis
 import numpy as np
+import pandas as pd
 
-# TODO document classifiers
 
 def similarity(X, y, group=None, n_splits = 1000, class_order=None,
+                    return_raw=False, return_distance=False, normalize=True,
                     split_size=None, distance='mahalanobis',
                     cov_estimator='oas', cov_method='class'):
     """
@@ -43,9 +45,11 @@ def similarity(X, y, group=None, n_splits = 1000, class_order=None,
         Ignored if distance is 'euclidean'
     """
 
+    assert y.shape[1]==1
+    y = y.ravel()
     classes = np.unique(y) if class_order is None else class_order
     groups = classes if group is None else np.unique(group)
-
+    
     split_size = len(groups)//2 if split_size is None else split_size
     sh = GroupShuffleSplit(n_splits, split_size, split_size)
 
@@ -61,8 +65,9 @@ def similarity(X, y, group=None, n_splits = 1000, class_order=None,
     results = pd.DataFrame()
     for cv_i, (idx_1, idx_2) in enumerate(sh.split(X, y, group)):
         X_1, X_2, y_1, y_2  = X[idx_1], X[idx_2], y[idx_1], y[idx_2]
-        mean_1 = [X_1[y_1==yi].mean(axis=0) for yi in classes]
-        mean_2 = [X_2[y_2==yi].mean(axis=0) for yi in classes]
+
+        mean_1 = [X_1[(y_1==yi).ravel()].mean(axis=0) for yi in classes]
+        mean_2 = [X_2[(y_2==yi).ravel()].mean(axis=0) for yi in classes]
 
         if cov_method == 'split':
             clf.fit_cov((X_1, X_2), (y_1, y_2), is_tuple=True)
@@ -70,7 +75,7 @@ def similarity(X, y, group=None, n_splits = 1000, class_order=None,
         dists_1 = clf.fit(X_1, y_1).transform(mean_2)
         dists_2 = clf.fit(X_2, y_2).transform(mean_1)
 
-        local_res = pd.DataFrame(np.vstack((dists1,dists2)),
+        local_res = pd.DataFrame(np.vstack((dists_1,dists_2)),
                         index=pd.Index(np.hstack((classes, classes)),
                                                 name='Real Time'),
                         columns=pd.Index(classes, name='Target time'))
@@ -78,8 +83,22 @@ def similarity(X, y, group=None, n_splits = 1000, class_order=None,
         local_res['cv'] = cv_i
 
         results = results.append(local_res)
+    
+    if normalize:
+        results[classes] = results[classes]/results[classes].values.max()
+    
+    if return_distance:
+        pass
+    else:
+        results[classes] = 1-results[classes]
 
-    return results
+    if return_raw: 
+        return results
+    else:
+        results = results.reset_index().groupby('Real Time').mean().drop(['split','cv'],axis=1)
+        if cov_method != 'single':
+            results = (results+results.T)/2
+        return results
 
 
 class MahalanobisClassifier():
@@ -118,6 +137,7 @@ class MahalanobisClassifier():
         if self.classes is None:
             self.classes = np.unique(y)
 
+
         self.center_ = {yi : X[y==yi].mean(axis=0) for yi in self.classes}
 
         if not self._cov_fitted:
@@ -129,13 +149,13 @@ class MahalanobisClassifier():
         if is_tuple:
             # Remove the mean of each
             assert len(X) == 2 and len(y) == 2
-            x0 = pd.DataFrame(X[0], index=y[0])
+            x0 = pd.DataFrame(X[0], index=pd.Index(y[0], name='index'))
             x0 = x0 - x0.reset_index().groupby('index').mean()
-            x1 = pd.DataFrame(X[1], index=y[1])
+            x1 = pd.DataFrame(X[1], index=pd.Index(y[1], name='index'))
             x1 = x1 - x1.reset_index().groupby('index').mean()
 
             X = np.vstack((x0.values, x1.values))
-            y = np.vstack(y[0], y[1])
+            y = np.hstack((y[0], y[1]))
 
         if self.shared_cov:
             precision = self.estimator.fit(X).get_precision()
