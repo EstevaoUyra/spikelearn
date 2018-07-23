@@ -15,14 +15,19 @@ import h5py
 
 
 def spikes_behavior_from_ez(filename):
-    def behav_to_df(f):
-        behav = pd.DataFrame({'duration':f['behavior']['DRRD'][:].reshape(-1),
-        'offset':f['behavior']['NPEnd'][:].reshape(-1),
-        'onset':f['behavior']['NPStart'][:].reshape(-1)}, index=pd.Index(np.arange(f['behavior']['DRRD'].shape[1])+1, name='trial'))
-
-        assert not any(behav.duration != (behav.offset - behav.onset)), 'There are inconsistencies in duration'
+    def behav_to_df(f, is_h5=True):
+        if is_h5:
+            behav = pd.DataFrame({'duration':f['behavior']['DRRD'][:].reshape(-1),
+            'offset':f['behavior']['NPEnd'][:].reshape(-1),
+            'onset':f['behavior']['NPStart'][:].reshape(-1)}, index=pd.Index(np.arange(f['behavior']['DRRD'].shape[1])+1, name='trial'))
+        else:
+            behav = pd.DataFrame({'duration':f['behavior']['DRRD'][0,0].reshape(-1),
+        'offset':f['behavior']['NPEnd'][0,0].reshape(-1),
+        'onset':f['behavior']['NPStart'][0,0].reshape(-1)}, index=pd.Index(np.arange(f['behavior']['DRRD'][0,0].shape[0])+1, name='trial'))
+        
+        assert not any(behav.duration - (behav.offset-behav.onset)> 1e-10), 'There are inconsistencies in duration'
         return behav
-
+        
     def spikes_inside(times, onset, offset, baseline = .5):
         return times[np.logical_and(times>(onset-baseline), times<offset)]
 
@@ -34,8 +39,10 @@ def spikes_behavior_from_ez(filename):
             trials += [trial for i in range(len(aux_spk))]
 
         return np.array(spk), np.array(trials)
-
-    behavior = behav_to_df(h5py.File('%s/Behavior.mat'%filename, 'r'))
+    try:
+        behavior = behav_to_df(h5py.File('%s/Behavior.mat'%filename, 'r'))
+    except:
+        behavior = behav_to_df(loadmat('%s/Behavior.mat'%filename), is_h5=False)
     mat = loadmat('%s/spikes/openephys/openephys.spikes.cellinfo.mat'%filename)['spikes'][0,0]
 
     quality = pd.read_csv('%s/spikes/openephys/cluster_quality.tsv'%filename, '\t')
