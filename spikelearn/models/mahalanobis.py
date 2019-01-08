@@ -153,8 +153,7 @@ class MahalanobisClassifier():
         if self.classes is None:
             self.classes = np.unique(y)
 
-
-        self.center_ = {yi : X[y==yi].mean(axis=0) for yi in self.classes}
+        self.center_ = {yi: X[y == yi].mean(axis=0) for yi in self.classes}
 
         if not self._cov_fitted:
             self.fit_cov(X, y)
