@@ -5,7 +5,7 @@ from spikelearn.models.mahalanobis import MahalanobisClassifier
 
 DSETS = ['wide_smoothed', 'wide_smoothed_norm']
 allsims = {}
-for rat, dset in product(SHORTCUTS['group']['day1'], DSETS)
+for rat, dset in product(SHORTCUTS['group']['eletro'], DSETS):
     data = select(io.load(rat, dset), _min_duration=1.5, is_tired=False)
     X, y, trial = to_feature_array(data, Xyt=True, subset='full')
 
