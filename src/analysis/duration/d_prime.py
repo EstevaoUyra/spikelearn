@@ -9,12 +9,12 @@ import os
 from spikelearn.data import io, to_feature_array, select, SHORTCUTS
 
 # Directory
-savedir = 'data/results/duration/d_prime'
+savedir = 'data/results/duration/d_prime2'
 if not os.path.exists(savedir):
     os.makedirs(savedir)
 
 # Parameters
-T_short_MAX, T_long_MIN = 0.8, 1.2
+T_short_MAX, T_long_MIN = 1.5, 1.5
 
 for label in SHORTCUTS['groups']['DRRD']:
 
@@ -50,7 +50,6 @@ for label in SHORTCUTS['groups']['DRRD']:
     ## For duration
     sess, dur = 'is_init D\'', 'is_short D\''
     det, det_ses = 'detrended Duration D\'', 'detrended Trial Index D\''
-
 
     Dprime['regress'] = np.polyval( np.polyfit(Dprime[sess],
                                                Dprime[dur], 1 ),

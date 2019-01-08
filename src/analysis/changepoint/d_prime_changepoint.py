@@ -1,12 +1,14 @@
+import sys
+sys.path.append('.')
+import os
+
 import pandas as pd
 import numpy as np
 import scipy.stats as st
 from spikelearn.measures.dprime import cohen_d
 from itertools import product
 
-import sys
-sys.path.append('.')
-import os
+
 
 from spikelearn.data import io, to_feature_array, select, SHORTCUTS
 
@@ -16,12 +18,7 @@ if not os.path.exists(savedir):
     os.makedirs(savedir)
 
 # Parameters
-DSETS = ['narrow_smoothed', 'narrow_smoothed_norm', 'medium_smoothed',
-        'medium_smoothed_norm', 'narrow_smoothed', 'narrow_smoothed_norm',
-        'wide_smoothed']
-
-# Parameters
-T_short_MAX, T_long_MIN = 1, 1
+T_short_MAX, T_long_MIN = 1.5, 1.5
 wsize = 60
 
 for label in SHORTCUTS['groups']['DRRD']:
@@ -76,8 +73,6 @@ for label in SHORTCUTS['groups']['DRRD']:
         for time, unit in product(b_id, units):
             selected = data[data.trial.isin(toi)].groupby('unit').get_group(unit)
             res.loc[(unit, time, trialmin), 'window_d'] = cohen_d(time, 'is_short', selected)
-
-
 
 
     filename = '{}_Dprime_cp_init.csv'.format(label)

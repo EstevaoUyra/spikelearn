@@ -9,7 +9,7 @@
 *.mm
 *.json
 /reports/figures
-
+catboost_info
 
 ###Python###
 

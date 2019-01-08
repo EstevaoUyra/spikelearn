@@ -1,22 +1,10 @@
-from sklearn.datasets import make_moons, make_circles, make_classification
-from sklearn.neural_network import MLPClassifier
-from sklearn.neighbors import KNeighborsClassifier
-from sklearn.svm import SVC, LinearSVC
-from sklearn.gaussian_process import GaussianProcessClassifier
-from sklearn.gaussian_process.kernels import RBF
-from sklearn.tree import DecisionTreeClassifier
-from sklearn.ensemble import RandomForestClassifier, AdaBoostClassifier
-from sklearn.naive_bayes import GaussianNB
-from sklearn.discriminant_analysis import LinearDiscriminantAnalysis, QuadraticDiscriminantAnalysis
-from sklearn.linear_model import LogisticRegression
+
 
 import time
 import pickle
 import sys
-sys.path.append('/home/tevo/Documents/UFABC/Spikes')
-sys.path.append('/home/tevo/Documents/UFABC/SingleUnit Spike Learning/src/models/')
+sys.path.append('.')
 import os
-os.chdir('/home/tevo/Documents/UFABC/Spikes')
 
 import matplotlib.pyplot as plt
 from skopt import load
@@ -31,10 +19,11 @@ classifiers = makeClassifierList()
 ## Simulation parameters
 
 saveDir = 'predictions_xgboost'; os.makedirs(saveDir)
+
 # For decoding
-min_trial_duration = 1000
-tmin, tmax = 200, 700
+min_trial_duration = 1.5
 sim_test_size = .2 ; max_train_size = .8 ;
+
 # For statistics
 n_bootstrap = 5; n_bootstrap_shuffles = 5;
 n_shuffles_true = 25;

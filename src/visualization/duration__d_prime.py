@@ -13,7 +13,6 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 sns.set_color_codes("dark")
 
-
 from spikelearn.data import SHORTCUTS, io, select
 
 # Folders of interest

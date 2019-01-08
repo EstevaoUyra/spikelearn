@@ -3,13 +3,10 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 import sys
 sys.path.append('/home/tevo/Documents/UFABC/Spikes')
-import os
-os.chdir('/home/tevo/Documents/UFABC/Spikes')
 
 from spikeHelper.filters import kernelSmooth,binarize
 from spikeHelper.loadSpike import Rat
 
-r = Rat(8)
 sns.set_style('darkgrid')
 
 

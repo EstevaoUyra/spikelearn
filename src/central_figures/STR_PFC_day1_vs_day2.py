@@ -1,3 +1,6 @@
+import sys
+sys.path.append('.')
+
 from spikelearn import io, select, to_feature_array, SHORTCUTS
 from spikelearn import shuffle_val_predict
 from spikelearn.data.selection import frankenstein
@@ -8,12 +11,12 @@ from sklearn.linear_model import LogisticRegressionCV
 clf = LogisticRegressionCV()
 
 
-day_1_labels = [l for l in SHORTCUTS['groups']['EZ'] if '_2' not in label]
+day_1_labels = [l for l in SHORTCUTS['groups']['EZ'] if '_2' not in l]
 dfs_day1 = [io.load(label, 'wide_smoothed') for label in day_1_labels]
 pfc_day1 = frankenstein(dfs_day1, _min_duration=1.5, area = 'PFC')
 str_day1 = frankenstein(dfs_day1, _min_duration=1.5, area = 'STR')
 
-day_2_labels = [l for l in SHORTCUTS['groups']['EZ'] if '_2' in label]
+day_2_labels = [l for l in SHORTCUTS['groups']['EZ'] if '_2' in l]
 dfs_day2 = [io.load(label, 'wide_smoothed') for label in day_2_labels]
 pfc_day2 = frankenstein(dfs_day2, _min_duration=1.5, area = 'PFC')
 str_day2 = frankenstein(dfs_day2, _min_duration=1.5, area = 'STR')

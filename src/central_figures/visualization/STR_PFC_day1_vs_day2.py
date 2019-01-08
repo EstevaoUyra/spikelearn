@@ -2,7 +2,12 @@ import matplotlib as mlp
 import matplotlib.pyplot as plt
 import seaborn as sns
 import numpy as np
+plt.switch_backend('agg')
 
+import sys
+sys.path.append('.')
+
+import os
 mlp.rcParams['font.size'] = 18
 label_size, title_size = 22, 25
 vmin, vmax = 0.08,.13
@@ -18,7 +23,7 @@ cbar = plt.axes((.88, .1, .05, .6), facecolor='w')
 
 
 import pickle
-res = pickle.load('data/results/central_figures/STR_PFC_day1_vs_day2.pickle')
+res = pickle.load(open('data/results/central_figures/STR_PFC_day1_vs_day2.pickle','rb'))
 # Plot results
 res.proba_matrix(grouping=('tested_on','pfc_day1'), vmin=vmin, vmax=vmax, cbar=False, ax=pfc_1);
 res.proba_matrix(grouping=('tested_on','pfc_day2'), vmin=vmin, vmax=vmax, cbar=False, ax=pfc_2);
@@ -26,7 +31,7 @@ res.proba_matrix(grouping=('tested_on','str_day1'), vmin=vmin, vmax=vmax, cbar=F
 res.proba_matrix(grouping=('tested_on','str_day2'), vmin=vmin, vmax=vmax, cbar=False, ax=str_2);
 
 # Plot colorbar
-sns.heatmap(np.linspace(vmin,vmax,100).reshape(-1,1)[::-1],cbar=False, ax=ax)
+sns.heatmap(np.linspace(vmin,vmax,100).reshape(-1,1)[::-1],cbar=False, ax=cbar)
 cbar.yaxis.tick_right()
 cbar.tick_params(rotation=0)
 cbar.set_yticks(np.linspace(0,100,101)[::-20]); cbar.set_xticklabels(['']);

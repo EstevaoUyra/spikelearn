@@ -6,7 +6,7 @@ import glob
 import json
 import numpy as np
 from .utils import get_filepaths_from_shortcut
-from .selection import select, to_feature_array
+from .selection import *
 from .preprocessing import remove_baseline
 
 #module_path = os.path.abspath(os.path.dirname(__file__))

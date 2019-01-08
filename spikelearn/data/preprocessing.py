@@ -33,7 +33,7 @@ def kernel_smooth(spike_vector, sigma, edges, bin_size=None, padding='symmetric'
         'constant', 'edge', 'maximum', 'mean', 'median', 'minimum', 'reflect',
         'symmetric', 'wrap', or a <function>.
 
-    border_correction : bool, default True
+    border_correction : bool, default False
         whether to divide borders by spikevector true contribution
         Raises a ValueError if used adjoined with padding
 

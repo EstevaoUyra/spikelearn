@@ -3,12 +3,15 @@ from sklearn.model_selection import GroupShuffleSplit
 from scipy.spatial.distance import mahalanobis
 import numpy as np
 import pandas as pd
+from multiprocessing import Pool
+from contextlib import closing
+from functools import partial
 
 
 def similarity(X, y, group=None, n_splits = 1000, class_order=None,
-                    return_raw=False, return_distance=False, normalize=True,
+                    return_raw=False, return_distance=False, normalize=False,
                     split_size=None, distance='mahalanobis',
-                    cov_estimator='oas', cov_method='class'):
+                    cov_estimator='oas', cov_method='shared_split', n_jobs=1):
     """
     Calculates similarity between points of each class.
 
@@ -38,68 +41,81 @@ def similarity(X, y, group=None, n_splits = 1000, class_order=None,
         Which method will decide regularization strength
         Ignored if distance is 'euclidean'
 
-    cov_method : {'class', 'split', 'single'}
-        single - only one covariance for whole dataset
-        class - one covariance per class
-        split - one covariance per class per split
+    cov_method : {'shared_split','shared_single', 'class_single', 'class_split'}
+        shared_single - only one covariance for whole dataset
+        shared_split - one covariance, recalculated in each split
+        class_single - one covariance per class
+        class_split - one covariance per class per split
         Ignored if distance is 'euclidean'
     """
-
+    assert cov_method in ['shared_split','shared_single', 'class_split', 'class_single']
     assert y.shape[1]==1
     y = y.ravel()
     classes = np.unique(y) if class_order is None else class_order
     groups = classes if group is None else np.unique(group)
     
     split_size = len(groups)//2 if split_size is None else split_size
-    sh = GroupShuffleSplit(n_splits, split_size, split_size)
+#     sh = GroupShuffleSplit(n_splits, split_size, split_size)
 
     if distance is 'mahalanobis':
         clf = MahalanobisClassifier(classes=classes, estimator=cov_estimator,
-                                        shared_cov= (cov_method == 'single'),
+                                        shared_cov= ('shared' in cov_method),
                                         assume_centered=False)
-        if cov_method != 'split':
+        if 'split' not in cov_method:
             clf.fit_cov(X, y)
+            
+    elif distance is 'euclidean':
+        clf = EuclideanClassifier()
+        raise NotImplementedError
     else:
         raise NotImplementedError
 
-    results = pd.DataFrame()
-    for cv_i, (idx_1, idx_2) in enumerate(sh.split(X, y, group)):
-        X_1, X_2, y_1, y_2  = X[idx_1], X[idx_2], y[idx_1], y[idx_2]
+    with closing(Pool(n_jobs)) as p:
+        func = partial(one_split, clf=clf, split_size=split_size,
+                       X=X, y=y, group=group, classes=classes, 
+                       cov_method=cov_method)
+        res = p.map(func, np.arange(n_splits))
+        results = pd.concat(res)
 
-        mean_1 = [X_1[(y_1==yi).ravel()].mean(axis=0) for yi in classes]
-        mean_2 = [X_2[(y_2==yi).ravel()].mean(axis=0) for yi in classes]
-
-        if cov_method == 'split':
-            clf.fit_cov((X_1, X_2), (y_1, y_2), is_tuple=True)
-
-        dists_1 = clf.fit(X_1, y_1).transform(mean_2)
-        dists_2 = clf.fit(X_2, y_2).transform(mean_1)
-
-        local_res = pd.DataFrame(np.vstack((dists_1,dists_2)),
-                        index=pd.Index(np.hstack((classes, classes)),
-                                                name='Real Time'),
-                        columns=pd.Index(classes, name='Target time'))
-        local_res['split'] = [1]*len(classes) + [2]*len(classes)
-        local_res['cv'] = cv_i
-
-        results = results.append(local_res)
-    
     if normalize:
         results[classes] = results[classes]/results[classes].values.max()
     
     if return_distance:
         pass
     else:
-        results[classes] = 1-results[classes]
+        results[classes] = 1/(1+results[classes])
 
     if return_raw: 
         return results
     else:
         results = results.reset_index().groupby('Real Time').mean().drop(['split','cv'],axis=1)
-        if cov_method != 'single':
+        if 'class' in cov_method:
             results = (results+results.T)/2
         return results
+    
 
+def one_split(cv_i, clf, split_size, X, y, group, classes, cov_method):
+    sh = GroupShuffleSplit(1, split_size, split_size,random_state=cv_i)
+    (idx_1, idx_2) = next(sh.split(X, y, group))
+    X_1, X_2, y_1, y_2  = X[idx_1], X[idx_2], y[idx_1], y[idx_2]
+    
+    mean_1 = [X_1[(y_1==yi).ravel()].mean(axis=0) for yi in classes]
+    mean_2 = [X_2[(y_2==yi).ravel()].mean(axis=0) for yi in classes]
+    
+    if 'split' in cov_method:
+        clf.fit_cov((X_1, X_2), (y_1, y_2), is_tuple=True)
+
+    dists_1 = clf.fit(X_1, y_1).transform(mean_2)
+    dists_2 = clf.fit(X_2, y_2).transform(mean_1)
+
+    local_res = pd.DataFrame(np.vstack((dists_1,dists_2)),
+                    index=pd.Index(np.hstack((classes, classes)),
+                                            name='Real Time'),
+                    columns=pd.Index(classes, name='Target time'))
+    local_res['split'] = [1]*len(classes) + [2]*len(classes)
+    local_res['cv'] = cv_i
+
+    return local_res
 
 class MahalanobisClassifier():
     """

@@ -5,6 +5,8 @@ import numpy as np
 from itertools import product
 import subprocess
 import matplotlib as mpl
+from glob import glob
+import os
 
 def to_video(listfile, outputfile,
                 fps=3, w=800, h=600, type='png'):
@@ -16,6 +18,8 @@ def to_video(listfile, outputfile,
     listfile : string, path-to-file
         Path to a file containing the image names in its rows, in the order
         that they should appear on the video.
+        May be a path to a folder (without ending slash) and if so the files
+        are ordered alphabetically
 
     outputfile : string
         The name of the output video.
@@ -28,9 +32,17 @@ def to_video(listfile, outputfile,
     type : string, default 'png'
         Type of the images being transformed.
     """
-    subprocess.run(['mencoder',
-                    'mf://@{}'.format(listfile)]+
-                    '-mf w={}:h={}:fps={}:type={} -ovc lavc -lavcopts vcodec=mpeg4:mbd=2:trell -oac copy -o'.format(w, h, fps, type).split(' ') +
+    if os.path.isdir(listfile):
+        listfile = sorted(glob(listfile+'/*.{}'.format(type)))
+        if encoder == 'ffmpeg':
+            subprocess.run(['ffmpeg',
+                            '-framerate {}'.format(fps) +
+                            '-pattern_type glob -i "*.png" {}.mp4'.format('outputfile')])
+            
+    else:
+        subprocess.run(['mencoder',
+                        'mf://@{}'.format(listfile)]+
+                        '-mf w={}:h={}:fps={}:type={} -ovc lavc -lavcopts vcodec=mpeg4:mbd=2:trell -oac copy -o'.format(w, h, fps, type).split(' ') +
                     ['{}.avi'.format(outputfile)])
 
 def raster_multiple(spike_trains, time='time', yaxis='trial', xlim=None,
@@ -358,27 +370,38 @@ def pretty_neurons(spike_vector=None, show_spikes=True, sigma=0,
 def singleRatBehaviorPlot(durations, tVec=None, threshold='max',cpax=True, s=20,
                             Tc = 1.5, kde='fl', kdeN = 100, ticksize=14,
                             axislabel_size=16, reverse=False, tmax = 5,
-                            figsize = 4):
+                            ax = None, rolling_avg = 60):
     #TODO document function
     """
     Plots the responses along the trials, together with the
     """
-    f = plt.figure(figsize=(figsize,figsize))
+    f = plt.gcf()
+    if ax is None:
+        ax = plt.gca()
+        
     mpl.rcParams['font.size']=ticksize
 
     trialNumber = np.arange(len(durations))
     if tVec is None:
         tVec = (np.arange(len(durations)) == len(durations)//2).astype(int)
-
+    kdeN_label = kdeN
+    if kdeN =='half':
+        kdeN = len(durations)//2
+    
+    
+    
     # Behavioral dots
     nonRewarded = (durations < Tc)
-    plt.scatter(durations[nonRewarded],trialNumber[nonRewarded],s=s, marker='o',facecolors='none',edgecolor='k')#=(0.6, 0.036000000000000004, 0.0))#(0.48, 0.1416, 0.12))
+    plt.scatter(durations[nonRewarded],trialNumber[nonRewarded],s=s, marker='o',facecolors='none',edgecolor='k')
 
 
 
     rewarded = (durations >= Tc)
     plt.scatter(durations[rewarded],trialNumber[rewarded],color='k', s=s, marker='o')#(0.0, 0.6, 0.18600000000000008)
-
+    if rolling_avg:
+        rol_d = durations.rolling(rolling_avg, center=True).mean()
+        plt.plot(rol_d.values, rol_d.index.values, color='r', linewidth=4)
+    
     plt.ylim([0,len(durations)]); plt.xlim([0,tmax]);
     plt.ylabel('Trial number',fontsize=axislabel_size);
     if not reverse:
@@ -414,8 +437,8 @@ def singleRatBehaviorPlot(durations, tVec=None, threshold='max',cpax=True, s=20,
         first = durations[:kdeN]
         last = durations[-kdeN:]
 
-        sns.kdeplot(first,label='First %d trials'%kdeN,color='b',linewidth=2);
-        sns.kdeplot(last, label = 'Last %d trials'%kdeN,color = 'magenta',linewidth=4);
+        sns.kdeplot(first,label='First {} trials'.format(kdeN_label),color='b',linewidth=2);
+        sns.kdeplot(last, label = 'Last {} trials'.format(kdeN_label),color = 'magenta',linewidth=2);
         plt.xlim([0,tmax]);plt.ylim([0,0.8])
 
         pcax.axhline(kdeN,linestyle='--',color='b',linewidth=4);
@@ -442,6 +465,8 @@ def singleRatBehaviorPlot(durations, tVec=None, threshold='max',cpax=True, s=20,
         pcax.arrow(1,np.argmax(tVec)+kdeN,0,-30, head_width=0.05, head_length=10, fc='magenta', ec='magenta',linewidth=2)
         pcax.arrow(4,np.argmax(tVec)+kdeN,0,-30, head_width=0.05, head_length=10, fc='magenta', ec='magenta',linewidth=2)
 
+    kdax.set_xticks([])
+    kdax.vlines(Tc, 0,1, linestyle='--')
 
     #plt.suptitle('Behavior evolution\n in one session',y = 1.34, fontsize=axislabel_size*1.1, x=1.35)
 #    plt.tight_layout()

@@ -9,6 +9,15 @@ import numpy as np
 from sklearn.model_selection import ShuffleSplit, KFold
 import operator
 
+def get_each_other(vec, odd=True):
+    """
+    Useful for holdout
+    """
+    if type(vec)==pd.DataFrame:
+        return vec.iloc[np.arange(len(vec))%2==odd] 
+    return vec[np.arange(len(vec))%2==odd]
+
+
 class Batcher():
     """
     Implements an iterable cross-validator that groups all repeated indexes in the same group.
@@ -251,7 +260,6 @@ def to_feature_array(df, Xyt = False, subset='cropped'):
     """
     subset= [subset, subset+'_times']
     df = df.copy()[subset]
-
     bins = df.applymap(len).min()[0]
     df = df.applymap(lambda x: x[:bins])
 
@@ -259,7 +267,7 @@ def to_feature_array(df, Xyt = False, subset='cropped'):
                 index=df.index).reset_index().melt(['trial','unit'])
     times = pd.DataFrame(df[subset[1]].tolist(),
                 index=df.index).reset_index().melt(['trial','unit'])
-
+    
     rates['time'] = times.value
     rates = rates.drop('variable',axis=1)
     rates = rates.set_index(['trial', 'time','unit']).unstack()
@@ -313,7 +321,7 @@ def frankenstein(dfs, return_valid=True, subset='cropped',**kwargs):
         df['trial']=np.vstack([t*np.ones((nunits,1)) for t in range(ntrials)])
 
         to_merge.append(to_feature_array(df.set_index(['trial','unit']),
-                                            subset='cropped'))
+                                            subset=subset))
     for i, df in enumerate(to_merge):
         df.columns = pd.Index(['%d u%s'%(i, c) for c in df.columns], name='unit')
     return pd.concat(to_merge, axis=1)

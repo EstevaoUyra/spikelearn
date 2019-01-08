@@ -12,6 +12,7 @@ from sklearn.model_selection import ShuffleSplit
 from sklearn.gaussian_process import GaussianProcessClassifier
 from sklearn.discriminant_analysis import LinearDiscriminantAnalysis, QuadraticDiscriminantAnalysis
 from xgboost import XGBClassifier
+from lightgbm import LGBMClassifier
 
 
 # Customized classifiers
@@ -20,22 +21,22 @@ elasticSGD = lambda **params: SGDClassifier(loss='log', penalty='elasticnet',
 
 def makeClassifierList():
     classifiers =   [{'name':  'knn',
-                    'hyperparameter_space': [(1,100)],                       # N neighbors,
+                    'hyperparameter_space': [(1,50)],                       # N neighbors,
                     'hyperparameter_names': ['n_neighbors'],
-                    'n_calls':{'rand':10 ,'opt':40 },
+                    'n_calls':{'rand':10 ,'opt':20 },
                     'func': KNeighborsClassifier        # predict_proba
                     },
 
                     {'name':  'linSVM',
-                    'hyperparameter_space': [(1., 1e7)],                     # C, A(class_weight)
+                    'hyperparameter_space': [(1e-4, 1e5)],                     # C, A(class_weight)
                     'hyperparameter_names': ['C'],
                     'n_calls':{'rand':10 ,'opt':50 },
                     'func': LinearSVC                   # decision_function  class_weight
                     },
 
                     {'name':  'rbfSVM',
-                    'hyperparameter_space': [(1., 1e7, "log-uniform"),       # C
-                                            (1e-12, 1e-1, "log-uniform")],    # gamma
+                    'hyperparameter_space': [(1e-4, 1e6, "log-uniform"),       # C
+                                            (1e-4, 10, "log-uniform")],    # gamma
                     'hyperparameter_names': ['C','gamma'],
                     'n_calls':{'rand':50 ,'opt':120 },  # decision_function
                     'func': SVC
@@ -45,8 +46,7 @@ def makeClassifierList():
                     'hyperparameter_space': [(2, 8),                     # max_depth
                                             [.7,'sqrt','log2']],          # max_features
                     'hyperparameter_names': ['max_depth', 'max_features'],
-                    #'n_calls':{'rand':10 ,'opt':30 },
-                    'n_calls':{'rand':1 ,'opt':3 },
+                    'n_calls':{'rand':10 ,'opt':30 },
                     'func': DecisionTreeClassifier        #class_weight predict_proba
                     },
 
@@ -90,33 +90,40 @@ def makeClassifierList():
 
                     {'name':  'Logistic_Regression',
                     'hyperparameter_space': (['l1','l2'],
-                                             (1., 1e7, "log-uniform")),
+                                             (1e-4, 1e4, "log-uniform")),
                     'hyperparameter_names': ['penalty', 'C'],
-                    'n_calls':{'rand':() ,'opt':() },
+                    'n_calls':{'rand':(10) ,'opt':(20) },
                     'func': LogisticRegression          # class_weight, predict_proba
                     },
 
                     {'name':  'XGboost',
-                    'hyperparameter_space': [(1,15),
-                                             (0.01,1.),
-                                             (10,300),
-                                             (1e-6,10.,"log-uniform"),
-                                             (1,30),
-                                             (1e-6,1.,"log-uniform"),
-                                             (1e-6,1.,"log-uniform"),
-                                             (1e-6,1.,"log-uniform"),
-                                             (1e-6,1.,"log-uniform")],
+                    'hyperparameter_space': [(4, 10),
+                                             (0.001, .3, 'log-uniform'),
+                                             (10, 150),
+                                             (1e-4,10.,"log-uniform"),
+                                             (1, 30),
+                                             (1e-4, 10., "log-uniform"),
+                                             (1e-4, 10., "log-uniform"),
+                                             (.1, 1., "log-uniform"),
+                                             (.1, 1., "log-uniform")],
                     'hyperparameter_names': ['max_depth', 'learning_rate', 'n_estimators', 'gamma', 'min_child_weight', 'reg_alpha', 'reg_lambda', 'colsample_bytree', 'subsample'],
-                    'n_calls':{'rand':(30) ,'opt':(100) },
+                    'n_calls':{'rand':(60) ,'opt':(100) },
                     'func': XGBClassifier
                     },
-
-                    {'name' : 'elasticnet_SGD',
-                    'hyperparameter_space': [(0.,1.),
-                                            (1e-6, 1e-1, "log-uniform")],
-                    'hyperparameter_names': ['l1_ratio', 'alpha'],
-                    'n_calls':{'rand':50, 'opt':150},
-                    'func': elasticSGD
+                    {'name':  'LightGBM',
+                    'hyperparameter_space': [(4, 10),
+                                             (6, 10),
+                                             (0.001, .3, 'log-uniform'),
+                                             (10, 150),
+                                             ['gbdt','dart'],
+                                             (1, 30),
+                                             (1e-4, 10., "log-uniform"),
+                                             (1e-4, 10., "log-uniform"),
+                                             (.1, 1., "log-uniform"),
+                                             (.1, 1., "log-uniform")],
+                    'hyperparameter_names': ['max_depth','num_leaves', 'learning_rate', 'n_estimators', 'boosting_type', 'min_child_weight', 'reg_alpha', 'reg_lambda', 'colsample_bytree', 'subsample'],
+                    'n_calls':{'rand':(60) ,'opt':(100) },
+                    'func': LGBMClassifier
                     }
                     ]
     return classifiers
