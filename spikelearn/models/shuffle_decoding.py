@@ -1,7 +1,7 @@
 import pandas as pd
 import numpy as np
 from sklearn.model_selection import GroupShuffleSplit, cross_val_predict, GroupKFold
-from sklearn.base import clone, BaseSampler, SamplerMixin
+from sklearn.base import clone, TransformerMixin
 from sklearn.preprocessing import MinMaxScaler, StandardScaler, RobustScaler
 from sklearn.pipeline import Pipeline
 from sklearn.metrics import confusion_matrix
@@ -14,7 +14,6 @@ from numpy.random import permutation
 from scipy.stats import pearsonr
 import seaborn as sns
 import matplotlib.pyplot as plt
-
 import pickle
 
 
@@ -24,15 +23,20 @@ class MonteCarloFeatures(TransformerMixin):
         self.features_ = None
 
     def fit(self, X, y):
-        assert type(X) is pd.DataFrame
+        if type(X) is not pd.DataFrame:
+            X = pd.DataFrame(X)
         assert X.shape[1] >= self.n_features
         self.features_ = np.random.permutation(X.columns.values)[:self.n_features]
         return self
 
     def transform(self, X, y=None):
-        assert type(X) is pd.DataFrame
         assert X.shape[1] >= self.n_features
-        return X[self.features_]
+        if type(X) is not pd.DataFrame:
+            X = pd.DataFrame(X)
+            return X[self.features_].values
+        else:
+            return X[self.features_]
+        
 
     def fit_transform(self, X, y=None):
         return self.fit(X, y).transform(X, y)
@@ -503,12 +507,10 @@ def shuffle_cross_predict(clf, dfs, names=None, X=None, y=None, group=None,
         print(names)
     if X is None:
         assert group == None and y == None
-        if cross_prediction or get_weights:
-            assert len(np.unique([len(df.columns) for df in dfs])) == 1
-            assert all([(df.columns == dfs[0].columns).all() for df in dfs])
-            X = dfs[0].columns
-        else:
-            X = {name: df.columns for df, name in zip(dfs, names)}
+        assert len(np.unique([len(df.columns) for df in dfs])) == 1
+        assert all([(df.columns == dfs[0].columns).all() for df in dfs])
+        
+        X = dfs[0].columns
         y = dfs[0].index.names[1]
         group = dfs[0].index.names[0]
         dfs = [df.reset_index() for df in dfs]
@@ -578,6 +580,8 @@ def shuffle_cross_predict(clf, dfs, names=None, X=None, y=None, group=None,
             if verbose > 1: print(i, end=', ')
 
             clf_local = clone(clf)
+            print(type(traindf), type(X))
+            print(traindf.shape)
             clf_local.fit(traindf[X].values[train_idx], traindf[y].values[train_idx])
             # also test on each dataset
 
@@ -605,7 +609,7 @@ def shuffle_cross_predict(clf, dfs, names=None, X=None, y=None, group=None,
                                       n_features=len(X))
                 elif problem == 'regression':
                     pred = clf_local.predict(testdf[X].values[idx])
-                    res.append_pred(probas, true_labels,
+                    res.append_pred(pred, true_labels,
                                       cv=i, trained_on=name,
                                       tested_on=testname,
                                       trained_here=trained_here,

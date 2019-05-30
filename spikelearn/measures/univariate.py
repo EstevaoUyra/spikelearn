@@ -22,13 +22,12 @@ def bracketing(arr, border_size=1, range=None):
     """
     if range is None:
         range = (0, len(arr)-1)
-    center = np.arange(range[0]+border_size, range[1]-border_size+1)
+    center = np.arange(range[0]+border_size, range[1]-border_size+1).astype(int)
     borders = np.hstack( (np.arange(range[0], range[0]+border_size),
-                          np.arange(range[1]-border_size+1, range[1]+1)) )
-
+                          np.arange(range[1]-border_size+1, range[1]+1)) ).astype(int)
     if any( np.isin(center, borders) ) or any(np.bincount(borders)>1):
         raise ValueError("Border size %d is causing overlap"%border_size)
-
+    
     return arr[borders].mean() - arr[center].mean()
 
 def unit_similarity_evolution(epoched_vector, window=1,
@@ -73,7 +72,7 @@ def ramping_trajectory():
     ramping_p : array
         An array of log-odds for each duration.
     """
-    raise  NotImplementedError
+    raise NotImplementedError
 
 def ramping_p(firing_rate, times=None, range=None, return_r=False):
     """

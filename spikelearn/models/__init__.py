@@ -1,1 +1,1 @@
-from .shuffle_decoding import shuffle_val_predict
+from .shuffle_decoding import shuffle_val_predict, shuffle_cross_predict

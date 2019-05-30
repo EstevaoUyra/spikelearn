@@ -123,3 +123,6 @@ def remove_baseline(activity, baseline, baseline_size=None):
         assert isinstance(baseline.iloc[0,0], float)
 
     return (activity - baseline)[activity.columns]
+
+def bad_trials(label, threshold=20):
+    return select(io.load(label, 'no_smoothing'), is_selected=True).full.apply(lambda x: np.max(x)>threshold).unstack().any(axis=1)

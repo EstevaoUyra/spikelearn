@@ -5,10 +5,9 @@ from spikelearn.data.selection import frankenstein
 import os
 
 from sklearn.linear_model import LogisticRegressionCV
-clf = LogisticRegressionCV()
+clf = BayesianRidge()
 
 labels = SHORTCUTS['groups']['DRRD']
-
 dfs = [io.load(label, 'wide_smoothed') for label in labels]
 
 merged = frankenstein(dfs, _min_duration=1.5, is_tired=False)

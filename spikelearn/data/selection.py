@@ -281,7 +281,7 @@ def to_feature_array(df, Xyt = False, subset='cropped'):
     else:
         return rates
 
-def frankenstein(dfs, return_valid=True, subset='cropped',**kwargs):
+def frankenstein(dfs, return_valid=True, subset='cropped', full_remove_baseline=True, **kwargs):
     """
     Merges the features of multiple dataframes, selecting the subsets, and returns the feature array. Resets the trial index.
 
@@ -324,4 +324,9 @@ def frankenstein(dfs, return_valid=True, subset='cropped',**kwargs):
                                             subset=subset))
     for i, df in enumerate(to_merge):
         df.columns = pd.Index(['%d u%s'%(i, c) for c in df.columns], name='unit')
-    return pd.concat(to_merge, axis=1)
+        
+    alldfs = pd.concat(to_merge, axis=1)
+    if full_remove_baseline:
+        alldfs = select(alldfs.reset_index(), _mineq_time=0).set_index(['trial','time'])
+        
+    return alldfs
